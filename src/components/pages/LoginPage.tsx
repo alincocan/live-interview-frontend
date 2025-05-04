@@ -9,17 +9,20 @@ import {
     Box,
     Grid,
     Typography,
-    createTheme,
-    ThemeProvider,
+    Alert,
 } from '@mui/material';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import {darkGreyTheme} from "../../config/theme";
+import { useState } from 'react';
+import { AuthenticationService } from '../../service/authenticationService';
+import {LoginCredentials} from "../../bo/LoginCredentials.ts";
 
-type Inputs = {
-    email: string;
-    password: string;
-    remember: boolean;
+const boxStyles = {
+    my: 8,
+    mx: 4,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
 };
 
 const LoginPage: React.FC = () => {
@@ -27,13 +30,38 @@ const LoginPage: React.FC = () => {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<Inputs>();
+    } = useForm<LoginCredentials>();
 
     const navigate = useNavigate();
+    const [loginError, setLoginError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const onSubmit: SubmitHandler<Inputs> = (data) => {
-        console.log('Form data:', data);
-        navigate('/dashboard');
+
+
+    const onSubmit: SubmitHandler<LoginCredentials> = async (data) => {
+        setIsLoading(true);
+        setLoginError(null);
+
+        try {
+            const authService = AuthenticationService.getInstance();
+            const response = await authService.login({
+                email: data.email,
+                password: data.password,
+                remember: data.remember
+            });
+
+            if (response.success) {
+                console.log('Login successful');
+                navigate('/dashboard');
+            } else {
+                setLoginError(response.message || 'Authentication failed. Please try again.');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            setLoginError('An unexpected error occurred. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -46,19 +74,20 @@ const LoginPage: React.FC = () => {
 
                 />
                 <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-                    <Box
-                        sx={{
-                            my: 8,
-                            mx: 4,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
-                            <Typography fontSize="1.25rem" color="white">
-                                ?
-                            </Typography>
+                    <Box sx={boxStyles}>
+                        <Avatar sx={{ m: 1 }}>
+                            <Box
+                                component="img"
+                                src="images/man-logo.jpg"
+                                alt="My Image"
+                                sx={{
+                                    width: 50,
+                                    height: 'auto',
+                                    borderRadius: 2,
+                                    boxShadow: 3,
+                                }}
+                            />
+
                         </Avatar>
                         <Typography component="h1" variant="h5">
                             Sign in
@@ -107,13 +136,19 @@ const LoginPage: React.FC = () => {
                                 }
                                 label="Remember me"
                             />
+                            {loginError && (
+                                <Alert severity="error" sx={{ mt: 2, width: '100%' }}>
+                                    {loginError}
+                                </Alert>
+                            )}
                             <Button
                                 type="submit"
                                 fullWidth
                                 variant="contained"
                                 sx={{ mt: 3, mb: 2 }}
+                                disabled={isLoading}
                             >
-                                Sign In
+                                {isLoading ? 'Signing In...' : 'Sign In'}
                             </Button>
                             <Grid container>
                                 <Grid item xs>
