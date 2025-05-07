@@ -1,20 +1,8 @@
-import {
-    Box,
-    Button,
-    Typography,
-    Card,
-    CardActionArea,
-    CardContent,
-    Container,
-} from '@mui/material';
-import { BrowserRouter as Router, Routes, Route, useNavigate, Outlet } from 'react-router-dom';
+import { Box, Button, Typography } from '@mui/material';
+import { useNavigate, Outlet } from 'react-router-dom';
 
-const DashboardPage: React.FC = () => {
+const AppLayout: React.FC = () => {
     const navigate = useNavigate();
-
-    const handleCardClick = () => {
-        navigate('/details');
-    };
 
     return (
         <Box
@@ -52,7 +40,7 @@ const DashboardPage: React.FC = () => {
                     <Button onClick={() => navigate('/dashboard')} sx={{ color: '#fff' }}>
                         Home
                     </Button>
-                    <Button onClick={() => navigate('/dashboard/profile')} sx={{ color: '#fff' }}>
+                    <Button onClick={() => navigate('/profile')} sx={{ color: '#fff' }}>
                         Profile
                     </Button>
                     <Button onClick={() => navigate('/settings')} sx={{ color: '#fff' }}>
@@ -71,4 +59,4 @@ const DashboardPage: React.FC = () => {
     );
 };
 
-export default DashboardPage;
+export default AppLayout;
