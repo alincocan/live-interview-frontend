@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {LoginCredentials} from "../bo/LoginCredentials.ts";
+import {SignUpData} from "../bo/SignUpData.ts";
 
 export interface LoginResponse {
   accessToken?: string;
@@ -8,6 +9,16 @@ export interface LoginResponse {
     email: string;
     // Add other user properties as needed
   };
+  success: boolean;
+  message?: string;
+}
+
+export interface SignUpResponse {
+  success: boolean;
+  message?: string;
+}
+
+export interface ConfirmUserResponse {
   success: boolean;
   message?: string;
 }
@@ -78,5 +89,81 @@ export class AuthenticationService {
 
   public isAuthenticated(): boolean {
     return !!localStorage.getItem('authToken') || !!sessionStorage.getItem('authToken');
+  }
+
+  public async signUp(userData: SignUpData): Promise<SignUpResponse> {
+    try {
+      const response = await axios.post<SignUpResponse>(
+        `${this.baseUrl}/auth/sign-up`,
+        userData
+      );
+
+      return {
+        success: true,
+        message: response.data.message || 'Registration successful!'
+      };
+    } catch (error: unknown) {
+      console.error('Sign up error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          success: false,
+          message: error.response.data?.message || 'Registration failed. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          success: false,
+          message: 'An error occurred during registration. Please try again.'
+        };
+      }
+    }
+  }
+
+  public async  confirmUser(token: string): Promise<ConfirmUserResponse> {
+    try {
+      const response = await axios.post<ConfirmUserResponse>(
+        `${this.baseUrl}/auth/confirm`,
+        { token }
+      );
+
+      return {
+        success: true,
+        message: response.data.message || 'Account confirmed successfully!'
+      };
+    } catch (error: unknown) {
+      console.error('Confirmation error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          success: false,
+          message: error.response.data?.message || 'Account confirmation failed. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          success: false,
+          message: 'An error occurred during confirmation. Please try again.'
+        };
+      }
+    }
   }
 }

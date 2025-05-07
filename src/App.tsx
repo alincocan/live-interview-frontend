@@ -11,6 +11,7 @@ import LoginPage from "./components/pages/LoginPage";
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import SignUpPage from "./components/pages/SignUpPage";
 import ForgotPasswordPage from "./components/pages/ForgotPasswordPage";
+import ConfirmUserPage from "./components/pages/ConfirmUserPage";
 import DashboardPage from "./components/pages/DashboardPage";
 import DashboardHome from "./components/pages/DeshboardHome";
 import ProfilePage from "./components/pages/ProfilePage";
@@ -74,6 +75,7 @@ function App() {
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/signup" element={<SignUpPage />} />
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                        <Route path="/confirm" element={<ConfirmUserPage />} />
                         <Route path="/dashboard" element={<DashboardPage />} >
                             <Route path="" element={<DashboardHome />} />
                             <Route path="profile" element={<ProfilePage />} />
