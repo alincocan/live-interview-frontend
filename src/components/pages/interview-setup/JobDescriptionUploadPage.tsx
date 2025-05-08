@@ -11,6 +11,7 @@ import {
     Divider,
     Stack,
     Alert,
+    CircularProgress,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { JobDescriptionParserService } from '../../../service/jobDescriptionParserService.ts';
@@ -19,6 +20,7 @@ const JobDescriptionUploadPage: React.FC = () => {
     const jobDescriptionParserService = JobDescriptionParserService.getInstance();
     const [file, setFile] = useState(null);
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleFileChange = (e) => {
@@ -32,6 +34,7 @@ const JobDescriptionUploadPage: React.FC = () => {
             return;
         }
 
+        setIsLoading(true);
         try {
             const { jobName, tags, success, message } = await jobDescriptionParserService.processJobDescriptionFile(file);
             if (!success) {
@@ -45,6 +48,8 @@ const JobDescriptionUploadPage: React.FC = () => {
             } else {
                 setAlertMessage('Error processing file: Something went wrong');
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -57,6 +62,7 @@ const JobDescriptionUploadPage: React.FC = () => {
             return;
         }
 
+        setIsLoading(true);
         try {
             const { jobName, tags, success, message } = await jobDescriptionParserService.processJobDescriptionText(jobDescriptionText);
             if (!success) {
@@ -70,6 +76,8 @@ const JobDescriptionUploadPage: React.FC = () => {
             } else {
                 setAlertMessage('Error processing text: Something went wrong');
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -103,105 +111,113 @@ const JobDescriptionUploadPage: React.FC = () => {
             <Typography sx={{ mb: 5, color: 'text.secondary' }} variant="h4">
                 Interview Setup
             </Typography>
-            {alertMessage && (
-                <Box sx={{ mb: 2, width: '100%' }}>
-                    <Alert severity="error" sx={{ mb: 3 }}>
-                        {alertMessage}
-                    </Alert>
+            {isLoading ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <CircularProgress size={50} sx={{ mb: 2 }} />
+                    <Typography variant="body1" color={theme => theme.palette.text.primary} sx={{ mb: 3 }}>Processing the job description...</Typography>
                 </Box>
-            )}
-            <Stack spacing={2} alignItems="center">
-                <Card sx={{ width: 500 }}>
-                    <CardContent>
-                        <Typography variant="h6" gutterBottom>
-                            Upload job description
-                        </Typography>
-                        <Typography variant="body2" gutterBottom>
-                            You can upload a job description to pre-configure the interview settings.
-                        </Typography>
-                        <Box component="form" onSubmit={handleFileSubmit} sx={{ mt: 2 }}>
-                            <Button
-                                variant="outlined"
-                                component="label"
-                                fullWidth
-                                sx={{
-                                    textTransform: 'none',
-                                    justifyContent: 'flex-start',
-                                    color: 'text.secondary',
-                                    borderColor: 'text.secondary',
-                                }}
-                            >
-                                {file ? file.name : 'Choose File'}
-                                <Input
-                                    type="file"
-                                    onChange={handleFileChange}
-                                    inputProps={{ accept: '.pdf,.docx' }}
-                                    sx={{ display: 'none' }}
+            ) : (
+                <>
+                    {alertMessage && (
+                        <Box sx={{ mb: 2, width: '100%' }}>
+                            <Alert severity="error" sx={{ mb: 3 }}>
+                                {alertMessage}
+                            </Alert>
+                        </Box>
+                    )}
+                    <Stack spacing={2} alignItems="center">
+                        <Card sx={{ width: 500 }}>
+                            <CardContent>
+                                <Typography variant="h6" gutterBottom>
+                                    Upload job description
+                                </Typography>
+                                <Typography variant="body2" gutterBottom>
+                                    You can upload a job description to pre-configure the interview settings.
+                                </Typography>
+                                <Box component="form" onSubmit={handleFileSubmit} sx={{ mt: 2 }}>
+                                    <Button
+                                        variant="outlined"
+                                        component="label"
+                                        fullWidth
+                                        sx={{
+                                            textTransform: 'none',
+                                            justifyContent: 'flex-start',
+                                            color: 'text.secondary',
+                                            borderColor: 'text.secondary',
+                                        }}
+                                    >
+                                        {file ? file.name : 'Choose File'}
+                                        <Input
+                                            type="file"
+                                            onChange={handleFileChange}
+                                            inputProps={{ accept: '.pdf,.docx' }}
+                                            sx={{ display: 'none' }}
+                                        />
+                                    </Button>
+                                    <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
+                                        <Button
+                                            type="submit"
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={(e) => {
+                                                if (file && !['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
+                                                    e.preventDefault();
+                                                    setAlertMessage("Invalid file format. Please upload a PDF or DOCX file.");
+                                                    return;
+                                                }
+                                            }}
+                                            >
+                                            Upload
+                                        </Button>
+                                    </Box>
+                                </Box>
+                            </CardContent>
+                        </Card>
+
+                        <OrDivider />
+
+                        <Card sx={{ width: 500 }}>
+                            <CardContent>
+                                <Typography variant="h6" gutterBottom>
+                                    Write the job description
+                                </Typography>
+                                <Typography variant="body2" gutterBottom>
+                                    Type below the job description to preconfigure the interview settings.
+                                </Typography>
+
+                                <TextField
+                                    id="job-description-textfield"
+                                    multiline
+                                    rows={4}
+                                    fullWidth
+                                    variant="outlined"
+                                    placeholder="Enter your message..."
+                                    sx={{ mt: 2 }}
                                 />
-                            </Button>
-                            <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
-                                <Button
-                                    type="submit"
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={(e) => {
-                                        if (file && !['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
-                                            e.preventDefault();
-                                            setAlertMessage("Invalid file format. Please upload a PDF or DOCX file.");
-                                            return;
-                                        }
-                                    }}
-                                >
-                                    Upload
-                                </Button>
-                            </Box>
-                        </Box>
-                    </CardContent>
-                </Card>
 
-                <OrDivider />
+                                <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleTextSubmit}
+                                    >
+                                        Send
+                                    </Button>
+                                </Box>
+                            </CardContent>
+                        </Card>
 
-                <Card sx={{ width: 500 }}>
-                    <CardContent>
-                        <Typography variant="h6" gutterBottom>
-                            Write the job description
-                        </Typography>
-                        <Typography variant="body2" gutterBottom>
-                            Type below the job description to preconfigure the interview settings.
-                        </Typography>
+                        <OrDivider />
 
-                        <TextField
-                            id="job-description-textfield"
-                            multiline
-                            rows={4}
-                            fullWidth
+                        <Button
                             variant="outlined"
-                            placeholder="Enter your message..."
-                            sx={{ mt: 2 }}
-                        />
-
-                        <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleTextSubmit}
-                            >
-                                Send
-                            </Button>
-                        </Box>
-                    </CardContent>
-                </Card>
-
-                <OrDivider />
-
-                <Button
-                    variant="outlined"
-                    onClick={handleSkip}
-                    sx={{ width: 350, padding: '1rem' }}
-                >
-                    Skip to setup page
-                </Button>
-            </Stack>
+                            onClick={handleSkip}
+                            sx={{ width: 350, padding: '1rem' }}
+                        >
+                            Skip to setup page
+                        </Button>
+                    </Stack>
+                </>)}
         </Container>
     );
 };
