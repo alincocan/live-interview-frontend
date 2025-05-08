@@ -7,10 +7,11 @@ import {
     Box,
     Typography,
     Container,
-    createTheme,
-    ThemeProvider,
+    Alert,
 } from '@mui/material';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { useState } from 'react';
+import { AuthenticationService } from '../../service/authenticationService';
 
 type Inputs = {
     email: string;
@@ -23,10 +24,37 @@ const ForgotPasswordPage: React.FC = () => {
         formState: { errors },
     } = useForm<Inputs>();
 
-    const onSubmit: SubmitHandler<Inputs> = (data) => {
-        console.log('Send recovery to:', data.email);
-        alert(`Password recovery email sent to ${data.email}`);
-        // You can integrate Firebase Auth's sendPasswordResetEmail here
+    const [isLoading, setIsLoading] = useState(false);
+    const [responseMessage, setResponseMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+    const onSubmit: SubmitHandler<Inputs> = async (data) => {
+        setIsLoading(true);
+        setResponseMessage(null);
+
+        try {
+            const authService = AuthenticationService.getInstance();
+            const response = await authService.recoverPassword(data.email);
+
+            if (response.success) {
+                setResponseMessage({
+                    type: 'success',
+                    text: response.message || 'Password recovery email sent successfully!'
+                });
+            } else {
+                setResponseMessage({
+                    type: 'error',
+                    text: response.message || 'Failed to send recovery email. Please try again.'
+                });
+            }
+        } catch (error) {
+            console.error('Password recovery error:', error);
+            setResponseMessage({
+                type: 'error',
+                text: 'An unexpected error occurred. Please try again.'
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -38,8 +66,17 @@ const ForgotPasswordPage: React.FC = () => {
                     alignItems: 'center',
                 }}
             >
-                <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
-                    <Typography fontSize="1.25rem" color="white">?</Typography>
+                <Avatar sx={{ m: 1 }}>
+                    <Box
+                        component="img"
+                        src="images/man-logo.jpg"
+                        alt="My Image"
+                        sx={{
+                            width: 50,
+                            height: 'auto',
+                            borderRadius: 2, boxShadow: 3,
+                        }}
+                    />
                 </Avatar>
                 <Typography component="h1" variant="h5" color={theme => theme.palette.text.primary}>
                     Forgot Password
@@ -63,13 +100,22 @@ const ForgotPasswordPage: React.FC = () => {
                         error={!!errors.email}
                         helperText={errors.email?.message}
                     />
+                    {responseMessage && (
+                        <Alert 
+                            severity={responseMessage.type} 
+                            sx={{ mt: 2, width: '100%' }}
+                        >
+                            {responseMessage.text}
+                        </Alert>
+                    )}
                     <Button
                         type="submit"
                         fullWidth
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
+                        disabled={isLoading}
                     >
-                        Send Reset Link
+                        {isLoading ? 'Sending...' : 'Send Reset Link'}
                     </Button>
                     <Grid container justifyContent="flex-end">
                         <Grid item>

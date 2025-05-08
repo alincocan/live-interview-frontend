@@ -13,12 +13,7 @@ export interface LoginResponse {
   message?: string;
 }
 
-export interface SignUpResponse {
-  success: boolean;
-  message?: string;
-}
-
-export interface ConfirmUserResponse {
+export interface Response {
   success: boolean;
   message?: string;
 }
@@ -91,9 +86,9 @@ export class AuthenticationService {
     return !!localStorage.getItem('authToken') || !!sessionStorage.getItem('authToken');
   }
 
-  public async signUp(userData: SignUpData): Promise<SignUpResponse> {
+  public async signUp(userData: SignUpData): Promise<Response> {
     try {
-      const response = await axios.post<SignUpResponse>(
+      const response = await axios.post<Response>(
         `${this.baseUrl}/auth/sign-up`,
         userData
       );
@@ -129,9 +124,9 @@ export class AuthenticationService {
     }
   }
 
-  public async  confirmUser(token: string): Promise<ConfirmUserResponse> {
+  public async  confirmUser(token: string): Promise<Response> {
     try {
-      const response = await axios.post<ConfirmUserResponse>(
+      const response = await axios.post<Response>(
         `${this.baseUrl}/auth/confirm`,
         { token }
       );
@@ -162,6 +157,82 @@ export class AuthenticationService {
         return {
           success: false,
           message: 'An error occurred during confirmation. Please try again.'
+        };
+      }
+    }
+  }
+
+  public async recoverPassword(email: string): Promise<Response> {
+    try {
+      const response = await axios.post<Response>(
+        `${this.baseUrl}/auth/recover-password`,
+        { email }
+      );
+
+      return {
+        success: true,
+        message: response.data.message || 'Password recovery email sent successfully!'
+      };
+    } catch (error: unknown) {
+      console.error('Password recovery error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          success: false,
+          message: error.response.data?.message || 'Password recovery failed. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          success: false,
+          message: 'An error occurred during password recovery. Please try again.'
+        };
+      }
+    }
+  }
+
+  public async resetPassword(token: string, password: string): Promise<Response> {
+    try {
+      const response = await axios.post<Response>(
+        `${this.baseUrl}/auth/reset-password`,
+        { token, password }
+      );
+
+      return {
+        success: true,
+        message: response.data.message || 'Password reset successfully!'
+      };
+    } catch (error: unknown) {
+      console.error('Password reset error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          success: false,
+          message: error.response.data?.message || 'Password reset failed. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          success: false,
+          message: 'An error occurred during password reset. Please try again.'
         };
       }
     }

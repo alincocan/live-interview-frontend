@@ -3,6 +3,7 @@ import LoginPage from "./components/pages/LoginPage";
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import SignUpPage from "./components/pages/SignUpPage";
 import ForgotPasswordPage from "./components/pages/ForgotPasswordPage";
+import ResetPasswordPage from "./components/pages/ResetPasswordPage";
 import ConfirmUserPage from "./components/pages/ConfirmUserPage";
 import DashboardHome from "./components/pages/DeshboardHome";
 import ProfilePage from "./components/pages/ProfilePage";
@@ -31,6 +32,7 @@ function App() {
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/signup" element={<SignUpPage />} />
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                        <Route path="/reset-password" element={<ResetPasswordPage />} />
                         <Route path="/confirm" element={<ConfirmUserPage />} />
                         <Route path="/" element={
                             <ProtectedRoute>
