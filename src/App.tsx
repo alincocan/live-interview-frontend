@@ -12,6 +12,8 @@ import { Box, ThemeProvider } from "@mui/material";
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './layouts/AppLayout';
 import PageNotFound from './components/pages/PageNotFound';
+import JobDescriptionUploadPage from './components/pages/interview-setup/JobDescriptionUploadPage';
+import InterviewConfigurationPage from './components/pages/interview-setup/InterviewConfigurationPage';
 
 function App() {
 
@@ -42,6 +44,8 @@ function App() {
                             <Route path="profile" element={<ProfilePage />} />
                             <Route path="choose" element={<ChooseInterviewerPage />} />
                             <Route path="settings" />
+                            <Route path="interview/upload" element={<JobDescriptionUploadPage />} />
+                            <Route path="interview/setup" element={<InterviewConfigurationPage jobName={''} domain={''} tags={[]} />} />
                             {/*<Route path="details" element={<DetailsPage />} />*/}
                         </Route>
                         <Route path="*" element={<PageNotFound />} />
