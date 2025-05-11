@@ -410,8 +410,9 @@ const InterviewPage: React.FC = () => {
                                         borderRadius: '8px'
                                     }}
                                     onClick={() => {
-                                        // Navigate to results page
-                                        window.location.href = '/results';
+                                        // Navigate to interview results page
+                                        const interviewId = sessionStorage.getItem('interviewId');
+                                        window.location.href = `/interview/${interviewId}`;
                                     }}
                                 >
                                     Go to results

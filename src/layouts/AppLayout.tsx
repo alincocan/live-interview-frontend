@@ -1,8 +1,16 @@
 import { Box, Button, Typography } from '@mui/material';
 import { useNavigate, Outlet } from 'react-router-dom';
+import { AuthenticationService } from '../service/authenticationService';
 
 const AppLayout: React.FC = () => {
     const navigate = useNavigate();
+
+    const handleLogout = () => {
+        // Get the authentication service instance and call logout
+        AuthenticationService.getInstance().logout();
+        // Redirect to login page
+        navigate('/login');
+    };
 
     return (
         <Box
@@ -34,7 +42,7 @@ const AppLayout: React.FC = () => {
                 }}
             >
                 <Typography variant="h6" sx={{ color: '#fff' }}>
-                    My Dashboard
+                    Live Interview AI
                 </Typography>
                 <Box>
                     <Button onClick={() => navigate('/dashboard')} sx={{ color: '#fff' }}>
@@ -46,7 +54,7 @@ const AppLayout: React.FC = () => {
                     <Button onClick={() => navigate('/settings')} sx={{ color: '#fff' }}>
                         Settings
                     </Button>
-                    <Button onClick={() => navigate('/logout')} sx={{ color: '#fff' }}>
+                    <Button onClick={handleLogout} sx={{ color: '#fff' }}>
                         Logout
                     </Button>
                 </Box>
