@@ -221,9 +221,9 @@ const InterviewConfiguration: React.FC = () => {
                                 />
                                 <Chip
                                     label="Mid"
-                                    onClick={() => handleDifficultyChange("MID")}
-                                    color={difficultyLevel === "MID" ? "info" : "info"}
-                                    variant={difficultyLevel === "MID" ? "filled" : "outlined"}
+                                    onClick={() => handleDifficultyChange("MIDLEVEL")}
+                                    color={difficultyLevel === "MIDLEVEL" ? "info" : "info"}
+                                    variant={difficultyLevel === "MIDLEVEL" ? "filled" : "outlined"}
                                     sx={{ cursor: 'pointer' }}
                                 />
                                 <Chip

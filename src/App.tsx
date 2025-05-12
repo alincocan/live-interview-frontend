@@ -46,8 +46,8 @@ function App() {
                             <Route index element={<Navigate to="/dashboard" replace />} />
                             <Route path="dashboard" element={<DashboardHome />} />
                             <Route path="profile" element={<ProfilePage />} />
-                            <Route path="choose" element={<ChooseInterviewerPage />} />
                             <Route path="settings" />
+                            <Route path="interview/choose" element={<ChooseInterviewerPage />} />
                             <Route path="interview/upload" element={<JobDescriptionUploadPage />} />
                             <Route path="interview/setup" element={<InterviewConfigurationPage />} />
                             <Route path="interview/questions" element={<InterviewPage />} />

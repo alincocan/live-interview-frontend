@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Typography,
     Card,
@@ -8,20 +8,36 @@ import {
     Container,
     Button,
     TextField,
-    Divider,
     Stack,
     Alert,
     CircularProgress,
+    Modal,
+    IconButton,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { JobDescriptionParserService } from '../../../service/jobDescriptionParserService.ts';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import SkipNextIcon from '@mui/icons-material/SkipNext';
+import CloseIcon from '@mui/icons-material/Close';
 
 const JobDescriptionUploadPage: React.FC = () => {
     const jobDescriptionParserService = JobDescriptionParserService.getInstance();
     const [file, setFile] = useState(null);
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [openFileModal, setOpenFileModal] = useState(false);
+    const [openTextModal, setOpenTextModal] = useState(false);
     const navigate = useNavigate();
+
+    // Clear sessionStorage items when component mounts
+    useEffect(() => {
+        sessionStorage.removeItem('jobName');
+        sessionStorage.removeItem('tags');
+        sessionStorage.removeItem('duration');
+        sessionStorage.removeItem('softSkillsPercentage');
+        sessionStorage.removeItem('difficulty');
+    }, []);
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -29,11 +45,6 @@ const JobDescriptionUploadPage: React.FC = () => {
 
     const handleFileSubmit = async (e) => {
         e.preventDefault();
-        if (!file) {
-            setAlertMessage("Please select a file first.");
-            return;
-        }
-
         setIsLoading(true);
         try {
             const { jobName, tags, success, message } = await jobDescriptionParserService.processJobDescriptionFile(file);
@@ -91,18 +102,26 @@ const JobDescriptionUploadPage: React.FC = () => {
         navigate('/interview/setup');
     };
 
-    const OrDivider = () => (
-        <Box
-            display="flex"
-            alignItems="center"
-            width="100%"
-            sx={{ my: 2 }}
-        >
-            <Divider sx={{ flex: 1 }} />
-            <Typography sx={{ mx: 2, color: 'text.secondary' }}>OR</Typography>
-            <Divider sx={{ flex: 1 }} />
-        </Box>
-    );
+    const baseModalStyle = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        bgcolor: 'background.paper',
+        boxShadow: 24,
+        p: 4,
+        borderRadius: 2,
+    };
+
+    const fileModalStyle = {
+        ...baseModalStyle,
+        width: 500, // Original width for file upload modal
+    };
+
+    const textModalStyle = {
+        ...baseModalStyle,
+        width: 800, // Current width for text input modal
+    };
 
     return (
         <Container
@@ -124,22 +143,119 @@ const JobDescriptionUploadPage: React.FC = () => {
                 </Box>
             ) : (
                 <>
-                    {alertMessage && (
-                        <Box sx={{ mb: 2, width: '100%' }}>
-                            <Alert severity="error" sx={{ mb: 3 }}>
-                                {alertMessage}
-                            </Alert>
-                        </Box>
-                    )}
-                    <Stack spacing={2} alignItems="center">
-                        <Card sx={{ width: 500 }}>
-                            <CardContent>
-                                <Typography variant="h6" gutterBottom>
+                    <Stack
+                        direction="row"
+                        spacing={3}
+                        justifyContent="center"
+                        sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' }, gap: 2 }}
+                    >
+                        <Card
+                            sx={{
+                                width: 260,
+                                height: 180,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                '&:hover': {
+                                    transform: 'translateY(-5px)',
+                                    boxShadow: 6
+                                }
+                            }}
+                            onClick={() => setOpenFileModal(true)}
+                        >
+                            <CardContent sx={{ textAlign: 'center' }}>
+                                <UploadFileIcon sx={{ fontSize: 60, color: 'primary.main', mb: 1 }} />
+                                <Typography variant="h6" component="div">
                                     Upload job description
                                 </Typography>
-                                <Typography variant="body2" gutterBottom>
+                            </CardContent>
+                        </Card>
+
+                        <Card
+                            sx={{
+                                width: 260,
+                                height: 180,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                '&:hover': {
+                                    transform: 'translateY(-5px)',
+                                    boxShadow: 6
+                                }
+                            }}
+                            onClick={() => setOpenTextModal(true)}
+                        >
+                            <CardContent sx={{ textAlign: 'center' }}>
+                                <EditNoteIcon sx={{ fontSize: 60, color: 'primary.main', mb: 1 }} />
+                                <Typography variant="h6" component="div">
+                                    Write job description
+                                </Typography>
+                            </CardContent>
+                        </Card>
+
+                        <Card
+                            sx={{
+                                width: 260,
+                                height: 180,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                '&:hover': {
+                                    transform: 'translateY(-5px)',
+                                    boxShadow: 6
+                                }
+                            }}
+                            onClick={handleSkip}
+                        >
+                            <CardContent sx={{ textAlign: 'center' }}>
+                                <SkipNextIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 1 }} />
+                                <Typography variant="h6" component="div" color="text.secondary">
+                                    Skip to setup page
+                                </Typography>
+                            </CardContent>
+                        </Card>
+
+                        {/* File Upload Modal */}
+                        <Modal
+                            open={openFileModal}
+                            onClose={() => setOpenFileModal(false)}
+                            aria-labelledby="file-upload-modal"
+                            aria-describedby="modal-for-uploading-job-description-file"
+                        >
+                            <Box sx={{...fileModalStyle, position: 'relative'}}>
+                                <IconButton
+                                    aria-label="close"
+                                    onClick={() => setOpenFileModal(false)}
+                                    sx={{
+                                        position: 'absolute',
+                                        right: 8,
+                                        top: 8,
+                                    }}
+                                >
+                                    <CloseIcon />
+                                </IconButton>
+                                <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', color: 'primary.main' }}>
+                                    Upload job description
+                                </Typography>
+                                <Typography variant="body2" gutterBottom sx={{ textAlign: 'center', color: 'text.secondary' }}>
                                     You can upload a job description to pre-configure the interview settings.
                                 </Typography>
+                                {alertMessage && (
+                                    <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+                                        {alertMessage}
+                                    </Alert>
+                                )}
                                 <Box component="form" onSubmit={handleFileSubmit} sx={{ mt: 2 }}>
                                     <Button
                                         variant="outlined"
@@ -161,44 +277,66 @@ const JobDescriptionUploadPage: React.FC = () => {
                                         />
                                     </Button>
                                     <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
-                                        <Button
-                                            type="submit"
-                                            variant="contained"
-                                            color="primary"
-                                            onClick={(e) => {
-                                                if (file && !['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
-                                                    e.preventDefault();
-                                                    setAlertMessage("Invalid file format. Please upload a PDF or DOCX file.");
-                                                    return;
-                                                }
-                                            }}
+                                        {file && (
+                                            <Button
+                                                type="submit"
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={(e) => {
+                                                    if (!['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
+                                                        e.preventDefault();
+                                                        setAlertMessage("Invalid file format. Please upload a PDF or DOCX file.");
+                                                        return;
+                                                    }
+                                                }}
                                             >
-                                            Upload
-                                        </Button>
+                                                Upload
+                                            </Button>
+                                        )}
                                     </Box>
                                 </Box>
-                            </CardContent>
-                        </Card>
+                            </Box>
+                        </Modal>
 
-                        <OrDivider />
-
-                        <Card sx={{ width: 500 }}>
-                            <CardContent>
-                                <Typography variant="h6" gutterBottom>
+                        {/* Text Input Modal */}
+                        <Modal
+                            open={openTextModal}
+                            onClose={() => setOpenTextModal(false)}
+                            aria-labelledby="text-input-modal"
+                            aria-describedby="modal-for-writing-job-description"
+                        >
+                            <Box sx={{...textModalStyle, position: 'relative'}}>
+                                <IconButton
+                                    aria-label="close"
+                                    onClick={() => setOpenTextModal(false)}
+                                    sx={{
+                                        position: 'absolute',
+                                        right: 8,
+                                        top: 8,
+                                    }}
+                                >
+                                    <CloseIcon />
+                                </IconButton>
+                                <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', color: 'primary.main' }}>
                                     Write the job description
                                 </Typography>
-                                <Typography variant="body2" gutterBottom>
+                                <Typography variant="body2" gutterBottom  sx={{ textAlign: 'center', color: 'text.secondary' }}>
                                     Type below the job description to preconfigure the interview settings.
                                 </Typography>
+                                {alertMessage && (
+                                    <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+                                        {alertMessage}
+                                    </Alert>
+                                )}
 
                                 <TextField
                                     id="job-description-textfield"
                                     multiline
-                                    rows={4}
+                                    rows={20}
                                     fullWidth
                                     variant="outlined"
                                     placeholder="Enter your message..."
-                                    sx={{ mt: 2 }}
+                                    sx={{ mt: 2, minHeight: '250px' }}
                                 />
 
                                 <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
@@ -210,18 +348,8 @@ const JobDescriptionUploadPage: React.FC = () => {
                                         Send
                                     </Button>
                                 </Box>
-                            </CardContent>
-                        </Card>
-
-                        <OrDivider />
-
-                        <Button
-                            variant="outlined"
-                            onClick={handleSkip}
-                            sx={{ width: 350, padding: '1rem' }}
-                        >
-                            Skip to setup page
-                        </Button>
+                            </Box>
+                        </Modal>
                     </Stack>
                 </>)}
         </Container>
