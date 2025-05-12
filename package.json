@@ -18,6 +18,7 @@
     "@react-three/drei": "^9.57.3",
     "@react-three/fiber": "^8.13.2",
     "axios": "^1.6.5",
+    "date-fns": "^2.30.0",
     "mammoth": "^1.9.0",
     "pdfjs-dist": "^5.2.133",
     "react": "^18.2.0",

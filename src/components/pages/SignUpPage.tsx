@@ -9,9 +9,13 @@ import {
     Container,
     Alert,
     CircularProgress,
+    InputAdornment,
+    IconButton,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AuthenticationService } from '../../service/authenticationService';
 import {SignUpData} from "../../bo/SignUpData.ts";
 
@@ -19,16 +23,60 @@ const SignUpPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [yearsOfExperience, setYearsOfExperience] = useState<number | null>(null);
+    const dateInputRef = useRef<HTMLInputElement>(null);
+
+    // Set the language for the date picker to English
+    useEffect(() => {
+        if (dateInputRef.current) {
+            // Set multiple attributes to ensure the date picker displays in English
+            dateInputRef.current.setAttribute('lang', 'en-US');
+            dateInputRef.current.setAttribute('data-locale', 'en-US');
+            dateInputRef.current.setAttribute('data-language', 'en');
+
+            // Some browsers respect this format
+            dateInputRef.current.setAttribute('data-date-format', 'yyyy-mm-dd');
+
+            // Force the browser to recognize the language change
+            const value = dateInputRef.current.value;
+            dateInputRef.current.value = '';
+            setTimeout(() => {
+                if (dateInputRef.current) {
+                    dateInputRef.current.value = value;
+                }
+            }, 10);
+        }
+    }, []);
 
     const {
         register,
         handleSubmit,
         formState: { errors },
         watch,
+        setValue,
     } = useForm<SignUpData>();
 
-    // Watch the password field to use for validation
-    const password = watch('password');
+    // No need to watch password field here as we're using it directly in validation
+
+    // Handle years of experience increment/decrement
+    const handleIncrement = () => {
+        const newValue = (yearsOfExperience || 0) + 1;
+        setYearsOfExperience(newValue);
+        setValue('yearsOfExperience', newValue, { shouldValidate: true });
+    };
+
+    const handleDecrement = () => {
+        if (yearsOfExperience && yearsOfExperience > 0) {
+            const newValue = yearsOfExperience - 1;
+            setYearsOfExperience(newValue);
+            setValue('yearsOfExperience', newValue, { shouldValidate: true });
+        }
+    };
+
+    const handleYearsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value === '' ? null : Number(e.target.value);
+        setYearsOfExperience(value);
+    };
 
     const onSubmit: SubmitHandler<SignUpData> = async (data) => {
         // Clear previous messages
@@ -43,7 +91,10 @@ const SignUpPage: React.FC = () => {
                 lastName: data.lastName,
                 email: data.email,
                 occupation: data.occupation,
-                password: data.password
+                yearsOfExperience: data.yearsOfExperience,
+                dateOfBirth: data.dateOfBirth,
+                password: data.password,
+                confirmPassword: data.confirmPassword
             };
 
             // Call the authentication service
@@ -160,6 +211,96 @@ const SignUpPage: React.FC = () => {
                                         helperText={errors.occupation?.message}
                                     />
                                 </Grid>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Years of Experience"
+                                        type="number"
+                                        value={yearsOfExperience === null ? '' : yearsOfExperience}
+                                        onChange={handleYearsChange}
+                                        inputProps={{ 
+                                            min: 0,
+                                            style: { textAlign: 'center' }
+                                        }}
+                                        sx={{
+                                            '& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button': {
+                                                WebkitAppearance: 'none',
+                                                margin: 0,
+                                            },
+                                            '& input[type=number]': {
+                                                MozAppearance: 'textfield',
+                                            },
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <IconButton 
+                                                        onClick={handleDecrement}
+                                                        disabled={!yearsOfExperience || yearsOfExperience <= 0}
+                                                        size="small"
+                                                        sx={{ 
+                                                            bgcolor: 'action.selected',
+                                                            borderRadius: '4px',
+                                                            '&:hover': { bgcolor: 'action.hover' }
+                                                        }}
+                                                    >
+                                                        <RemoveIcon fontSize="small" />
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton 
+                                                        onClick={handleIncrement}
+                                                        size="small"
+                                                        sx={{ 
+                                                            bgcolor: 'action.selected',
+                                                            borderRadius: '4px',
+                                                            '&:hover': { bgcolor: 'action.hover' }
+                                                        }}
+                                                    >
+                                                        <AddIcon fontSize="small" />
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        {...register('yearsOfExperience', { 
+                                            required: 'Years of experience is required',
+                                            valueAsNumber: true,
+                                            min: {
+                                                value: 0,
+                                                message: 'Years must be a positive number'
+                                            }
+                                        })}
+                                        error={!!errors.yearsOfExperience}
+                                        helperText={errors.yearsOfExperience?.message}
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Date of Birth"
+                                        type="date"
+                                        InputLabelProps={{ shrink: true }}
+                                        inputProps={{ 
+                                            lang: 'en-US',
+                                            style: { textAlign: 'left' }
+                                        }}
+                                        InputProps={{
+                                            inputRef: dateInputRef
+                                        }}
+                                        sx={{
+                                            '& input::-webkit-calendar-picker-indicator': {
+                                                filter: 'invert(0.5)'
+                                            }
+                                        }}
+                                        {...register('dateOfBirth', { 
+                                            required: 'Date of birth is required'
+                                        })}
+                                        error={!!errors.dateOfBirth}
+                                        helperText={errors.dateOfBirth?.message}
+                                    />
+                                </Grid>
                                 <Grid item xs={12}>
                                     <TextField
                                         fullWidth
@@ -184,8 +325,10 @@ const SignUpPage: React.FC = () => {
                                         type="password"
                                         {...register('confirmPassword', {
                                             required: 'Please confirm your password',
-                                            validate: value =>
-                                                value === password || 'Passwords do not match'
+                                            validate: value => {
+                                                const passwordValue = watch('password');
+                                                return value === passwordValue || 'Passwords do not match';
+                                            }
                                         })}
                                         error={!!errors.confirmPassword}
                                         helperText={errors.confirmPassword?.message}
