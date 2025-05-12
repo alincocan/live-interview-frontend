@@ -16,6 +16,7 @@ import PageNotFound from './components/pages/PageNotFound';
 import JobDescriptionUploadPage from './components/pages/interview-setup/JobDescriptionUploadPage';
 import InterviewConfigurationPage from './components/pages/interview-setup/InterviewConfigurationPage';
 import InterviewPage from './components/pages/InterviewPage';
+import InterviewResultPage from './components/pages/InterviewResultPage';
 
 function App() {
 
@@ -50,6 +51,7 @@ function App() {
                             <Route path="interview/upload" element={<JobDescriptionUploadPage />} />
                             <Route path="interview/setup" element={<InterviewConfigurationPage jobName={''} domain={''} tags={[]} />} />
                             <Route path="interview/questions" element={<InterviewPage />} />
+                            <Route path="interview/:interviewId" element={<InterviewResultPage />} />
                             {/*<Route path="details" element={<DetailsPage />} />*/}
                         </Route>
                         <Route path="*" element={<PageNotFound />} />

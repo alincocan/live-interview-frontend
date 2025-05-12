@@ -5,6 +5,9 @@ export interface InterviewQuestion {
   question: string;
   softSkill: boolean;
   tags: string[];
+  answer?: string;
+  score?: number;
+  correctAnswer?: string;
   // Add other properties as needed
 }
 
@@ -43,6 +46,17 @@ export interface FinalizeInterviewRequest {
 
 export interface FinalizeInterviewResponse {
   success: boolean;
+  message?: string;
+}
+
+export interface InterviewDetailsResponse {
+  id: string;
+  jobName: string;
+  difficulty: string;
+  duration: number;
+  score: number;
+  questions: InterviewQuestion[];
+  success?: boolean;
   message?: string;
 }
 
@@ -187,6 +201,65 @@ export class InterviewService {
         return {
           success: false,
           message: 'An error occurred while finalizing the interview. Please try again.'
+        };
+      }
+    }
+  }
+
+  public async getInterviewDetails(interviewId: string): Promise<InterviewDetailsResponse> {
+    try {
+      const token = this.getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await axios.get<InterviewDetailsResponse>(
+        `${this.baseUrl}/interview/${interviewId}`,
+        { headers }
+      );
+
+      return {
+        ...response.data,
+        success: true
+      };
+    } catch (error: unknown) {
+      console.error('Get interview details error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          id: '',
+          jobName: '',
+          difficulty: '',
+          duration: 0,
+          score: 0,
+          questions: [],
+          success: false,
+          message: error.response.data?.message || 'Failed to fetch interview details. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          id: '',
+          jobName: '',
+          difficulty: '',
+          duration: 0,
+          score: 0,
+          questions: [],
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          id: '',
+          jobName: '',
+          difficulty: '',
+          duration: 0,
+          score: 0,
+          questions: [],
+          success: false,
+          message: 'An error occurred while fetching interview details. Please try again.'
         };
       }
     }
