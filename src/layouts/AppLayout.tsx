@@ -163,7 +163,7 @@ const AppLayout: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
                     {/* Start Interview Menu Item */}
                     <Box 
-                        onClick={() => navigate('/interview/upload')}
+                        onClick={() => navigate('/interview/choose')}
                         sx={{
                             mr: 2,
                             color: '#fff',
