@@ -49,7 +49,7 @@ function App() {
                             <Route path="choose" element={<ChooseInterviewerPage />} />
                             <Route path="settings" />
                             <Route path="interview/upload" element={<JobDescriptionUploadPage />} />
-                            <Route path="interview/setup" element={<InterviewConfigurationPage jobName={''} domain={''} tags={[]} />} />
+                            <Route path="interview/setup" element={<InterviewConfigurationPage />} />
                             <Route path="interview/questions" element={<InterviewPage />} />
                             <Route path="interview/:interviewId" element={<InterviewResultPage />} />
                             {/*<Route path="details" element={<DetailsPage />} />*/}
