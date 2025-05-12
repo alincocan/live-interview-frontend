@@ -45,13 +45,6 @@ const InterviewPage: React.FC = () => {
 
 
     useEffect(() => {
-        // Initialize session storage with default values if not already set
-        sessionStorage.setItem('duration', '10');
-        sessionStorage.setItem('jobName', 'Java Developer');
-        sessionStorage.setItem('softSkillsPercentage', '10');
-        sessionStorage.setItem('difficulty', 'JUNIOR');
-        sessionStorage.setItem('tags', JSON.stringify(['Collections', 'Multi-Threading', 'Exceptions']));
-
         // Fetch data from sessionStorage
         const duration = sessionStorage.getItem('duration');
         const jobName = sessionStorage.getItem('jobName');

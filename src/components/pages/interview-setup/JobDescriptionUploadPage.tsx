@@ -41,7 +41,10 @@ const JobDescriptionUploadPage: React.FC = () => {
                 setAlertMessage(message || 'Failed to process the job description file. Please try again.');
                 return;
             }
-            navigate('/interview/setup', { state: { jobName, tags } });
+            // Save jobName and tags in sessionStorage
+            sessionStorage.setItem('jobName', jobName || '');
+            sessionStorage.setItem('tags', JSON.stringify(tags));
+            navigate('/interview/setup');
         } catch (error) {
             if (error instanceof Error) {
                 setAlertMessage(`Error processing file: ${error.message}`);
@@ -69,7 +72,10 @@ const JobDescriptionUploadPage: React.FC = () => {
                 setAlertMessage(message || 'Failed to process the job description text. Please try again.');
                 return;
             }
-            navigate('/interview/setup', { state: { jobName, tags } });
+            // Save jobName and tags in sessionStorage
+            sessionStorage.setItem('jobName', jobName || '');
+            sessionStorage.setItem('tags', JSON.stringify(tags));
+            navigate('/interview/setup');
         } catch (error) {
             if (error instanceof Error) {
                 setAlertMessage(`Error processing text: ${error.message}`);
