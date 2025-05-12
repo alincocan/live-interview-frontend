@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Container,
     Typography,
@@ -12,7 +12,9 @@ import {
     TextField,
     Button,
     Snackbar,
+    IconButton,
 } from '@mui/material';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import { 
     InterviewService, 
     InterviewQuestion, 
@@ -42,6 +44,91 @@ const InterviewPage: React.FC = () => {
         difficulty: '',
         tags: [] as string[]
     });
+
+    // Audio refs
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const audioUrlRef = useRef<string | null>(null);
+
+    // Function to decode base64 audio and play it
+    const playQuestionAudio = () => {
+        const currentQuestion = questions[currentQuestionIndex];
+        if (!currentQuestion || !currentQuestion.audio) {
+            console.log('No audio available for this question');
+            return;
+        }
+
+        try {
+            console.log('Playing audio for question:', currentQuestionIndex + 1);
+
+            // Clean up previous audio URL if it exists
+            if (audioUrlRef.current) {
+                URL.revokeObjectURL(audioUrlRef.current);
+                audioUrlRef.current = null;
+            }
+
+            // Decode base64 string to binary data
+            const binaryString = atob(currentQuestion.audio);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            // Create blob from binary data
+            const blob = new Blob([bytes], { type: 'audio/mp3' });
+            const audioUrl = URL.createObjectURL(blob);
+            audioUrlRef.current = audioUrl;
+
+            // Use the audio element from the ref
+            if (!audioRef.current) {
+                console.error('Audio element ref is not available');
+                return;
+            }
+            const audioElement = audioRef.current;
+
+            // Set audio element attributes
+            audioElement.preload = 'auto';
+            audioElement.crossOrigin = 'anonymous';
+            audioElement.volume = 1.0;
+            audioElement.muted = false;
+            audioElement.src = audioUrl;
+
+            // Play the audio
+            audioElement.load();
+            audioElement.play()
+                .then(() => console.log('Audio playing successfully'))
+                .catch(error => {
+                    console.error('Error playing audio:', error);
+                    if (error.name === 'NotAllowedError') {
+                        console.log('Autoplay prevented by browser. User interaction required.');
+                    }
+                });
+        } catch (error) {
+            console.error('Error processing audio:', error);
+        }
+    };
+
+    // Play audio when a new question is displayed
+    useEffect(() => {
+        if (questions.length > 0 && currentQuestionIndex >= 0 && interviewStarted && !isLoading) {
+            // Add a small delay to ensure the UI is updated before playing audio
+            const timeoutId = setTimeout(() => {
+                playQuestionAudio();
+            }, 500);
+
+            // Clean up timeout if component unmounts or dependencies change
+            return () => clearTimeout(timeoutId);
+        }
+    }, [currentQuestionIndex, questions, interviewStarted, isLoading]);
+
+    // Clean up audio resources when component unmounts
+    useEffect(() => {
+        return () => {
+            if (audioUrlRef.current) {
+                URL.revokeObjectURL(audioUrlRef.current);
+                audioUrlRef.current = null;
+            }
+        };
+    }, []);
 
 
     useEffect(() => {
@@ -422,9 +509,30 @@ const InterviewPage: React.FC = () => {
                                 {questions.length > 0 ? (
                                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                                         <Box>
-                                            <Typography variant="body1" gutterBottom>
-                                                {questions[currentQuestionIndex].question}
-                                            </Typography>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <Typography variant="body1" gutterBottom>
+                                                    {questions[currentQuestionIndex].question}
+                                                </Typography>
+                                                {questions[currentQuestionIndex].audio && (
+                                                    <IconButton 
+                                                        color="primary" 
+                                                        onClick={playQuestionAudio}
+                                                        aria-label="Play question audio"
+                                                        size="small"
+                                                    >
+                                                        <VolumeUpIcon />
+                                                    </IconButton>
+                                                )}
+                                                {/* Hidden audio element for better browser compatibility */}
+                                                <audio 
+                                                    id="question-audio" 
+                                                    ref={audioRef}
+                                                    style={{ display: 'none' }}
+                                                    controls
+                                                    preload="auto"
+                                                    crossOrigin="anonymous"
+                                                />
+                                            </Box>
                                             <Typography 
                                                 variant="body2" 
                                                 color="text.secondary"
