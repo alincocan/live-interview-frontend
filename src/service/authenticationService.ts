@@ -1,6 +1,7 @@
 import axios from 'axios';
 import {LoginCredentials} from "../bo/LoginCredentials.ts";
 import {SignUpData} from "../bo/SignUpData.ts";
+import {Response} from "../bo/Response.ts";
 
 export interface LoginResponse {
   accessToken?: string;
@@ -9,11 +10,6 @@ export interface LoginResponse {
     email: string;
     // Add other user properties as needed
   };
-  success: boolean;
-  message?: string;
-}
-
-export interface Response {
   success: boolean;
   message?: string;
 }

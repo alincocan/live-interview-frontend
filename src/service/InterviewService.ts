@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {Response} from "../bo/Response.ts";
 
 export interface InterviewQuestion {
   id: string;
@@ -35,18 +36,8 @@ export interface ValidateAnswerRequest {
   softSkill?: boolean;
 }
 
-export interface ValidateAnswerResponse {
-  success: boolean;
-  message?: string;
-}
-
 export interface FinalizeInterviewRequest {
   interviewId: string;
-}
-
-export interface FinalizeInterviewResponse {
-  success: boolean;
-  message?: string;
 }
 
 export interface InterviewDetailsResponse {
@@ -122,12 +113,12 @@ export class InterviewService {
     }
   }
 
-  public async validateAnswer(request: ValidateAnswerRequest): Promise<ValidateAnswerResponse> {
+  public async validateAnswer(request: ValidateAnswerRequest): Promise<Response> {
     try {
       const token = this.getAuthToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const response = await axios.post<ValidateAnswerResponse>(
+      const response = await axios.post<Response>(
         `${this.baseUrl}/interview/questions/validate`,
         request,
         { headers }
@@ -164,12 +155,12 @@ export class InterviewService {
     }
   }
 
-  public async finalizeInterview(request: FinalizeInterviewRequest): Promise<FinalizeInterviewResponse> {
+  public async finalizeInterview(request: FinalizeInterviewRequest): Promise<Response> {
     try {
       const token = this.getAuthToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const response = await axios.post<FinalizeInterviewResponse>(
+      const response = await axios.post<Response>(
         `${this.baseUrl}/interview/finalize`,
         request,
         { headers }
