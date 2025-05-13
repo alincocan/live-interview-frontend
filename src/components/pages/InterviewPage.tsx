@@ -9,18 +9,19 @@ import {
     Alert,
     Chip,
     Paper,
-    TextField,
     Button,
     Snackbar,
     IconButton,
 } from '@mui/material';
-import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
 import { 
     InterviewService, 
     InterviewQuestion, 
     ValidateAnswerRequest,
     FinalizeInterviewRequest
 } from '../../service/InterviewService';
+
 
 const InterviewPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +49,69 @@ const InterviewPage: React.FC = () => {
     // Audio refs
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const audioUrlRef = useRef<string | null>(null);
+
+    // Recording refs and state
+    const [isRecording, setIsRecording] = useState(false);
+    const [audioBase64, setAudioBase64] = useState('');
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+
+    // Function to start recording
+    const startRecording = async () => {
+        audioChunksRef.current = [];
+        try {
+            console.log('Starting recording...');
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                console.log('Recording stopped, processing audio...');
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+                convertBlobToBase64(audioBlob);
+
+                // Stop all tracks of the stream
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+            console.log('Recording started');
+        } catch (error) {
+            console.error('Error starting recording:', error);
+            setIsRecording(false);
+        }
+    };
+
+    // Function to stop recording
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            console.log('Stopping recording...');
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
+
+    // Function to convert blob to base64
+    const convertBlobToBase64 = (blob: Blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            if (reader.result) {
+                // Extract the base64 data (remove the data URL prefix)
+                const base64data = reader.result.toString().split(',')[1];
+                setAudioBase64(base64data);
+                setUserAnswer(base64data); // Set the user answer to the base64 audio data
+                console.log('Audio converted to base64');
+            }
+        };
+        reader.readAsDataURL(blob);
+    };
 
     // Function to decode base64 audio and play it
     const playQuestionAudio = () => {
@@ -92,6 +156,12 @@ const InterviewPage: React.FC = () => {
             audioElement.muted = false;
             audioElement.src = audioUrl;
 
+            // Add event listener for when audio ends
+            audioElement.onended = () => {
+                console.log('Audio playback ended, starting recording');
+                startRecording();
+            };
+
             // Play the audio
             audioElement.load();
             audioElement.play()
@@ -120,6 +190,7 @@ const InterviewPage: React.FC = () => {
         }
     }, [currentQuestionIndex, questions, interviewStarted, isLoading]);
 
+
     // Clean up audio resources when component unmounts
     useEffect(() => {
         return () => {
@@ -127,8 +198,14 @@ const InterviewPage: React.FC = () => {
                 URL.revokeObjectURL(audioUrlRef.current);
                 audioUrlRef.current = null;
             }
+
+            // Stop recording if active
+            if (mediaRecorderRef.current && isRecording) {
+                mediaRecorderRef.current.stop();
+                setIsRecording(false);
+            }
         };
-    }, []);
+    }, [isRecording]);
 
 
     useEffect(() => {
@@ -186,6 +263,8 @@ const InterviewPage: React.FC = () => {
         setInterviewStarted(true);
         setCurrentQuestionIndex(0);
         setUserAnswer('');
+        setAudioBase64(''); // Reset audio base64 data
+        setIsRecording(false); // Reset recording state
 
         // Generate interview questions when the interview starts
         generateInterviewQuestions(interviewData);
@@ -193,8 +272,8 @@ const InterviewPage: React.FC = () => {
 
     // Function to handle moving to the next question
     const handleNextQuestion = async () => {
-        if (userAnswer.trim() === '') {
-            setValidationError('Please provide an answer before proceeding.');
+        if (!audioBase64) {
+            setValidationError('Please record an answer before proceeding.');
             setShowValidationError(true);
             return;
         }
@@ -223,6 +302,8 @@ const InterviewPage: React.FC = () => {
                 if (currentQuestionIndex < questions.length - 1) {
                     setCurrentQuestionIndex(prevIndex => prevIndex + 1);
                     setUserAnswer('');
+                    setAudioBase64(''); // Reset audio base64 data
+                    setIsRecording(false); // Reset recording state
                 }
                 setValidationError(null);
             } else {
@@ -241,8 +322,8 @@ const InterviewPage: React.FC = () => {
 
     // Function to handle finishing the interview
     const handleFinishInterview = async () => {
-        if (userAnswer.trim() === '') {
-            setValidationError('Please provide an answer before finishing.');
+        if (!audioBase64) {
+            setValidationError('Please record an answer before finishing.');
             setShowValidationError(true);
             return;
         }
@@ -513,16 +594,6 @@ const InterviewPage: React.FC = () => {
                                                 <Typography variant="body1" gutterBottom>
                                                     {questions[currentQuestionIndex].question}
                                                 </Typography>
-                                                {questions[currentQuestionIndex].audio && (
-                                                    <IconButton 
-                                                        color="primary" 
-                                                        onClick={playQuestionAudio}
-                                                        aria-label="Play question audio"
-                                                        size="small"
-                                                    >
-                                                        <VolumeUpIcon />
-                                                    </IconButton>
-                                                )}
                                                 {/* Hidden audio element for better browser compatibility */}
                                                 <audio 
                                                     id="question-audio" 
@@ -547,23 +618,63 @@ const InterviewPage: React.FC = () => {
                                             </Box>
                                         </Box>
 
-                                        <TextField
-                                            label="Your Answer"
-                                            multiline
-                                            rows={4}
-                                            value={userAnswer}
-                                            onChange={(e) => setUserAnswer(e.target.value)}
-                                            fullWidth
-                                            variant="outlined"
-                                            placeholder="Type your answer here..."
-                                        />
+                                        {isRecording ? (
+                                            <Box 
+                                                sx={{ 
+                                                    display: 'flex', 
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    p: 4,
+                                                    bgcolor: 'rgba(244, 67, 54, 0.1)',
+                                                    borderRadius: 2,
+                                                    minHeight: '150px'
+                                                }}
+                                            >
+                                                <MicIcon sx={{ fontSize: 60, color: 'error.main', mb: 2 }} />
+                                                <Typography variant="h6" color="error.main">
+                                                    Recording in progress...
+                                                </Typography>
+                                                <IconButton 
+                                                    color="error" 
+                                                    onClick={stopRecording}
+                                                    aria-label="Stop recording"
+                                                    sx={{ mt: 2 }}
+                                                >
+                                                    <MicOffIcon fontSize="large" />
+                                                </IconButton>
+                                            </Box>
+                                        ) : (
+                                            <Box 
+                                                sx={{ 
+                                                    display: 'flex', 
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    p: 4,
+                                                    bgcolor: 'rgba(0, 0, 0, 0.05)',
+                                                    borderRadius: 2,
+                                                    minHeight: '150px'
+                                                }}
+                                            >
+                                                {audioBase64 ? (
+                                                    <Typography variant="h6" color="primary.main">
+                                                        Recording completed. Ready to submit.
+                                                    </Typography>
+                                                ) : (
+                                                    <Typography variant="h6" color="text.secondary">
+                                                        Waiting for question audio to finish...
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        )}
 
                                         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                                             <Button 
                                                 variant="contained" 
                                                 color="primary"
                                                 onClick={currentQuestionIndex >= questions.length - 1 ? handleFinishInterview : handleNextQuestion}
-                                                disabled={isValidating}
+                                                disabled={isValidating || isRecording}
                                             >
                                                 {isValidating ? (
                                                     <>
