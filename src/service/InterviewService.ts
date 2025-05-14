@@ -9,6 +9,7 @@ export interface InterviewQuestion {
   answer?: string;
   score?: number;
   correctAnswer?: string;
+  audio?: string; // Base64 encoded mp3 audio for the question
   // Add other properties as needed
 }
 
