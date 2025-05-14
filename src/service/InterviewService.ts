@@ -52,6 +52,22 @@ export interface InterviewDetailsResponse {
   message?: string;
 }
 
+export interface InterviewListItem {
+  id: string;
+  jobName: string;
+  difficulty: string;
+  duration: number;
+  createTime: string,
+  score: number;
+  date: string; // ISO date string
+}
+
+export interface InterviewListResponse {
+  interviews: InterviewListItem[];
+  success: boolean;
+  message?: string;
+}
+
 export class InterviewService {
   private static instance: InterviewService;
   private baseUrl: string = import.meta.env.VITE_API_URL || 'http://localhost:8081';
@@ -75,7 +91,7 @@ export class InterviewService {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const response = await axios.post<GenerateQuestionsResponse>(
-        `${this.baseUrl}/interview/generate`, 
+        `${this.baseUrl}/interviews/generate`,
         request,
         { headers }
       );
@@ -120,7 +136,7 @@ export class InterviewService {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const response = await axios.post<Response>(
-        `${this.baseUrl}/interview/questions/validate`,
+        `${this.baseUrl}/interviews/questions/validate`,
         request,
         { headers }
       );
@@ -162,7 +178,7 @@ export class InterviewService {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const response = await axios.post<Response>(
-        `${this.baseUrl}/interview/finalize`,
+        `${this.baseUrl}/interviews/finalize`,
         request,
         { headers }
       );
@@ -198,13 +214,57 @@ export class InterviewService {
     }
   }
 
+  public async getInterviews(): Promise<InterviewListResponse> {
+    try {
+      const token = this.getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await axios.get<InterviewListResponse>(
+        `${this.baseUrl}/interviews`,
+        { headers }
+      );
+
+      return {
+        ...response.data,
+        success: true
+      };
+    } catch (error: unknown) {
+      console.error('Get interviews list error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          interviews: [],
+          success: false,
+          message: error.response.data?.message || 'Failed to fetch interviews. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          interviews: [],
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          interviews: [],
+          success: false,
+          message: 'An error occurred while fetching interviews. Please try again.'
+        };
+      }
+    }
+  }
+
   public async getInterviewDetails(interviewId: string): Promise<InterviewDetailsResponse> {
     try {
       const token = this.getAuthToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const response = await axios.get<InterviewDetailsResponse>(
-        `${this.baseUrl}/interview/${interviewId}`,
+        `${this.baseUrl}/interviews/${interviewId}`,
         { headers }
       );
 

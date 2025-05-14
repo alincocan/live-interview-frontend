@@ -9,6 +9,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AddIcon from '@mui/icons-material/Add';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SchoolIcon from '@mui/icons-material/School';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 
 const AppLayout: React.FC = () => {
     const navigate = useNavigate();
@@ -199,6 +200,26 @@ const AppLayout: React.FC = () => {
                     >
                         <SchoolIcon sx={{ mr: 1, color: '#2196F3' }} />
                         <Typography>Trainings</Typography>
+                    </Box>
+
+                    {/* Interview List Menu Item */}
+                    <Box 
+                        onClick={() => navigate('/interview/list')}
+                        sx={{
+                            mr: 2,
+                            color: '#fff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            padding: '6px 16px',
+                            borderRadius: '4px',
+                            '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }}
+                    >
+                        <ListAltIcon sx={{ mr: 1, color: '#FF9800' }} />
+                        <Typography>My Interviews</Typography>
                     </Box>
 
                     {/* Token Balance Button */}
