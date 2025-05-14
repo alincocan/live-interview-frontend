@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
-import { 
+import {
     InterviewService, 
     InterviewQuestion, 
     ValidateAnswerRequest,
@@ -595,8 +595,8 @@ const InterviewPage: React.FC = () => {
                                                     {questions[currentQuestionIndex].question}
                                                 </Typography>
                                                 {/* Hidden audio element for better browser compatibility */}
-                                                <audio 
-                                                    id="question-audio" 
+                                                <audio
+                                                    id="question-audio"
                                                     ref={audioRef}
                                                     style={{ display: 'none' }}
                                                     controls
@@ -619,9 +619,9 @@ const InterviewPage: React.FC = () => {
                                         </Box>
 
                                         {isRecording ? (
-                                            <Box 
-                                                sx={{ 
-                                                    display: 'flex', 
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
                                                     flexDirection: 'column',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
@@ -635,8 +635,8 @@ const InterviewPage: React.FC = () => {
                                                 <Typography variant="h6" color="error.main">
                                                     Recording in progress...
                                                 </Typography>
-                                                <IconButton 
-                                                    color="error" 
+                                                <IconButton
+                                                    color="error"
                                                     onClick={stopRecording}
                                                     aria-label="Stop recording"
                                                     sx={{ mt: 2 }}
@@ -645,9 +645,9 @@ const InterviewPage: React.FC = () => {
                                                 </IconButton>
                                             </Box>
                                         ) : (
-                                            <Box 
-                                                sx={{ 
-                                                    display: 'flex', 
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
                                                     flexDirection: 'column',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
