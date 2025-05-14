@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { AuthenticationService } from '../../service/authenticationService';
 import {LoginCredentials} from "../../bo/LoginCredentials.ts";
+import GoogleLogo from '../../components/icons/GoogleLogo';
 
 const boxStyles = {
     my: 8,
@@ -124,6 +125,7 @@ const LoginPage: React.FC = () => {
                                 color="primary"
                                 onClick={handleGoogleLogin}
                                 disabled={googleLoading}
+                                startIcon={<GoogleLogo sx={{ fontSize: 20 }} />}
                                 sx={{ mt: 1, mb: 2 }}
                             >
                                 {googleLoading ? 'Loading...' : 'Sign in with Google'}

@@ -11,6 +11,7 @@ import {
     CircularProgress,
     InputAdornment,
     IconButton,
+    Divider,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -18,13 +19,34 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { useState, useEffect, useRef } from 'react';
 import { AuthenticationService } from '../../service/authenticationService';
 import {SignUpData} from "../../bo/SignUpData.ts";
+import GoogleLogo from '../../components/icons/GoogleLogo';
 
 const SignUpPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [yearsOfExperience, setYearsOfExperience] = useState<number | null>(null);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const dateInputRef = useRef<HTMLInputElement>(null);
+
+    const handleGoogleLogin = () => {
+        setGoogleLoading(true);
+        setErrorMessage(null);
+
+        try {
+            const authService = AuthenticationService.getInstance();
+            // Redirect to the Google login URL
+            const googleLoginUrl = authService.getGoogleLoginUrl();
+            window.location.href = googleLoginUrl;
+
+            // Note: We don't need to set googleLoading to false here since we're redirecting
+            // the user away from this page
+        } catch (error) {
+            console.error('Google login error:', error);
+            setErrorMessage('An error occurred during Google login. Please try again.');
+            setGoogleLoading(false);
+        }
+    };
 
     // Set the language for the date picker to English
     useEffect(() => {
@@ -167,6 +189,28 @@ const SignUpPage: React.FC = () => {
                             onSubmit={handleSubmit(onSubmit)}
                             sx={{ mt: 3 }}
                         >
+                            {/* Google Sign Up Button */}
+                            <Box sx={{ width: '100%', mb: 2 }}>
+                                <Button
+                                    fullWidth
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleGoogleLogin}
+                                    disabled={googleLoading}
+                                    startIcon={<GoogleLogo sx={{ fontSize: 20 }} />}
+                                    sx={{ mt: 1, mb: 2 }}
+                                >
+                                    {googleLoading ? 'Loading...' : 'Sign up with Google'}
+                                </Button>
+                            </Box>
+
+                            {/* Divider between Google signup and regular signup */}
+                            <Divider sx={{ width: '100%', mb: 2 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                    OR
+                                </Typography>
+                            </Divider>
+
                             <Grid container spacing={2}>
                                 <Grid item xs={6}>
                                     <TextField
@@ -350,13 +394,6 @@ const SignUpPage: React.FC = () => {
                                 ) : (
                                     'Sign Up'
                                 )}
-                            </Button>
-                            <Button
-                                fullWidth
-                                variant="outlined"
-                                sx={{ mb: 2 }}
-                            >
-                                Sign up with Google
                             </Button>
                             <Grid container justifyContent="flex-end">
                                 <Grid item>
