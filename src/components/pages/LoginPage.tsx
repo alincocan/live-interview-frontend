@@ -10,6 +10,7 @@ import {
     Grid,
     Typography,
     Alert,
+    Divider,
 } from '@mui/material';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -35,6 +36,28 @@ const LoginPage: React.FC = () => {
     const navigate = useNavigate();
     const [loginError, setLoginError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+
+    const handleGoogleLogin = () => {
+        setGoogleLoading(true);
+        setLoginError(null);
+
+        try {
+            const authService = AuthenticationService.getInstance();
+            // Instead of fetching HTML and rendering it, redirect to the Google login URL
+            const googleLoginUrl = authService.getGoogleLoginUrl();
+
+            // Open the Google login URL in a new window or redirect the current window
+            window.location.href = googleLoginUrl;
+
+            // Note: We don't need to set googleLoading to false here since we're redirecting
+            // the user away from this page
+        } catch (error) {
+            console.error('Google login error:', error);
+            setLoginError('An error occurred during Google login. Please try again.');
+            setGoogleLoading(false);
+        }
+    };
 
 
 
@@ -92,11 +115,33 @@ const LoginPage: React.FC = () => {
                         <Typography component="h1" variant="h5">
                             Sign in
                         </Typography>
+
+                        {/* Google Login Section */}
+                        <Box sx={{ width: '100%', mt: 3, mb: 2 }}>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                onClick={handleGoogleLogin}
+                                disabled={googleLoading}
+                                sx={{ mt: 1, mb: 2 }}
+                            >
+                                {googleLoading ? 'Loading...' : 'Sign in with Google'}
+                            </Button>
+                        </Box>
+
+                        {/* Divider between Google login and regular login */}
+                        <Divider sx={{ width: '100%', mb: 2 }}>
+                            <Typography variant="body2" color="text.secondary">
+                                OR
+                            </Typography>
+                        </Divider>
+
                         <Box
                             component="form"
                             onSubmit={handleSubmit(onSubmit)}
                             noValidate
-                            sx={{ mt: 1 }}
+                            sx={{ mt: 1, width: '100%' }}
                         >
                             <TextField
                                 margin="normal"

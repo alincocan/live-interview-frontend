@@ -5,6 +5,8 @@ import SignUpPage from "./components/pages/SignUpPage";
 import ForgotPasswordPage from "./components/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./components/pages/ResetPasswordPage";
 import ConfirmUserPage from "./components/pages/ConfirmUserPage";
+import OAuth2RedirectPage from "./components/pages/OAuth2RedirectPage";
+import ProfileUpdatePage from "./components/pages/ProfileUpdatePage";
 import DashboardHome from "./components/pages/DeshboardHome";
 import ProfilePage from "./components/pages/ProfilePage";
 import ChooseInterviewerPage from "./components/pages/ChooseInterviewerPage";
@@ -39,6 +41,8 @@ function App() {
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                         <Route path="/reset-password" element={<ResetPasswordPage />} />
                         <Route path="/confirm" element={<ConfirmUserPage />} />
+                        <Route path="/oauth2/redirect" element={<OAuth2RedirectPage />} />
+                        <Route path="/profile-update" element={<ProfileUpdatePage />} />
                         <Route path="/" element={
                             <ProtectedRoute>
                                 <AppLayout />

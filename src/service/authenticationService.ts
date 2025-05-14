@@ -233,4 +233,48 @@ export class AuthenticationService {
       }
     }
   }
+
+  public async googleLogin(): Promise<string> {
+    try {
+      // Instead of fetching HTML content, get the URL for redirection
+      const response = await axios.post(
+        `${this.baseUrl}/auth/google/login`,
+        {},
+        {
+          responseType: 'text'
+        }
+      );
+
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Google login error:', error);
+      throw error;
+    }
+  }
+
+  // Method to get the Google login URL directly
+  public getGoogleLoginUrl(): string {
+    return `${this.baseUrl}/auth/google/login`;
+  }
+
+  // Method to authenticate with OAuth2 token
+  public async authenticateWithToken(token: string): Promise<LoginResponse> {
+    try {
+      // Store the token in localStorage (assuming we want to remember the user)
+      localStorage.setItem('authToken', token);
+
+      // Return a successful response
+      return {
+        accessToken: token,
+        success: true
+      };
+    } catch (error: unknown) {
+      console.error('OAuth authentication error:', error);
+
+      return {
+        success: false,
+        message: 'An error occurred during authentication. Please try again.'
+      };
+    }
+  }
 }

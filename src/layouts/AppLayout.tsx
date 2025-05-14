@@ -23,31 +23,65 @@ const AppLayout: React.FC = () => {
     const [purchaseError, setPurchaseError] = useState<string>('');
     const [purchaseSuccess, setPurchaseSuccess] = useState<boolean>(false);
 
+    // Form handling for token purchase is not needed here
+
+    // Function to check if required fields are missing
+    const checkMissingFields = (userData: User | null): string[] => {
+        if (!userData) return [];
+
+        const requiredFields: Array<{ field: keyof User, label: string }> = [
+            { field: 'firstName', label: 'First Name' },
+            { field: 'lastName', label: 'Last Name' },
+            { field: 'dateOfBirth', label: 'Date of Birth' },
+            { field: 'occupation', label: 'Occupation' }
+        ];
+
+        // Get missing fields from the required fields list
+        const missing = requiredFields
+            .filter(({ field }) => !userData[field])
+            .map(({ label }) => label);
+
+        // Special check for yearsOfExperience being 0
+        if (userData.yearsOfExperience === 0) {
+            missing.push('Years of Experience');
+        }
+
+        return missing;
+    };
+
+
     useEffect(() => {
         // Fetch user data when component mounts
         const fetchUserData = async () => {
             try {
                 const userService = UserService.getInstance();
                 // Check if user data already exists in storage
-                let storedUser = userService.getUserFromStorage();
+                let storedUser = null;
 
-                if (!storedUser) {
-                    // If not, fetch from server
-                    const response = await userService.getCurrentUser();
-                    if (response.success && response.user) {
-                        storedUser = response.user;
-                    }
+                // If not, fetch from server
+                const response = await userService.getCurrentUser();
+                if (response.success && response.user) {
+                    storedUser = response.user;
                 }
 
                 // Set the user state
                 setUser(storedUser);
+
+                // Check for missing fields and redirect to profile update page if needed
+                if (storedUser) {
+                    const missing = checkMissingFields(storedUser);
+                    if (missing.length > 0) {
+                        // Redirect to profile update page
+                        navigate('/profile-update');
+                    }
+                }
             } catch (error) {
                 console.error('Error fetching user data:', error);
             }
         };
 
         fetchUserData();
-    }, []);
+    }, [navigate]);
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -378,6 +412,7 @@ const AppLayout: React.FC = () => {
                     )}
                 </DialogActions>
             </Dialog>
+
         </Box>
     );
 };

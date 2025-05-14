@@ -174,4 +174,68 @@ export class UserService {
       }
     }
   }
+
+  public async updateUser(userData: Partial<User>): Promise<UserResponse> {
+    try {
+      // Get the auth token from storage
+      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+
+      if (!token) {
+        return {
+          success: false,
+          message: 'No authentication token found'
+        };
+      }
+
+      // Create a copy of userData without the id property
+      const dataToUpdate = { ...userData };
+      delete dataToUpdate.id;
+
+      const response = await axios.put<User>(
+        `${this.baseUrl}/users/me`,
+        dataToUpdate,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      // Update user data in storage
+      if (response.data) {
+        const updatedUserData = JSON.stringify(response.data);
+
+        if (localStorage.getItem('authToken')) {
+          localStorage.setItem('userData', updatedUserData);
+        } else {
+          sessionStorage.setItem('userData', updatedUserData);
+        }
+      }
+
+      return {
+        success: true,
+        user: response.data,
+        message: 'User data updated successfully'
+      };
+    } catch (error: unknown) {
+      console.error('Update user error:', error);
+
+      if (axios.isAxiosError(error) && error.response) {
+        return {
+          success: false,
+          message: error.response.data?.message || 'Failed to update user data.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        return {
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        return {
+          success: false,
+          message: 'An error occurred while updating user data. Please try again.'
+        };
+      }
+    }
+  }
 }
