@@ -17,6 +17,7 @@ import JobDescriptionUploadPage from './components/pages/interview-setup/JobDesc
 import InterviewConfigurationPage from './components/pages/interview-setup/InterviewConfigurationPage';
 import InterviewPage from './components/pages/InterviewPage';
 import InterviewResultPage from './components/pages/InterviewResultPage';
+import InterviewListPage from './components/pages/InterviewListPage';
 
 function App() {
 
@@ -51,6 +52,7 @@ function App() {
                             <Route path="interview/upload" element={<JobDescriptionUploadPage />} />
                             <Route path="interview/setup" element={<InterviewConfigurationPage />} />
                             <Route path="interview/questions" element={<InterviewPage />} />
+                            <Route path="interview/list" element={<InterviewListPage />} />
                             <Route path="interview/:interviewId" element={<InterviewResultPage />} />
                             {/*<Route path="details" element={<DetailsPage />} />*/}
                         </Route>
