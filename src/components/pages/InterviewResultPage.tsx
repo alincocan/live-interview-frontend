@@ -53,6 +53,13 @@ const InterviewResultPage: React.FC = () => {
 
                 if (response.success) {
                     setInterviewDetails(response);
+
+                    // Initialize bookmarkedQuestions array with questions that have bookmarked=true
+                    const bookmarkedIds = response.questions
+                        .filter(question => question.bookmarked)
+                        .map(question => question.id);
+                    setBookmarkedQuestions(bookmarkedIds);
+
                     setErrorMessage(null);
                 } else {
                     setErrorMessage(response.message || 'Failed to fetch interview details. Please try again.');
@@ -81,14 +88,44 @@ const InterviewResultPage: React.FC = () => {
     };
 
     // Toggle bookmark for a question
-    const toggleBookmark = (questionId: string) => {
-        setBookmarkedQuestions(prev => {
-            if (prev.includes(questionId)) {
-                return prev.filter(id => id !== questionId);
-            } else {
-                return [...prev, questionId];
+    const toggleBookmark = async (questionId: string) => {
+        try {
+            const interviewService = InterviewService.getInstance();
+
+            // Update local state first for immediate UI feedback
+            setBookmarkedQuestions(prev => {
+                if (prev.includes(questionId)) {
+                    return prev.filter(id => id !== questionId);
+                } else {
+                    return [...prev, questionId];
+                }
+            });
+
+            // Call the API to update the bookmark state on the server
+            const response = await interviewService.toggleBookmark(questionId);
+
+            if (!response.success) {
+                console.error('Failed to toggle bookmark:', response.message);
+                // Revert the local state change if the API call fails
+                setBookmarkedQuestions(prev => {
+                    if (prev.includes(questionId)) {
+                        return prev.filter(id => id !== questionId);
+                    } else {
+                        return [...prev, questionId];
+                    }
+                });
             }
-        });
+        } catch (error) {
+            console.error('Error toggling bookmark:', error);
+            // Revert the local state change if an error occurs
+            setBookmarkedQuestions(prev => {
+                if (prev.includes(questionId)) {
+                    return prev.filter(id => id !== questionId);
+                } else {
+                    return [...prev, questionId];
+                }
+            });
+        }
     };
 
     return (

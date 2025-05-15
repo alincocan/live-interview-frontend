@@ -10,6 +10,7 @@ export interface InterviewQuestion {
   score?: number;
   correctAnswer?: string;
   audio?: string; // Base64 encoded mp3 audio for the question
+  bookmarked?: boolean; // Flag to indicate if the question is bookmarked
   // Add other properties as needed
 }
 
@@ -253,6 +254,48 @@ export class InterviewService {
           interviews: [],
           success: false,
           message: 'An error occurred while fetching interviews. Please try again.'
+        };
+      }
+    }
+  }
+
+  public async toggleBookmark(questionId: string): Promise<Response> {
+    try {
+      const token = this.getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await axios.put<Response>(
+        `${this.baseUrl}/questions/${questionId}/bookmark`,
+        {},
+        { headers }
+      );
+
+      return {
+        ...response.data,
+        success: true
+      };
+    } catch (error: unknown) {
+      console.error('Toggle bookmark error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          success: false,
+          message: error.response.data?.message || 'Failed to toggle bookmark. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          success: false,
+          message: 'An error occurred while toggling the bookmark. Please try again.'
         };
       }
     }
