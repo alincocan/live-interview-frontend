@@ -273,7 +273,7 @@ const InterviewListPage: React.FC = () => {
                     <Button 
                         variant="contained" 
                         color="primary" 
-                        onClick={() => navigate('/interview/upload')}
+                        onClick={() => navigate('/interview/')}
                         sx={{ 
                             px: 3, 
                             py: 1,

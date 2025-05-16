@@ -69,6 +69,31 @@ export interface InterviewListResponse {
   message?: string;
 }
 
+export interface Interviewer {
+  name: string;
+  voiceId: string;
+  glbPath: string;
+  avatarPath: string;
+}
+
+export interface InterviewersResponse {
+  interviewers: Interviewer[];
+  success: boolean;
+  message?: string;
+}
+
+export interface Country {
+  id: string;
+  name: string;
+  languageCode: string;
+}
+
+export interface CountriesResponse {
+  countries: Country[];
+  success: boolean;
+  message?: string;
+}
+
 export class InterviewService {
   private static instance: InterviewService;
   private baseUrl: string = import.meta.env.VITE_API_URL || 'http://localhost:8081';
@@ -355,6 +380,94 @@ export class InterviewService {
           questions: [],
           success: false,
           message: 'An error occurred while fetching interview details. Please try again.'
+        };
+      }
+    }
+  }
+
+  public async getInterviewers(): Promise<InterviewersResponse> {
+    try {
+      const token = this.getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await axios.get<InterviewersResponse>(
+        `${this.baseUrl}/interviewers`,
+        { headers }
+      );
+
+      return {
+        ...response.data,
+        success: true
+      };
+    } catch (error: unknown) {
+      console.error('Get interviewers error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          interviewers: [],
+          success: false,
+          message: error.response.data?.message || 'Failed to fetch interviewers. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          interviewers: [],
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          interviewers: [],
+          success: false,
+          message: 'An error occurred while fetching interviewers. Please try again.'
+        };
+      }
+    }
+  }
+
+  public async getCountries(): Promise<CountriesResponse> {
+    try {
+      const token = this.getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await axios.get<CountriesResponse>(
+        `${this.baseUrl}/countries`,
+        { headers }
+      );
+
+      return {
+        ...response.data,
+        success: true
+      };
+    } catch (error: unknown) {
+      console.error('Get countries error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          countries: [],
+          success: false,
+          message: error.response.data?.message || 'Failed to fetch countries. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          countries: [],
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          countries: [],
+          success: false,
+          message: 'An error occurred while fetching countries. Please try again.'
         };
       }
     }
