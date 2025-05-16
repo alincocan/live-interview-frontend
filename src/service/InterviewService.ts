@@ -111,6 +111,21 @@ export interface GetAudioResponse {
   message?: string;
 }
 
+export interface TransitionPhrase {
+  audio: string;
+}
+
+export interface AudioApiResponse {
+  transitionPhrases?: TransitionPhrase[];
+}
+
+export interface GetAudioResponse {
+  audio?: string; // Base64 encoded audio
+  transitionPhrases?: TransitionPhrase[]; // List of transition phrases with audio
+  success: boolean;
+  message?: string;
+}
+
 export class InterviewService {
   private static instance: InterviewService;
   private baseUrl: string = import.meta.env.VITE_API_URL || 'http://localhost:8081';
@@ -506,8 +521,8 @@ export class InterviewService {
           audio: response.data.transitionPhrases[0].audio,
           success: true
         };
-      } else if (response.data && Array.isArray(response.data) && response.data.length > 0 && 
-                response.data[0].transitionPhrases && Array.isArray(response.data[0].transitionPhrases) && 
+      } else if (response.data && Array.isArray(response.data) && response.data.length > 0 &&
+                response.data[0].transitionPhrases && Array.isArray(response.data[0].transitionPhrases) &&
                 response.data[0].transitionPhrases.length > 0) {
         // Handle case where response is an array of objects with transitionPhrases
         return {
@@ -570,8 +585,8 @@ export class InterviewService {
           transitionPhrases: response.data.transitionPhrases,
           success: true
         };
-      } else if (response.data && Array.isArray(response.data) && response.data.length > 0 && 
-                response.data[0].transitionPhrases && Array.isArray(response.data[0].transitionPhrases) && 
+      } else if (response.data && Array.isArray(response.data) && response.data.length > 0 &&
+                response.data[0].transitionPhrases && Array.isArray(response.data[0].transitionPhrases) &&
                 response.data[0].transitionPhrases.length > 0) {
         // Handle case where response is an array of objects with transitionPhrases
         return {
@@ -634,8 +649,8 @@ export class InterviewService {
           transitionPhrases: response.data.transitionPhrases,
           success: true
         };
-      } else if (response.data && Array.isArray(response.data) && response.data.length > 0 && 
-                response.data[0].transitionPhrases && Array.isArray(response.data[0].transitionPhrases) && 
+      } else if (response.data && Array.isArray(response.data) && response.data.length > 0 &&
+                response.data[0].transitionPhrases && Array.isArray(response.data[0].transitionPhrases) &&
                 response.data[0].transitionPhrases.length > 0) {
         // Handle case where response is an array of objects with transitionPhrases
         return {
@@ -677,6 +692,39 @@ export class InterviewService {
         return {
           success: false,
           message: 'An error occurred while fetching transition phrases. Please try again.'
+        };
+      }
+    }
+  }
+}
+
+      // Default case: no valid audio data found
+      return {
+        success: false,
+        message: 'No valid audio data found in the response.'
+      };
+    } catch (error: unknown) {
+      console.error('Get audio error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          success: false,
+          message: error.response.data?.message || 'Failed to fetch audio. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          success: false,
+          message: 'An error occurred while fetching audio. Please try again.'
         };
       }
     }
