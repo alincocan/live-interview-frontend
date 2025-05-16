@@ -19,11 +19,20 @@ import {
     InterviewService, 
     InterviewQuestion, 
     ValidateAnswerRequest,
-    FinalizeInterviewRequest
+    FinalizeInterviewRequest,
+    GetAudioResponse
 } from '../../service/InterviewService';
 
 
 const InterviewPage: React.FC = () => {
+    // Define keyframes for the pulse animation
+    const pulseKeyframes = `
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    `;
     const [isLoading, setIsLoading] = useState(true);
     const [isValidating, setIsValidating] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -46,9 +55,16 @@ const InterviewPage: React.FC = () => {
         tags: [] as string[]
     });
 
+    // State to track if we're loading both welcome audio and interview questions
+    const [isGeneratingInterview, setIsGeneratingInterview] = useState(false);
+
     // Audio refs
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const questionAudioRef = useRef<HTMLAudioElement | null>(null);
     const audioUrlRef = useRef<string | null>(null);
+
+    // Ref to track if welcome audio has been fetched
+    const welcomeAudioFetchedRef = useRef<boolean>(false);
 
     // Recording refs and state
     const [isRecording, setIsRecording] = useState(false);
@@ -115,6 +131,12 @@ const InterviewPage: React.FC = () => {
 
     // Function to decode base64 audio and play it
     const playQuestionAudio = () => {
+        // Check if currentQuestionIndex is valid
+        if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.length) {
+            console.log('Invalid question index:', currentQuestionIndex);
+            return;
+        }
+
         const currentQuestion = questions[currentQuestionIndex];
         if (!currentQuestion || !currentQuestion.audio) {
             console.log('No audio available for this question');
@@ -143,11 +165,11 @@ const InterviewPage: React.FC = () => {
             audioUrlRef.current = audioUrl;
 
             // Use the audio element from the ref
-            if (!audioRef.current) {
-                console.error('Audio element ref is not available');
+            if (!questionAudioRef.current) {
+                console.error('Question audio element ref is not available');
                 return;
             }
-            const audioElement = audioRef.current;
+            const audioElement = questionAudioRef.current;
 
             // Set audio element attributes
             audioElement.preload = 'auto';
@@ -190,6 +212,112 @@ const InterviewPage: React.FC = () => {
         }
     }, [currentQuestionIndex, questions, interviewStarted, isLoading]);
 
+
+    // Function to fetch and play welcome audio
+    const fetchAndPlayWelcomeAudio = async (isRetry = false) => {
+        // If this is not a retry and we've already fetched the welcome audio, don't fetch it again
+        if (!isRetry && welcomeAudioFetchedRef.current) {
+            console.log('Welcome audio already fetched, skipping duplicate call');
+            return;
+        }
+
+        try {
+            // Get languageCode and voiceId from session storage
+            const languageCode = sessionStorage.getItem('languageCode');
+            const selectedInterviewerStr = sessionStorage.getItem('selectedInterviewer');
+
+            if (!languageCode || !selectedInterviewerStr) {
+                console.error('Missing language code or interviewer data.');
+                return;
+            }
+
+            // Parse the selectedInterviewer object
+            const selectedInterviewer = JSON.parse(selectedInterviewerStr);
+            const voiceId = selectedInterviewer.voiceId;
+
+            if (!voiceId) {
+                console.error('Missing voice ID in interviewer data.');
+                return;
+            }
+
+            console.log('Fetching welcome audio...');
+            // Call the API to get the welcome audio
+            const interviewService = InterviewService.getInstance();
+            const response: GetAudioResponse = await interviewService.getAudio(languageCode, voiceId);
+
+            if (response.success && response.audio) {
+                // Mark that we've fetched the welcome audio
+                welcomeAudioFetchedRef.current = true;
+
+                // Play the welcome audio
+                playWelcomeAudio(response.audio);
+            } else {
+                console.error('Failed to fetch welcome audio:', response.message);
+            }
+        } catch (error) {
+            console.error('Error fetching welcome audio:', error);
+        }
+    };
+
+    // Function to play welcome audio
+    const playWelcomeAudio = (audioBase64: string) => {
+        try {
+            // Clean up previous audio URL if it exists
+            if (audioUrlRef.current) {
+                URL.revokeObjectURL(audioUrlRef.current);
+                audioUrlRef.current = null;
+            }
+
+            // Decode base64 string to binary data
+            const binaryString = atob(audioBase64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            // Create blob from binary data
+            const blob = new Blob([bytes], { type: 'audio/mp3' });
+            const audioUrl = URL.createObjectURL(blob);
+            audioUrlRef.current = audioUrl;
+
+            // Use the audio element from the ref
+            if (!audioRef.current) {
+                console.error('Audio element ref is not available');
+                return;
+            }
+            const audioElement = audioRef.current;
+
+            // Set audio element attributes
+            audioElement.preload = 'auto';
+            audioElement.crossOrigin = 'anonymous';
+            audioElement.volume = 1.0;
+            audioElement.muted = false;
+            audioElement.src = audioUrl;
+
+            // Add event listener for when audio ends
+            audioElement.onended = () => {
+                console.log('Welcome audio playback ended, waiting 3 seconds before starting interview');
+                // Wait 3 seconds before starting the interview
+                setTimeout(() => {
+                    startInterviewAfterIntro();
+                }, 3000);
+            };
+
+            // Play the audio
+            audioElement.load();
+            audioElement.play()
+                .then(() => console.log('Welcome audio playing successfully'))
+                .catch(error => {
+                    console.error('Error playing welcome audio:', error);
+                    if (error.name === 'NotAllowedError') {
+                        console.log('Autoplay prevented by browser. User interaction required.');
+                    }
+                });
+        } catch (error) {
+            console.error('Error processing welcome audio:', error);
+            setWelcomeAudioError('An error occurred while playing the welcome audio.');
+        }
+    };
 
     // Clean up audio resources when component unmounts
     useEffect(() => {
@@ -259,21 +387,37 @@ const InterviewPage: React.FC = () => {
 
     // Function to start the interview
     const startInterview = () => {
+        setIsGeneratingInterview(true);
         setIsLoading(true);
         setInterviewStarted(true);
-        setCurrentQuestionIndex(0);
+        setCurrentQuestionIndex(-1); // Set to -1 initially, will be set to 0 after welcome audio
         setUserAnswer('');
         setAudioBase64(''); // Reset audio base64 data
         setIsRecording(false); // Reset recording state
 
-        // Generate interview questions when the interview starts
+        // Generate interview questions first
         generateInterviewQuestions(interviewData);
+    };
+
+    // Function to actually start the interview after welcome audio
+    const startInterviewAfterIntro = () => {
+        // This function is called after the welcome audio finishes playing and the 3-second delay
+        // Set currentQuestionIndex to 0 to trigger the useEffect hook that plays the first question
+        setCurrentQuestionIndex(0);
     };
 
     // Function to handle moving to the next question
     const handleNextQuestion = async () => {
         if (!audioBase64) {
             setValidationError('Please record an answer before proceeding.');
+            setShowValidationError(true);
+            return;
+        }
+
+        // Check if currentQuestionIndex is valid
+        if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.length) {
+            console.error('Invalid question index:', currentQuestionIndex);
+            setValidationError('An error occurred with the current question. Please try again.');
             setShowValidationError(true);
             return;
         }
@@ -285,14 +429,16 @@ const InterviewPage: React.FC = () => {
             const interviewId = sessionStorage.getItem('interviewId');
             const jobName = sessionStorage.getItem('jobName');
 
+            const currentQuestion = questions[currentQuestionIndex];
+
             const request: ValidateAnswerRequest = {
-                questionId: questions[currentQuestionIndex].id,
-                question: questions[currentQuestionIndex].question,
+                questionId: currentQuestion.id,
+                question: currentQuestion.question,
                 answer: userAnswer,
                 interviewId: interviewId || undefined,
                 jobName: jobName || undefined,
-                tags: questions[currentQuestionIndex].tags,
-                softSkill: questions[currentQuestionIndex].softSkill
+                tags: currentQuestion.tags,
+                softSkill: currentQuestion.softSkill
             };
 
             const response = await interviewService.validateAnswer(request);
@@ -328,6 +474,14 @@ const InterviewPage: React.FC = () => {
             return;
         }
 
+        // Check if currentQuestionIndex is valid
+        if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.length) {
+            console.error('Invalid question index:', currentQuestionIndex);
+            setValidationError('An error occurred with the current question. Please try again.');
+            setShowValidationError(true);
+            return;
+        }
+
         setIsValidating(true);
 
         try {
@@ -335,14 +489,16 @@ const InterviewPage: React.FC = () => {
             const interviewId = sessionStorage.getItem('interviewId');
             const jobName = sessionStorage.getItem('jobName');
 
+            const currentQuestion = questions[currentQuestionIndex];
+
             const request: ValidateAnswerRequest = {
-                questionId: questions[currentQuestionIndex].id,
-                question: questions[currentQuestionIndex].question,
+                questionId: currentQuestion.id,
+                question: currentQuestion.question,
                 answer: userAnswer,
                 interviewId: interviewId || undefined,
                 jobName: jobName || undefined,
-                tags: questions[currentQuestionIndex].tags,
-                softSkill: questions[currentQuestionIndex].softSkill
+                tags: currentQuestion.tags,
+                softSkill: currentQuestion.softSkill
             };
 
             const response = await interviewService.validateAnswer(request);
@@ -408,6 +564,9 @@ const InterviewPage: React.FC = () => {
                 if (response.interviewId) {
                     sessionStorage.setItem('interviewId', response.interviewId);
                 }
+
+                // Now that questions are generated, fetch and play welcome audio
+                await fetchAndPlayWelcomeAudio();
             } else {
                 setErrorMessage(response.message || 'Failed to generate interview questions.');
             }
@@ -416,6 +575,7 @@ const InterviewPage: React.FC = () => {
             setErrorMessage('An unexpected error occurred. Please try again.');
         } finally {
             setIsLoading(false);
+            setIsGeneratingInterview(false);
         }
     };
 
@@ -433,6 +593,17 @@ const InterviewPage: React.FC = () => {
 
     return (
         <Container maxWidth="md" sx={{ py: 4, position: 'relative' }}>
+            <style>{pulseKeyframes}</style>
+            {/* Hidden audio element for welcome audio */}
+            <audio
+                id="welcome-audio"
+                ref={audioRef}
+                style={{ display: 'none' }}
+                controls
+                preload="auto"
+                crossOrigin="anonymous"
+            />
+
             {/* Validation Error Snackbar */}
             <Snackbar
                 open={showValidationError}
@@ -440,6 +611,16 @@ const InterviewPage: React.FC = () => {
                 onClose={handleCloseValidationError}
                 message={validationError}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            />
+
+            {/* Hidden audio element for question audio */}
+            <audio
+                id="question-audio"
+                ref={questionAudioRef}
+                style={{ display: 'none' }}
+                controls
+                preload="auto"
+                crossOrigin="anonymous"
             />
 
             {/* Timer in the upper right corner */}
@@ -480,12 +661,26 @@ const InterviewPage: React.FC = () => {
                 </>
             )}
 
-            {isLoading ? (
+            {isGeneratingInterview ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 4 }}>
+                    <CircularProgress size={60} />
+                    <Box sx={{ mt: 2, width: '100%', maxWidth: 400 }}>
+                        <Box sx={{ width: '100%', bgcolor: 'background.paper', borderRadius: 1 }}>
+                            <Box
+                                sx={{
+                                    width: '100%',
+                                    height: 10,
+                                    bgcolor: 'primary.main',
+                                    borderRadius: 1,
+                                    animation: 'pulse 1.5s infinite ease-in-out'
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                </Box>
+            ) : isLoading ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 4 }}>
                     <CircularProgress />
-                    <Typography variant="body1" align="center" color="white" sx={{ mt: 2 }}>
-                        We are loading the interview questions
-                    </Typography>
                 </Box>
             ) : errorMessage ? (
                 <Alert severity="error" sx={{ my: 2 }}>
@@ -584,10 +779,10 @@ const InterviewPage: React.FC = () => {
                         <Card>
                             <CardContent>
                                 <Typography variant="h6" gutterBottom>
-                                    Question {currentQuestionIndex + 1} of {questions.length}
+                                    Question {currentQuestionIndex >= 0 ? currentQuestionIndex + 1 : 0} of {questions.length}
                                 </Typography>
 
-                                {questions.length > 0 ? (
+                                {questions.length > 0 && currentQuestionIndex >= 0 && currentQuestionIndex < questions.length ? (
                                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                                         <Box>
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -597,7 +792,7 @@ const InterviewPage: React.FC = () => {
                                                 {/* Hidden audio element for better browser compatibility */}
                                                 <audio
                                                     id="question-audio"
-                                                    ref={audioRef}
+                                                    ref={questionAudioRef}
                                                     style={{ display: 'none' }}
                                                     controls
                                                     preload="auto"
@@ -612,7 +807,8 @@ const InterviewPage: React.FC = () => {
                                                 Tags:
                                             </Typography>
                                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                                                {questions[currentQuestionIndex].tags.map((tag, index) => (
+                                                {questions[currentQuestionIndex] && questions[currentQuestionIndex].tags && 
+                                                 questions[currentQuestionIndex].tags.map((tag, index) => (
                                                     <Chip key={index} label={tag} variant="outlined" />
                                                 ))}
                                             </Box>
