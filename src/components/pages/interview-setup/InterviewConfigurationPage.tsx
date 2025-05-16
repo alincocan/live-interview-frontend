@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Container,
@@ -13,6 +13,10 @@ import {
     Button,
     Tooltip,
     FormHelperText,
+    FormControl,
+    Select,
+    MenuItem,
+    SelectChangeEvent,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import TuneIcon from '@mui/icons-material/Tune';
@@ -20,6 +24,8 @@ import WorkIcon from '@mui/icons-material/Work';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import LanguageIcon from '@mui/icons-material/Language';
+import { InterviewService, Country } from '../../../service/InterviewService';
 
 const InterviewConfiguration: React.FC = () => {
     const navigate = useNavigate();
@@ -35,6 +41,9 @@ const InterviewConfiguration: React.FC = () => {
     const [duration, setDuration] = useState<number>(60);
     const [tags, setTags] = useState<string[]>(storedTags);
     const [newTag, setNewTag] = useState<string>('');
+    const [countries, setCountries] = useState<Country[]>([]);
+    const [selectedCountry, setSelectedCountry] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
 
     // Error state management
     const [errors, setErrors] = useState<{
@@ -43,8 +52,36 @@ const InterviewConfiguration: React.FC = () => {
         softSkills?: string;
         duration?: string;
         tags?: string;
+        country?: string;
         form?: string;
     }>({});
+
+    // Fetch countries when component mounts
+    useEffect(() => {
+        const fetchCountries = async () => {
+            try {
+                setLoading(true);
+                const interviewService = InterviewService.getInstance();
+                const response = await interviewService.getCountries();
+
+                if (response.success && response.countries) {
+                    setCountries(response.countries);
+                    // Set default country if available
+                    if (response.countries.length > 0) {
+                        setSelectedCountry(response.countries[0].id);
+                    }
+                } else {
+                    console.error('Failed to fetch countries:', response.message);
+                }
+            } catch (error) {
+                console.error('Error fetching countries:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCountries();
+    }, []);
 
     // Track if form has been submitted
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
@@ -55,6 +92,14 @@ const InterviewConfiguration: React.FC = () => {
         // Clear error when field is updated
         if (errors.difficultyLevel) {
             setErrors(prev => ({ ...prev, difficultyLevel: undefined }));
+        }
+    };
+
+    const handleCountryChange = (event: SelectChangeEvent) => {
+        setSelectedCountry(event.target.value);
+        // Clear error when field is updated
+        if (errors.country) {
+            setErrors(prev => ({ ...prev, country: undefined }));
         }
     };
 
@@ -114,7 +159,7 @@ const InterviewConfiguration: React.FC = () => {
 
     // Validate form fields
     const validateForm = () => {
-        let newErrors: { [key: string]: string } = {};
+        const newErrors: { [key: string]: string } = {};
         let isValid = true;
 
         // Validate difficultyLevel
@@ -135,6 +180,12 @@ const InterviewConfiguration: React.FC = () => {
         // Validate softSkills (already has a default value, but checking for completeness)
         if (!["0", "25", "50"].includes(softSkills)) {
             newErrors.softSkills = "Please select a valid soft skills option";
+            isValid = false;
+        }
+
+        // Validate country
+        if (!selectedCountry) {
+            newErrors.country = "Please select a country";
             isValid = false;
         }
 
@@ -168,12 +219,17 @@ const InterviewConfiguration: React.FC = () => {
 
         // Use the values directly from the chips
 
+        // Find the selected country's languageCode
+        const selectedCountryObj = countries.find(country => country.id === selectedCountry);
+        const languageCode = selectedCountryObj ? selectedCountryObj.languageCode : '';
+
         // Save values to session storage
         sessionStorage.setItem('duration', duration.toString());
         sessionStorage.setItem('jobName', jobName);
         sessionStorage.setItem('softSkillsPercentage', softSkills);
         sessionStorage.setItem('difficulty', difficultyLevel);
         sessionStorage.setItem('tags', JSON.stringify(tags));
+        sessionStorage.setItem('languageCode', languageCode);
 
         // Log the saved values
         console.log('Saved to session storage:', {
@@ -181,7 +237,8 @@ const InterviewConfiguration: React.FC = () => {
             jobName,
             softSkillsPercentage: softSkills,
             difficulty: difficultyLevel,
-            tags
+            tags,
+            languageCode
         });
 
         // Navigate to the InterviewPage
@@ -198,10 +255,6 @@ const InterviewConfiguration: React.FC = () => {
                 pt: 8,
             }}
         >
-            <Typography sx={{ mb: 5, color: 'text.secondary' }} variant="h4">
-                Interview Setup
-            </Typography>
-
             <Card sx={{ width: '100%', mb: 4 }}>
                 <CardContent>
                     <Stack spacing={3}>
@@ -299,6 +352,72 @@ const InterviewConfiguration: React.FC = () => {
                             {isSubmitted && errors.softSkills && (
                                 <FormHelperText error>{errors.softSkills}</FormHelperText>
                             )}
+                        </Box>
+
+                        {/* Country Dropdown */}
+                        <Box>
+                            <Box sx={{ width: '50%' }}>
+                                <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <LanguageIcon sx={{ mr: 1 }} />
+                                    Country
+                                </Typography>
+                                <FormControl fullWidth error={isSubmitted && !!errors.country}>
+                                    <Select
+                                        value={selectedCountry}
+                                        onChange={handleCountryChange}
+                                        displayEmpty
+                                        renderValue={(selected) => {
+                                            if (!selected) {
+                                                return <em>Select a country</em>;
+                                            }
+
+                                            const country = countries.find(c => c.id === selected);
+                                            if (!country) return <em>Select a country</em>;
+
+                                            const countryCode = country.languageCode.split('-')[1] || country.languageCode;
+
+                                            return (
+                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <img 
+                                                        src={`https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`} 
+                                                        alt={`${country.name} flag`}
+                                                        style={{ marginRight: '8px', width: '24px', height: '18px' }}
+                                                    />
+                                                    {country.name}
+                                                </Box>
+                                            );
+                                        }}
+                                    >
+                                        {loading ? (
+                                            <MenuItem value="" disabled>
+                                                Loading countries...
+                                            </MenuItem>
+                                        ) : countries.length === 0 ? (
+                                            <MenuItem value="" disabled>
+                                                No countries available
+                                            </MenuItem>
+                                        ) : (
+                                            countries.map((country) => {
+                                                // Extract country code from languageCode (e.g., 'en-US' -> 'US')
+                                                const countryCode = country.languageCode.split('-')[1] || country.languageCode;
+                                                return (
+                                                    <MenuItem key={country.id} value={country.id} sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <img 
+                                                            src={`https://flagcdn.com/24x18/${countryCode.toLowerCase()}.png`} 
+                                                            alt={`${country.name} flag`}
+                                                            style={{ marginRight: '8px', width: '24px', height: '18px' }}
+                                                        />
+                                                        {country.name}
+                                                    </MenuItem>
+                                                );
+                                            })
+                                        )}
+                                    </Select>
+                                    {isSubmitted && errors.country && (
+                                        <FormHelperText>{errors.country}</FormHelperText>
+                                    )}
+                                </FormControl>
+                            </Box>
                         </Box>
 
                         {/* Duration Slider */}
