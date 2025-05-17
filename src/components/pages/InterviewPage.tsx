@@ -815,6 +815,16 @@ const InterviewPage: React.FC = () => {
                 crossOrigin="anonymous"
             />
 
+            {/* Hidden audio element for transition audio */}
+            <audio
+                id="transition-audio"
+                ref={transitionAudioRef}
+                style={{ display: 'none' }}
+                controls
+                preload="auto"
+                crossOrigin="anonymous"
+            />
+
             {/* Validation Error Snackbar */}
             <Snackbar
                 open={showValidationError}
