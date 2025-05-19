@@ -10,6 +10,7 @@ import AddIcon from '@mui/icons-material/Add';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SchoolIcon from '@mui/icons-material/School';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 
 const AppLayout: React.FC = () => {
     const navigate = useNavigate();
@@ -104,6 +105,11 @@ const AppLayout: React.FC = () => {
         UserService.getInstance().clearUserData();
         // Redirect to login page
         navigate('/login');
+    };
+
+    const handleBookmarkedQuestionsClick = () => {
+        handleMenuClose();
+        navigate('/questions/bookmarked');
     };
 
     const handleOpenPurchaseDialog = () => {
@@ -334,10 +340,15 @@ const AppLayout: React.FC = () => {
                         }}
                         PaperProps={{
                             style: {
-                                width: '200px',
+                                width: '250px',
                             },
                         }}
                     >
+                        <MenuItem onClick={handleBookmarkedQuestionsClick}>
+                            <BookmarkIcon sx={{ mr: 1, color: '#FF9800' }} />
+                            Bookmarked Questions
+                        </MenuItem>
+                        <Divider />
                         <MenuItem onClick={handleProfileClick}>
                             <PersonIcon sx={{ mr: 1 }} />
                             Profile
