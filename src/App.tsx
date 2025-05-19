@@ -20,6 +20,7 @@ import InterviewConfigurationPage from './components/pages/interview-setup/Inter
 import InterviewPage from './components/pages/InterviewPage';
 import InterviewResultPage from './components/pages/InterviewResultPage';
 import InterviewListPage from './components/pages/InterviewListPage';
+import BookmarkedQuestionsPage from './components/pages/BookmarkedQuestionsPage';
 
 function App() {
 
@@ -58,6 +59,7 @@ function App() {
                             <Route path="interview/questions" element={<InterviewPage />} />
                             <Route path="interview/list" element={<InterviewListPage />} />
                             <Route path="interview/:interviewId" element={<InterviewResultPage />} />
+                            <Route path="questions/bookmarked" element={<BookmarkedQuestionsPage />} />
                             {/*<Route path="details" element={<DetailsPage />} />*/}
                         </Route>
                         <Route path="*" element={<PageNotFound />} />

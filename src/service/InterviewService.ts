@@ -71,6 +71,12 @@ export interface InterviewListResponse {
   message?: string;
 }
 
+export interface BookmarkedQuestionsResponse {
+  questions: InterviewQuestion[];
+  success: boolean;
+  message?: string;
+}
+
 export interface Interviewer {
   name: string;
   voiceId: string;
@@ -853,6 +859,50 @@ export class InterviewService {
         return {
           success: false,
           message: 'An error occurred while fetching transition phrases. Please try again.'
+        };
+      }
+    }
+  }
+
+  public async getBookmarkedQuestions(): Promise<BookmarkedQuestionsResponse> {
+    try {
+      const token = this.getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await axios.get<BookmarkedQuestionsResponse>(
+        `${this.baseUrl}/questions/bookmarked`,
+        { headers }
+      );
+
+      return {
+        ...response.data,
+        success: true
+      };
+    } catch (error: unknown) {
+      console.error('Get bookmarked questions error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          questions: [],
+          success: false,
+          message: error.response.data?.message || 'Failed to fetch bookmarked questions. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          questions: [],
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          questions: [],
+          success: false,
+          message: 'An error occurred while fetching bookmarked questions. Please try again.'
         };
       }
     }

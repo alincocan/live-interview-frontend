@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import {
     Container,
@@ -8,36 +8,46 @@ import {
     CardContent,
     CircularProgress,
     Paper,
-    IconButton,
-    Tooltip
+    IconButton
 } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { InterviewService, InterviewDetailsResponse } from '../../service/InterviewService';
+import QuestionDisplay from '../QuestionDisplay';
 
 const InterviewResultPage: React.FC = () => {
     const { interviewId } = useParams<{ interviewId: string }>();
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [interviewDetails, setInterviewDetails] = useState<InterviewDetailsResponse | null>(null);
+    const questionsListRef = useRef<HTMLDivElement>(null);
 
-    // Current question index for slider
+    // Current question index for display
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+    // Function to navigate to a specific question
+    const handleGoToSlide = (index: number) => {
+        if (interviewDetails && interviewDetails.questions.length > 0) {
+            setCurrentQuestionIndex(index);
+        }
+    };
+
+    // Functions for horizontal scrolling
+    const scrollLeft = () => {
+        if (questionsListRef.current) {
+            questionsListRef.current.scrollLeft -= 85; // Scroll by one question (45px) + one connector (40px)
+        }
+    };
+
+    const scrollRight = () => {
+        if (questionsListRef.current) {
+            questionsListRef.current.scrollLeft += 85; // Scroll by one question (45px) + one connector (40px)
+        }
+    };
 
     // Track bookmarked questions
     const [bookmarkedQuestions, setBookmarkedQuestions] = useState<string[]>([]);
 
-    // Control tooltip visibility
-    const [showBookmarkTooltip, setShowBookmarkTooltip] = useState(true);
-
-    // Show tooltip for 5 seconds when page loads
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setShowBookmarkTooltip(false);
-        }, 5000);
-
-        return () => clearTimeout(timer);
-    }, []);
 
     useEffect(() => {
         const fetchInterviewDetails = async () => {
@@ -75,17 +85,11 @@ const InterviewResultPage: React.FC = () => {
         fetchInterviewDetails();
     }, [interviewId]);
 
-    // Direct navigation to a specific question
-    const handleGoToSlide = (index: number) => {
-        if (interviewDetails && interviewDetails.questions.length > 0) {
-            setCurrentQuestionIndex(index);
-        }
-    };
-
     // Format difficulty level for display
     const formatDifficulty = (difficulty: string) => {
         return difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
     };
+
 
     // Toggle bookmark for a question
     const toggleBookmark = async (questionId: string) => {
@@ -359,328 +363,140 @@ const InterviewResultPage: React.FC = () => {
                             height: { xs: 'auto', md: '100%' },
                             overflow: 'hidden'
                         }}>
-                            {interviewDetails.questions.length > 0 ? (
-                                <>
-                                    {/* Questions Linked List */}
-                                    <Box sx={{ 
-                                        display: 'flex', 
-                                        justifyContent: 'center', 
-                                        alignItems: 'center',
-                                        mb: 2,
-                                        overflow: 'auto',
-                                        width: '100%',
-                                        py: 2,
-                                        px: 1
-                                    }}>
-                                        <Box sx={{ 
-                                            display: 'flex', 
-                                            alignItems: 'center',
-                                            minWidth: 'fit-content'
-                                        }}>
-                                            {interviewDetails.questions.map((question, index) => (
-                                                <React.Fragment key={index}>
-                                                    {/* Question Node */}
-                                                    <Box 
-                                                        onClick={() => handleGoToSlide(index)}
-                                                        sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            borderRadius: '50%',
-                                                            width: 45,
-                                                            height: 45,
-                                                            bgcolor: question.score && question.score >= 70 ? 'success.main' : 
-                                                                    question.score && question.score >= 40 ? 'warning.main' : 'error.main',
-                                                            color: 'white',
-                                                            fontWeight: 'bold',
-                                                            fontSize: '0.85rem',
-                                                            cursor: 'pointer',
-                                                            transition: 'all 0.2s ease',
-                                                            boxShadow: index === currentQuestionIndex ? 
-                                                                '0 0 0 3px white, 0 0 0 5px rgba(25, 118, 210, 0.8)' : 
-                                                                '0 2px 4px rgba(0,0,0,0.1)',
-                                                            border: index === currentQuestionIndex ? '2px solid' : 'none',
-                                                            borderColor: 'primary.main',
-                                                            transform: index === currentQuestionIndex ? 'scale(1.15)' : 'scale(1)',
-                                                            zIndex: index === currentQuestionIndex ? 2 : 1,
-                                                            '&:hover': {
-                                                                transform: 'scale(1.1)',
-                                                                boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
-                                                            }
-                                                        }}
-                                                    >
-                                                        <Box sx={{ textAlign: 'center' }}>
-                                                            <Typography variant="caption" sx={{ display: 'block', fontWeight: 'bold', lineHeight: 1 }}>
-                                                                Q{index + 1}
-                                                            </Typography>
-                                                            <Typography variant="body2" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
-                                                                {question.score !== undefined && question.score !== null ? question.score.toFixed(0) : 'N/A'}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Box>
 
-                                                    {/* Connector Line */}
-                                                    {index < interviewDetails.questions.length - 1 && (
-                                                        <Box sx={{ 
-                                                            width: 40, 
-                                                            height: 3, 
-                                                            bgcolor: 'grey.400',
-                                                            mx: 1
-                                                        }} />
-                                                    )}
-                                                </React.Fragment>
-                                            ))}
-                                        </Box>
-                                    </Box>
-
-                                    {/* Question Details Card */}
-                                    {interviewDetails.questions.length > 0 && (
-                                        <Card 
-                                            sx={{ 
-                                                borderRadius: 2, 
-                                                boxShadow: '0 4px 20px 0 rgba(0,0,0,0.1)',
-                                                overflow: 'hidden',
-                                                border: '2px solid #1976d2', // Added a distinctive blue border to make the change more noticeable
-                                                height: '100%', // Using full height to make the card extend to the bottom of the screen
-                                                display: 'flex',
-                                                flexDirection: 'column'
-                                            }}
-                                        >
-                                            <CardContent sx={{ 
-                                                p: 0, 
-                                                height: '100%', 
-                                                display: 'flex', 
-                                                flexDirection: 'column',
-                                                '&:last-child': { pb: 0 } // Override default padding
-                                            }}>
-                                                {/* First Row: Question and Score (20% height) */}
-                                                <Box sx={{ 
-                                                    display: 'flex', 
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'flex-start',
-                                                    p: 3,
-                                                    height: '20%',
-                                                    borderBottom: '1px solid rgba(0,0,0,0.08)',
-                                                    overflow: 'auto'
-                                                }}>
-                                                    {/* Question */}
-                                                    <Box sx={{ flex: 1, pr: 2, display: 'flex', flexDirection: 'column' }}>
-                                                        <Box sx={{
-                                                            flex: 1, 
-                                                            overflow: 'auto',
-                                                            bgcolor: 'background.paper',
-                                                            p: 2,
-                                                            borderRadius: 1,
-                                                            border: '1px solid rgba(0,0,0,0.05)',
-                                                            '&::-webkit-scrollbar': {
-                                                                width: '8px',
-                                                            },
-                                                            '&::-webkit-scrollbar-thumb': {
-                                                                backgroundColor: 'rgba(0,0,0,0.1)',
-                                                                borderRadius: '4px',
-                                                            }
-                                                        }}>
-                                                            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                                                                {interviewDetails.questions[currentQuestionIndex].question}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Box>
-
-                                                    {/* Score and Bookmark */}
-                                                    <Box sx={{ 
-                                                        display: 'flex', 
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        mr: 2
-                                                    }}>
-                                                        {/* Score Circle */}
-                                                        <Box sx={{ 
-                                                            display: 'flex', 
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            position: 'relative',
-                                                            width: 60,
-                                                            height: 60,
-                                                            mr: 1
-                                                        }}>
-                                                            <CircularProgress 
-                                                                variant="determinate" 
-                                                                value={100} 
-                                                                size={60} 
-                                                                thickness={3}
-                                                                sx={{ 
-                                                                    color: interviewDetails.questions[currentQuestionIndex].score !== undefined && 
-                                                                           interviewDetails.questions[currentQuestionIndex].score !== null ?
-                                                                           (interviewDetails.questions[currentQuestionIndex].score >= 70 ? 'success.main' : 
-                                                                           interviewDetails.questions[currentQuestionIndex].score >= 40 ? 'warning.main' : 'error.main')
-                                                                           : 'grey.500',
-                                                                    position: 'absolute'
-                                                                }} 
-                                                            />
-                                                            <Typography 
-                                                                variant="h6" 
-                                                                component="div" 
-                                                                color="text.primary" 
-                                                                fontWeight="bold"
-                                                                sx={{
-                                                                    position: 'absolute',
-                                                                    textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                                                }}
-                                                            >
-                                                                {interviewDetails.questions[currentQuestionIndex].score !== undefined && 
-                                                                 interviewDetails.questions[currentQuestionIndex].score !== null ? 
-                                                                 interviewDetails.questions[currentQuestionIndex].score.toFixed(1) : 'N/A'}
-                                                            </Typography>
-                                                        </Box>
-
-                                                        {/* Bookmark Star */}
-                                                        <Tooltip 
-                                                            title="You can bookmark the question from here"
-                                                            open={showBookmarkTooltip}
-                                                            placement="top"
-                                                            arrow
-                                                            componentsProps={{
-                                                                tooltip: {
-                                                                    sx: {
-                                                                        bgcolor: 'primary.dark',
-                                                                        fontSize: '0.9rem',
-                                                                        padding: '8px 12px',
-                                                                        borderRadius: '4px'
-                                                                    }
-                                                                }
-                                                            }}
-                                                        >
-                                                            <IconButton 
-                                                                onClick={() => toggleBookmark(interviewDetails.questions[currentQuestionIndex].id)}
-                                                                sx={{ 
-                                                                    color: bookmarkedQuestions.includes(interviewDetails.questions[currentQuestionIndex].id) 
-                                                                        ? 'primary.main' 
-                                                                        : 'action.disabled',
-                                                                    '&:hover': {
-                                                                        color: bookmarkedQuestions.includes(interviewDetails.questions[currentQuestionIndex].id) 
-                                                                            ? 'primary.dark' 
-                                                                            : 'text.secondary'
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {bookmarkedQuestions.includes(interviewDetails.questions[currentQuestionIndex].id) 
-                                                                    ? <StarIcon sx={{ fontSize: '2rem' }} /> 
-                                                                    : <StarBorderIcon sx={{ fontSize: '2rem' }} />
-                                                                }
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </Box>
-                                                </Box>
-
-                                                {/* Second Row: Answer and Correct Answer (80% height) */}
-                                                <Box sx={{ 
-                                                    display: 'flex', 
-                                                    height: '80%',
-                                                    flexDirection: { xs: 'column', sm: 'row' }
-                                                }}>
-                                                    {/* Left Column: Answer */}
-                                                    <Box sx={{ 
-                                                        flex: 1, 
-                                                        p: 3, 
-                                                        borderRight: { xs: 'none', sm: '1px solid rgba(0,0,0,0.08)' },
-                                                        borderBottom: { xs: '1px solid rgba(0,0,0,0.08)', sm: 'none' },
-                                                        height: { xs: '50%', sm: '100%' },
-                                                        display: 'flex',
-                                                        flexDirection: 'column'
-                                                    }}>
-                                                        <Typography variant="h6" gutterBottom sx={{ 
-                                                            fontWeight: 'medium',
-                                                            color: 'primary.main',
-                                                            mb: 2
-                                                        }}>
-                                                            Your Answer
-                                                        </Typography>
-                                                        <Box sx={{ 
-                                                            flex: 1, 
-                                                            overflow: 'auto',
-                                                            bgcolor: 'background.paper',
-                                                            p: 2,
-                                                            borderRadius: 1,
-                                                            border: '1px solid rgba(0,0,0,0.05)',
-                                                            maxHeight: 'calc(100% - 40px)', // Subtract the height of the header
-                                                            '&::-webkit-scrollbar': {
-                                                                width: '8px',
-                                                            },
-                                                            '&::-webkit-scrollbar-thumb': {
-                                                                backgroundColor: 'rgba(0,0,0,0.1)',
-                                                                borderRadius: '4px',
-                                                            }
-                                                        }}>
-                                                            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', pb: 6 }}>
-                                                                {interviewDetails.questions[currentQuestionIndex].answer || 'No answer provided'}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Box>
-
-                                                    {/* Right Column: Correct Answer */}
-                                                    <Box sx={{ 
-                                                        flex: 1, 
-                                                        p: 3,
-                                                        height: { xs: '50%', sm: '100%' },
-                                                        display: 'flex',
-                                                        flexDirection: 'column'
-                                                    }}>
-                                                        <Typography variant="h6" gutterBottom sx={{ 
-                                                            fontWeight: 'medium',
-                                                            color: 'success.main',
-                                                            mb: 2
-                                                        }}>
-                                                            Correct Answer
-                                                        </Typography>
-                                                        <Box sx={{ 
-                                                            flex: 1, 
-                                                            overflow: 'auto',
-                                                            bgcolor: 'background.paper',
-                                                            p: 2,
-                                                            borderRadius: 1,
-                                                            border: '1px solid rgba(0,0,0,0.05)',
-                                                            maxHeight: 'calc(100% - 40px)', // Subtract the height of the header
-                                                            '&::-webkit-scrollbar': {
-                                                                width: '8px',
-                                                            },
-                                                            '&::-webkit-scrollbar-thumb': {
-                                                                backgroundColor: 'rgba(0,0,0,0.1)',
-                                                                borderRadius: '4px',
-                                                            }
-                                                        }}>
-                                                            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', pb: 6 }}>
-                                                                {interviewDetails.questions[currentQuestionIndex].correctAnswer || 'No correct answer provided'}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Box>
-                                                </Box>
-                                            </CardContent>
-                                        </Card>
-                                    )}
-
-                                </>
-                            ) : (
-                                <Paper 
-                                    elevation={0} 
-                                    sx={{ 
-                                        p: 4, 
-                                        borderRadius: 2,
-                                        border: '1px solid rgba(0,0,0,0.08)',
-                                        backgroundColor: 'info.lighter',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        textAlign: 'center'
+                            {/* Questions Linked List */}
+                            <Box sx={{ 
+                                display: 'flex', 
+                                justifyContent: 'center', 
+                                alignItems: 'center',
+                                mb: 2,
+                                width: '80%',
+                                py: 2,
+                                px: 1,
+                                mx: 'auto',
+                                position: 'relative'
+                            }}>
+                                {/* Left Navigation Button */}
+                                <IconButton 
+                                    onClick={scrollLeft}
+                                    sx={{
+                                        position: 'absolute',
+                                        left: -20,
+                                        zIndex: 10,
+                                        bgcolor: 'background.paper',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                        '&:hover': {
+                                            bgcolor: 'background.paper',
+                                            boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+                                        }
                                     }}
                                 >
-                                    <Typography variant="h6" color="info.dark" sx={{ fontWeight: 'medium', mb: 1 }}>
-                                        No Questions Found
-                                    </Typography>
-                                    <Typography variant="body1" color="text.secondary">
-                                        There are no questions available for this interview.
-                                    </Typography>
-                                </Paper>
-                            )}
+                                    <ChevronLeftIcon />
+                                </IconButton>
+
+                                {/* Right Navigation Button */}
+                                <IconButton 
+                                    onClick={scrollRight}
+                                    sx={{
+                                        position: 'absolute',
+                                        right: -20,
+                                        zIndex: 10,
+                                        bgcolor: 'background.paper',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                        '&:hover': {
+                                            bgcolor: 'background.paper',
+                                            boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+                                        }
+                                    }}
+                                >
+                                    <ChevronRightIcon />
+                                </IconButton>
+
+                                <Box 
+                                    ref={questionsListRef}
+                                    sx={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start',
+                                        width: '100%',
+                                        maxWidth: '640px', // Width for 8 questions: (8 * 45px) + (7 * 40px) = 640px
+                                        margin: '0 auto',
+                                        overflow: 'auto',
+                                        scrollBehavior: 'smooth',
+                                        paddingLeft: '20px', // Add padding on the left for the first node
+                                        paddingRight: '20px', // Add padding on the right for the last node
+                                        '&::-webkit-scrollbar': {
+                                            display: 'none'
+                                        },
+                                        msOverflowStyle: 'none',
+                                        scrollbarWidth: 'none',
+                                        '& > *': {
+                                            flexShrink: 0
+                                        }
+                                    }}
+                                >
+                                    {interviewDetails.questions.map((question, index) => (
+                                        <React.Fragment key={index}>
+                                            {/* Question Node */}
+                                            <Box 
+                                                onClick={() => handleGoToSlide(index)}
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    borderRadius: '50%',
+                                                    width: 45,
+                                                    height: 45,
+                                                    bgcolor: question.score && question.score >= 70 ? 'success.main' : 
+                                                            question.score && question.score >= 40 ? 'warning.main' : 'error.main',
+                                                    color: 'white',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '0.85rem',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s ease',
+                                                    boxShadow: index === currentQuestionIndex ? 
+                                                        '0 0 0 3px white, 0 0 0 5px rgba(25, 118, 210, 0.8)' : 
+                                                        '0 2px 4px rgba(0,0,0,0.1)',
+                                                    border: index === currentQuestionIndex ? '2px solid' : 'none',
+                                                    borderColor: 'primary.main',
+                                                    transform: index === currentQuestionIndex ? 'scale(1.15)' : 'scale(1)',
+                                                    zIndex: index === currentQuestionIndex ? 2 : 1,
+                                                    '&:hover': {
+                                                        transform: 'scale(1.1)',
+                                                        boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+                                                    }
+                                                }}
+                                            >
+                                                <Box sx={{ textAlign: 'center' }}>
+                                                    <Typography variant="caption" sx={{ display: 'block', fontWeight: 'bold', lineHeight: 1 }}>
+                                                        Q{index + 1}
+                                                    </Typography>
+                                                    <Typography variant="body2" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                                                        {question.score !== undefined && question.score !== null ? question.score.toFixed(0) : 'N/A'}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+
+                                            {/* Connector Line */}
+                                            {index < interviewDetails.questions.length - 1 && (
+                                                <Box sx={{ 
+                                                    width: 40, 
+                                                    height: 3, 
+                                                    bgcolor: 'grey.400',
+                                                    mx: 1
+                                                }} />
+                                            )}
+                                        </React.Fragment>
+                                    ))}
+                                </Box>
+                            </Box>
+
+                            <QuestionDisplay 
+                                questions={interviewDetails.questions} 
+                                bookmarkedQuestions={bookmarkedQuestions} 
+                                onToggleBookmark={toggleBookmark}
+                                currentQuestionIndex={currentQuestionIndex}
+                            />
                         </Box>
                     </Box>
                 </>
