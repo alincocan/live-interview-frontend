@@ -18,7 +18,7 @@ export interface GenerateQuestionsResponse {
   questions: InterviewQuestion[];
   success: boolean;
   message?: string;
-  interviewId?: string;
+  sessionId?: string;
 }
 
 export interface GenerateQuestionsRequest {
@@ -34,14 +34,14 @@ export interface ValidateAnswerRequest {
   questionId: string;
   question: string;
   answer: string;
-  interviewId?: string;
+  sessionId?: string;
   jobName?: string;
   tags?: string[];
   softSkill?: boolean;
 }
 
 export interface FinalizeInterviewRequest {
-  interviewId: string;
+  sessionId: string;
 }
 
 export interface InterviewDetailsResponse {
@@ -66,7 +66,7 @@ export interface InterviewListItem {
 }
 
 export interface InterviewListResponse {
-  interviews: InterviewListItem[];
+  sessions: InterviewListItem[];
   success: boolean;
   message?: string;
 }
@@ -263,7 +263,7 @@ export class InterviewService {
     }
   }
 
-  public async getInterviews(): Promise<InterviewListResponse> {
+  public async getSessions(): Promise<InterviewListResponse> {
     try {
       const token = this.getAuthToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -278,30 +278,30 @@ export class InterviewService {
         success: true
       };
     } catch (error: unknown) {
-      console.error('Get interviews list error:', error);
+      console.error('Get sessions list error:', error);
 
       // Handle different types of errors
       if (axios.isAxiosError(error) && error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
         return {
-          interviews: [],
+          sessions: [],
           success: false,
-          message: error.response.data?.message || 'Failed to fetch interviews. Please try again.'
+          message: error.response.data?.message || 'Failed to fetch sessions. Please try again.'
         };
       } else if (axios.isAxiosError(error) && error.request) {
         // The request was made but no response was received
         return {
-          interviews: [],
+          sessions: [],
           success: false,
           message: 'No response from server. Please try again later.'
         };
       } else {
         // Something happened in setting up the request that triggered an Error
         return {
-          interviews: [],
+          sessions: [],
           success: false,
-          message: 'An error occurred while fetching interviews. Please try again.'
+          message: 'An error occurred while fetching sessions. Please try again.'
         };
       }
     }
@@ -349,13 +349,13 @@ export class InterviewService {
     }
   }
 
-  public async getInterviewDetails(interviewId: string): Promise<InterviewDetailsResponse> {
+  public async getInterviewDetails(sessionId: string): Promise<InterviewDetailsResponse> {
     try {
       const token = this.getAuthToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const response = await axios.get<InterviewDetailsResponse>(
-        `${this.baseUrl}/interviews/${interviewId}`,
+        `${this.baseUrl}/interviews/${sessionId}`,
         { headers }
       );
 

@@ -539,7 +539,7 @@ const InterviewPage: React.FC = () => {
 
         try {
             const interviewService = InterviewService.getInstance();
-            const interviewId = sessionStorage.getItem('interviewId');
+            const sessionId = sessionStorage.getItem('sessionId');
             const jobName = sessionStorage.getItem('jobName');
 
             const currentQuestion = questions[currentQuestionIndex];
@@ -548,7 +548,7 @@ const InterviewPage: React.FC = () => {
                 questionId: currentQuestion.id,
                 question: currentQuestion.question,
                 answer: userAnswer,
-                interviewId: interviewId || undefined,
+                sessionId: sessionId || undefined,
                 jobName: jobName || undefined,
                 tags: currentQuestion.tags,
                 softSkill: currentQuestion.softSkill
@@ -599,7 +599,7 @@ const InterviewPage: React.FC = () => {
 
         try {
             const interviewService = InterviewService.getInstance();
-            const interviewId = sessionStorage.getItem('interviewId');
+            const sessionId = sessionStorage.getItem('sessionId');
             const jobName = sessionStorage.getItem('jobName');
 
             const currentQuestion = questions[currentQuestionIndex];
@@ -608,7 +608,7 @@ const InterviewPage: React.FC = () => {
                 questionId: currentQuestion.id,
                 question: currentQuestion.question,
                 answer: userAnswer,
-                interviewId: interviewId || undefined,
+                sessionId: sessionId || undefined,
                 jobName: jobName || undefined,
                 tags: currentQuestion.tags,
                 softSkill: currentQuestion.softSkill
@@ -621,12 +621,12 @@ const InterviewPage: React.FC = () => {
                 setInterviewCompleted(true);
                 setValidationError(null);
 
-                // Call the finalize endpoint if we have an interviewId
-                if (interviewId) {
+                // Call the finalize endpoint if we have a sessionId
+                if (sessionId) {
                     setIsFinalizing(true);
                     try {
                         const finalizeRequest: FinalizeInterviewRequest = {
-                            interviewId: interviewId
+                            sessionId: sessionId
                         };
 
                         const finalizeResponse = await interviewService.finalizeInterview(finalizeRequest);
@@ -752,9 +752,9 @@ const InterviewPage: React.FC = () => {
             if (response.success) {
                 setQuestions(response.questions);
 
-                // Store interviewId in sessionStorage if available
-                if (response.interviewId) {
-                    sessionStorage.setItem('interviewId', response.interviewId);
+                // Store sessionId in sessionStorage if available
+                if (response.sessionId) {
+                    sessionStorage.setItem('sessionId', response.sessionId);
                 }
 
                 // Now that questions are generated, fetch transition phrases and welcome audio
@@ -998,8 +998,8 @@ const InterviewPage: React.FC = () => {
                                     }}
                                     onClick={() => {
                                         // Navigate to interview results page
-                                        const interviewId = sessionStorage.getItem('interviewId');
-                                        window.location.href = `/interview/${interviewId}`;
+                                        const sessionId = sessionStorage.getItem('sessionId');
+                                        window.location.href = `/interview/${sessionId}`;
                                     }}
                                 >
                                     Go to results
