@@ -527,6 +527,14 @@ const InterviewPage: React.FC = () => {
             return;
         }
 
+        // Check if currentQuestionIndex is valid
+        if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.length) {
+            console.error('Invalid question index:', currentQuestionIndex);
+            setValidationError('An error occurred with the current question. Please try again.');
+            setShowValidationError(true);
+            return;
+        }
+
         setIsValidating(true);
 
         try {
@@ -807,6 +815,16 @@ const InterviewPage: React.FC = () => {
                 crossOrigin="anonymous"
             />
 
+            {/* Hidden audio element for transition audio */}
+            <audio
+                id="transition-audio"
+                ref={transitionAudioRef}
+                style={{ display: 'none' }}
+                controls
+                preload="auto"
+                crossOrigin="anonymous"
+            />
+
             {/* Validation Error Snackbar */}
             <Snackbar
                 open={showValidationError}
@@ -871,9 +889,9 @@ const InterviewPage: React.FC = () => {
                     </Typography>
                     <CircularProgress size={60} sx={{ mb: 3 }} />
                     <Box sx={{ width: '100%', maxWidth: 400 }}>
-                        <Box sx={{ 
-                            width: '100%', 
-                            bgcolor: 'rgba(0,0,0,0.05)', 
+                        <Box sx={{
+                            width: '100%',
+                            bgcolor: 'rgba(0,0,0,0.05)',
                             borderRadius: 2,
                             p: 0.5,
                             boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)'
@@ -1020,7 +1038,7 @@ const InterviewPage: React.FC = () => {
                                                 Tags:
                                             </Typography>
                                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                                                {questions[currentQuestionIndex] && questions[currentQuestionIndex].tags && 
+                                                {questions[currentQuestionIndex] && questions[currentQuestionIndex].tags &&
                                                  questions[currentQuestionIndex].tags.map((tag, index) => (
                                                     <Chip key={index} label={tag} variant="outlined" />
                                                 ))}
