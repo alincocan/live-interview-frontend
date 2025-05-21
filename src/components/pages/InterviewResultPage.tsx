@@ -16,10 +16,10 @@ import { InterviewService, InterviewDetailsResponse } from '../../service/Interv
 import QuestionDisplay from '../QuestionDisplay';
 
 const InterviewResultPage: React.FC = () => {
-    const { interviewId } = useParams<{ interviewId: string }>();
+    const { interviewId: sessionId } = useParams<{ interviewId: string }>();
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [interviewDetails, setInterviewDetails] = useState<InterviewDetailsResponse | null>(null);
+    const [sessionDetails, setSessionDetails] = useState<InterviewDetailsResponse | null>(null);
     const questionsListRef = useRef<HTMLDivElement>(null);
 
     // Current question index for display
@@ -27,7 +27,7 @@ const InterviewResultPage: React.FC = () => {
 
     // Function to navigate to a specific question
     const handleGoToSlide = (index: number) => {
-        if (interviewDetails && interviewDetails.questions.length > 0) {
+        if (sessionDetails && sessionDetails.questions.length > 0) {
             setCurrentQuestionIndex(index);
         }
     };
@@ -50,19 +50,19 @@ const InterviewResultPage: React.FC = () => {
 
 
     useEffect(() => {
-        const fetchInterviewDetails = async () => {
-            if (!interviewId) {
-                setErrorMessage('Interview ID is missing. Please try again.');
+        const fetchSessionDetails = async () => {
+            if (!sessionId) {
+                setErrorMessage('Session ID is missing. Please try again.');
                 setIsLoading(false);
                 return;
             }
 
             try {
                 const interviewService = InterviewService.getInstance();
-                const response = await interviewService.getInterviewDetails(interviewId);
+                const response = await interviewService.getInterviewDetails(sessionId);
 
                 if (response.success) {
-                    setInterviewDetails(response);
+                    setSessionDetails(response);
 
                     // Initialize bookmarkedQuestions array with questions that have bookmarked=true
                     const bookmarkedIds = response.questions
@@ -72,18 +72,18 @@ const InterviewResultPage: React.FC = () => {
 
                     setErrorMessage(null);
                 } else {
-                    setErrorMessage(response.message || 'Failed to fetch interview details. Please try again.');
+                    setErrorMessage(response.message || 'Failed to fetch session details. Please try again.');
                 }
             } catch (error) {
-                console.error('Error fetching interview details:', error);
+                console.error('Error fetching session details:', error);
                 setErrorMessage('An unexpected error occurred. Please try again.');
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchInterviewDetails();
-    }, [interviewId]);
+        fetchSessionDetails();
+    }, [sessionId]);
 
     // Format difficulty level for display
     const formatDifficulty = (difficulty: string) => {
@@ -166,7 +166,7 @@ const InterviewResultPage: React.FC = () => {
                             }
                         }}
                     >
-                        Loading interview results...
+                        Loading session results...
                     </Typography>
                 </Box>
             ) : errorMessage ? (
@@ -206,7 +206,7 @@ const InterviewResultPage: React.FC = () => {
                         </Box>
                     </Box>
                 </Paper>
-            ) : interviewDetails ? (
+            ) : sessionDetails ? (
                 <>
                     <Box sx={{ 
                         display: 'flex', 
@@ -215,7 +215,7 @@ const InterviewResultPage: React.FC = () => {
                         height: { md: 'calc(100vh - 100px)' }, // Increased height to use more of the viewport
                         mb: 0 // Removed bottom margin to allow content to extend closer to the bottom of the screen
                     }}>
-                        {/* Interview Details Card - Left Side */}
+                        {/* Session Details Card - Left Side */}
                         <Card 
                             sx={{ 
                                 borderRadius: 2, 
@@ -240,7 +240,7 @@ const InterviewResultPage: React.FC = () => {
                                         mb: 3
                                     }}
                                 >
-                                    Interview Summary
+                                    Session Summary
                                 </Typography>
                                 <Box sx={{ 
                                     display: 'flex', 
@@ -260,7 +260,7 @@ const InterviewResultPage: React.FC = () => {
                                                 Job Position:
                                             </Typography>
                                             <Typography variant="body1" fontWeight="bold">
-                                                {interviewDetails.jobName}
+                                                {sessionDetails.jobName}
                                             </Typography>
                                         </Box>
                                         <Box sx={{ 
@@ -273,7 +273,7 @@ const InterviewResultPage: React.FC = () => {
                                                 Difficulty:
                                             </Typography>
                                             <Typography variant="body1" fontWeight="bold">
-                                                {formatDifficulty(interviewDetails.difficulty)}
+                                                {formatDifficulty(sessionDetails.difficulty)}
                                             </Typography>
                                         </Box>
                                         <Box sx={{ 
@@ -285,7 +285,7 @@ const InterviewResultPage: React.FC = () => {
                                                 Duration:
                                             </Typography>
                                             <Typography variant="body1" fontWeight="bold">
-                                                {interviewDetails.duration} minutes
+                                                {sessionDetails.duration} minutes
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -298,14 +298,14 @@ const InterviewResultPage: React.FC = () => {
                                         my: 2,
                                         py: 1,
                                         borderRadius: 1,
-                                        bgcolor: interviewDetails.score >= 60 ? 'success.light' : 'error.light',
-                                        color: interviewDetails.score >= 60 ? 'success.dark' : 'error.dark',
+                                        bgcolor: sessionDetails.score >= 60 ? 'success.light' : 'error.light',
+                                        color: sessionDetails.score >= 60 ? 'success.dark' : 'error.dark',
                                         fontWeight: 'bold',
                                         fontSize: '1rem',
                                         textTransform: 'uppercase',
                                         letterSpacing: 1
                                     }}>
-                                        {interviewDetails.score >= 60 ? 'PASSED' : 'FAILED'}
+                                        {sessionDetails.score >= 60 ? 'PASSED' : 'FAILED'}
                                     </Box>
 
                                     <Box sx={{ 
@@ -330,15 +330,15 @@ const InterviewResultPage: React.FC = () => {
                                                 textShadow: '0 2px 4px rgba(0,0,0,0.2)'
                                             }}
                                         >
-                                            {interviewDetails.score.toFixed(1)}
+                                            {sessionDetails.score.toFixed(1)}
                                         </Typography>
                                         <Box sx={{ 
                                             mt: 1, 
                                             px: 2, 
                                             py: 0.5, 
                                             borderRadius: 5,
-                                            bgcolor: interviewDetails.score >= 60 ? (
-                                                        interviewDetails.score > 7 ? 'success.main' : 'warning.main'
+                                            bgcolor: sessionDetails.score >= 60 ? (
+                                                        sessionDetails.score > 7 ? 'success.main' : 'warning.main'
                                                     ) : 'error.main',
                                             color: 'white',
                                             fontSize: '0.75rem',
@@ -346,8 +346,8 @@ const InterviewResultPage: React.FC = () => {
                                             textTransform: 'uppercase',
                                             letterSpacing: 0.5
                                         }}>
-                                            {interviewDetails.score >= 60 ? (
-                                                interviewDetails.score > 7 ? 'Excellent' : 'Good'
+                                            {sessionDetails.score >= 60 ? (
+                                                sessionDetails.score > 7 ? 'Excellent' : 'Good'
                                             ) : 'Needs Improvement'}
                                         </Box>
                                     </Box>
@@ -435,7 +435,7 @@ const InterviewResultPage: React.FC = () => {
                                         }
                                     }}
                                 >
-                                    {interviewDetails.questions.map((question, index) => (
+                                    {sessionDetails.questions.map((question, index) => (
                                         <React.Fragment key={index}>
                                             {/* Question Node */}
                                             <Box 
@@ -478,7 +478,7 @@ const InterviewResultPage: React.FC = () => {
                                             </Box>
 
                                             {/* Connector Line */}
-                                            {index < interviewDetails.questions.length - 1 && (
+                                            {index < sessionDetails.questions.length - 1 && (
                                                 <Box sx={{ 
                                                     width: 40, 
                                                     height: 3, 
@@ -492,7 +492,7 @@ const InterviewResultPage: React.FC = () => {
                             </Box>
 
                             <QuestionDisplay 
-                                questions={interviewDetails.questions} 
+                                questions={sessionDetails.questions} 
                                 bookmarkedQuestions={bookmarkedQuestions} 
                                 onToggleBookmark={toggleBookmark}
                                 currentQuestionIndex={currentQuestionIndex}
@@ -531,10 +531,10 @@ const InterviewResultPage: React.FC = () => {
                         <Typography variant="h4" color="info.dark">?</Typography>
                     </Box>
                     <Typography variant="h5" color="info.dark" sx={{ fontWeight: 'medium', mb: 1 }}>
-                        No Interview Data Found
+                        No Session Data Found
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500 }}>
-                        We couldn't find any interview data for the requested ID. Please check that you have the correct interview ID or try again later.
+                        We couldn't find any session data for the requested ID. Please check that you have the correct session ID or try again later.
                     </Typography>
                 </Paper>
             )}
