@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
     Container,
     Typography,
@@ -21,11 +22,13 @@ import {
     ValidateAnswerRequest,
     FinalizeInterviewRequest,
     GetAudioResponse,
-    TransitionPhrase
+    TransitionPhrase,
+    GenerateQuestionsRequest
 } from '../../service/InterviewService';
 
 
 const InterviewPage: React.FC = () => {
+    const location = useLocation();
     // Define keyframes for the pulse animation
     const pulseKeyframes = `
         @keyframes pulse {
@@ -53,7 +56,8 @@ const InterviewPage: React.FC = () => {
         jobName: '',
         softSkillsPercentage: 0,
         difficulty: '',
-        tags: [] as string[]
+        tags: [] as string[],
+        languageCode: ''
     });
 
     // State to track if we're loading both welcome audio and interview questions
@@ -328,9 +332,14 @@ const InterviewPage: React.FC = () => {
         }
 
         try {
-            // Get languageCode and voiceId from session storage
-            const languageCode = sessionStorage.getItem('languageCode');
-            const selectedInterviewerStr = sessionStorage.getItem('selectedInterviewer');
+            // Get languageCode from interviewData
+            const languageCode = interviewData.languageCode;
+
+            // Get selectedInterviewer from location state if available, otherwise try sessionStorage
+            const selectedInterviewerFromState = location.state?.selectedInterviewer;
+            const selectedInterviewerStr = selectedInterviewerFromState ? 
+                JSON.stringify(selectedInterviewerFromState) : 
+                sessionStorage.getItem('selectedInterviewer');
 
             if (!languageCode || !selectedInterviewerStr) {
                 console.error('Missing language code or interviewer data.');
@@ -442,12 +451,8 @@ const InterviewPage: React.FC = () => {
 
 
     useEffect(() => {
-        // Fetch data from sessionStorage
-        const duration = sessionStorage.getItem('duration');
-        const jobName = sessionStorage.getItem('jobName');
-        const softSkillsPercentage = sessionStorage.getItem('softSkillsPercentage');
-        const difficulty = sessionStorage.getItem('difficulty');
-        const tags = sessionStorage.getItem('tags');
+        // Fetch data from location state
+        const { duration, jobName, softSkillsPercentage, difficulty, tags, languageCode } = location.state || {};
 
         if (!duration || !jobName || !softSkillsPercentage || !tags || !difficulty) {
             setErrorMessage('Missing interview configuration data. Please set up the interview first.');
@@ -461,7 +466,8 @@ const InterviewPage: React.FC = () => {
             jobName,
             softSkillsPercentage: parseInt(softSkillsPercentage, 10),
             difficulty,
-            tags: JSON.parse(tags)
+            tags: Array.isArray(tags) ? tags : JSON.parse(tags),
+            languageCode
         };
 
         setInterviewData(parsedData);
@@ -471,7 +477,7 @@ const InterviewPage: React.FC = () => {
 
         // Set loading to false after initializing data
         setIsLoading(false);
-    }, []);
+    }, [location.state]);
 
     // Timer countdown effect
     useEffect(() => {
@@ -540,7 +546,8 @@ const InterviewPage: React.FC = () => {
         try {
             const interviewService = InterviewService.getInstance();
             const sessionId = sessionStorage.getItem('sessionId');
-            const jobName = sessionStorage.getItem('jobName');
+            // Use jobName from interviewData instead of sessionStorage
+            const jobName = interviewData.jobName;
 
             const currentQuestion = questions[currentQuestionIndex];
 
@@ -600,7 +607,8 @@ const InterviewPage: React.FC = () => {
         try {
             const interviewService = InterviewService.getInstance();
             const sessionId = sessionStorage.getItem('sessionId');
-            const jobName = sessionStorage.getItem('jobName');
+            // Use jobName from interviewData instead of sessionStorage
+            const jobName = interviewData.jobName;
 
             const currentQuestion = questions[currentQuestionIndex];
 
@@ -669,9 +677,14 @@ const InterviewPage: React.FC = () => {
         }
 
         try {
-            // Get languageCode and voiceId from session storage
-            const languageCode = sessionStorage.getItem('languageCode');
-            const selectedInterviewerStr = sessionStorage.getItem('selectedInterviewer');
+            // Get languageCode from interviewData
+            const languageCode = interviewData.languageCode;
+
+            // Get selectedInterviewer from location state if available, otherwise try sessionStorage
+            const selectedInterviewerFromState = location.state?.selectedInterviewer;
+            const selectedInterviewerStr = selectedInterviewerFromState ? 
+                JSON.stringify(selectedInterviewerFromState) : 
+                sessionStorage.getItem('selectedInterviewer');
 
             if (!languageCode || !selectedInterviewerStr) {
                 console.error('Missing language code or interviewer data.');
@@ -722,12 +735,17 @@ const InterviewPage: React.FC = () => {
         tags: string[]
     }) => {
         try {
-            // Get languageCode and interviewerId from session storage
-            const languageCode = sessionStorage.getItem('languageCode');
-            const selectedInterviewerStr = sessionStorage.getItem('selectedInterviewer');
+            // Get languageCode from interviewData
+            const languageCode = interviewData.languageCode;
+
+            // Get selectedInterviewer from location state if available, otherwise try sessionStorage
+            const selectedInterviewerFromState = location.state?.selectedInterviewer;
+            const selectedInterviewerStr = selectedInterviewerFromState ? 
+                JSON.stringify(selectedInterviewerFromState) : 
+                sessionStorage.getItem('selectedInterviewer');
 
             // Create a copy of the data object to add the new properties
-            const requestData = { ...data };
+            const requestData: GenerateQuestionsRequest = { ...data };
 
             // Add language if available
             if (languageCode) {
@@ -799,16 +817,6 @@ const InterviewPage: React.FC = () => {
             <audio
                 id="welcome-audio"
                 ref={audioRef}
-                style={{ display: 'none' }}
-                controls
-                preload="auto"
-                crossOrigin="anonymous"
-            />
-
-            {/* Hidden audio element for transition audio */}
-            <audio
-                id="transition-audio"
-                ref={transitionAudioRef}
                 style={{ display: 'none' }}
                 controls
                 preload="auto"

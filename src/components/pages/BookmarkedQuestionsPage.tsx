@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Container,
     Typography,
@@ -19,6 +20,7 @@ import { InterviewService, InterviewQuestion } from '../../service/InterviewServ
 import QuestionDisplay from '../QuestionDisplay';
 
 const BookmarkedQuestionsPage: React.FC = () => {
+    const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [questions, setQuestions] = useState<InterviewQuestion[]>([]);
@@ -130,8 +132,13 @@ const BookmarkedQuestionsPage: React.FC = () => {
 
     // Handle start training button click
     const handleStartTraining = () => {
-        console.log('Start training on topics:', currentQuestionTags);
-        // Add your training logic here
+        // Get the first tag from the current question
+        if (currentQuestionTags.length > 0) {
+            // Navigate to the training/choose route with the tag in state (not visible in URL)
+            navigate('/training/choose', { state: { tag: currentQuestionTags[0] } });
+        } else {
+            console.error('No tags available for the current question');
+        }
     };
 
     return (
@@ -156,31 +163,33 @@ const BookmarkedQuestionsPage: React.FC = () => {
                     Bookmarked Questions
                 </Typography>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    {/* Current question's tags */}
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {currentQuestionTags.map((tag, index) => (
-                            <Chip 
-                                key={index} 
-                                label={tag} 
-                                size="small" 
-                                color="primary" 
-                                variant="outlined"
-                            />
-                        ))}
-                    </Box>
+                {!isLoading && !errorMessage && questions.length > 0 && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        {/* Current question's tags */}
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                            {currentQuestionTags.map((tag, index) => (
+                                <Chip 
+                                    key={index} 
+                                    label={tag} 
+                                    size="small" 
+                                    color="primary" 
+                                    variant="outlined"
+                                />
+                            ))}
+                        </Box>
 
-                    {/* Start training button */}
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<SchoolIcon />}
-                        onClick={handleStartTraining}
-                        sx={{ whiteSpace: 'nowrap' }}
-                    >
-                        Start Training on this Topic
-                    </Button>
-                </Box>
+                        {/* Start training button */}
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<SchoolIcon />}
+                            onClick={handleStartTraining}
+                            sx={{ whiteSpace: 'nowrap' }}
+                        >
+                            Start Training on this Topic
+                        </Button>
+                    </Box>
+                )}
             </Box>
 
             {isLoading ? (

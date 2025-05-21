@@ -14,7 +14,7 @@ import {
     Modal,
     IconButton,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { JobDescriptionParserService } from '../../../service/jobDescriptionParserService.ts';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import EditNoteIcon from '@mui/icons-material/EditNote';
@@ -29,6 +29,10 @@ const JobDescriptionUploadPage: React.FC = () => {
     const [openFileModal, setOpenFileModal] = useState(false);
     const [openTextModal, setOpenTextModal] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Get selectedInterviewer from location state if available
+    const selectedInterviewer = location.state?.selectedInterviewer;
 
     // Clear sessionStorage items when component mounts
     useEffect(() => {
@@ -52,10 +56,15 @@ const JobDescriptionUploadPage: React.FC = () => {
                 setAlertMessage(message || 'Failed to process the job description file. Please try again.');
                 return;
             }
-            // Save jobName and tags in sessionStorage
+            // Save jobName in sessionStorage, but pass tags and selectedInterviewer as state
             sessionStorage.setItem('jobName', jobName || '');
-            sessionStorage.setItem('tags', JSON.stringify(tags));
-            navigate('/interview/setup');
+            // Don't store tags in sessionStorage, pass them as state instead
+            navigate('/interview/setup', { 
+                state: { 
+                    tags,
+                    selectedInterviewer 
+                } 
+            });
         } catch (error) {
             if (error instanceof Error) {
                 setAlertMessage(`Error processing file: ${error.message}`);
@@ -83,10 +92,15 @@ const JobDescriptionUploadPage: React.FC = () => {
                 setAlertMessage(message || 'Failed to process the job description text. Please try again.');
                 return;
             }
-            // Save jobName and tags in sessionStorage
+            // Save jobName in sessionStorage, but pass tags and selectedInterviewer as state
             sessionStorage.setItem('jobName', jobName || '');
-            sessionStorage.setItem('tags', JSON.stringify(tags));
-            navigate('/interview/setup');
+            // Don't store tags in sessionStorage, pass them as state instead
+            navigate('/interview/setup', { 
+                state: { 
+                    tags,
+                    selectedInterviewer 
+                } 
+            });
         } catch (error) {
             if (error instanceof Error) {
                 setAlertMessage(`Error processing text: ${error.message}`);
@@ -99,7 +113,11 @@ const JobDescriptionUploadPage: React.FC = () => {
     };
 
     const handleSkip = () => {
-        navigate('/interview/setup');
+        navigate('/interview/setup', { 
+            state: { 
+                selectedInterviewer 
+            } 
+        });
     };
 
     const baseModalStyle = {

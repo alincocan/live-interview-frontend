@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Container,
     Typography,
@@ -29,17 +29,33 @@ import { InterviewService, Country } from '../../../service/InterviewService';
 
 const InterviewConfiguration: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
 
-    // Get jobName and tags from sessionStorage
+    // Determine if this is for training based on the path
+    const isTraining = location.pathname.includes('/training/');
+
+    // Get tag from location state if available
+    const stateTag = location.state?.tag;
+
+    // Get selectedInterviewer from location state if available
+    const selectedInterviewer = location.state?.selectedInterviewer;
+
+    // Get jobName from sessionStorage
     const storedJobName = sessionStorage.getItem('jobName') || '';
-    const storedTags = sessionStorage.getItem('tags') ? JSON.parse(sessionStorage.getItem('tags') || '[]') : [];
+
+    // Get tags from location state if available
+    const tagsFromState = location.state?.tags;
 
     // State management for form fields
     const [difficultyLevel, setDifficultyLevel] = useState<string>('');
     const [jobName, setJobName] = useState<string>(storedJobName);
     const [softSkills, setSoftSkills] = useState<string>('');
     const [duration, setDuration] = useState<number>(60);
-    const [tags, setTags] = useState<string[]>(storedTags);
+    const [numQuestions, setNumQuestions] = useState<number>(15); // For training mode
+
+    // Initialize tags with stateTag if available, otherwise use tagsFromState
+    const initialTags = stateTag ? [stateTag] : tagsFromState || [];
+    const [tags, setTags] = useState<string[]>(initialTags);
     const [newTag, setNewTag] = useState<string>('');
     const [countries, setCountries] = useState<Country[]>([]);
     const [selectedCountry, setSelectedCountry] = useState<string>('');
@@ -51,6 +67,7 @@ const InterviewConfiguration: React.FC = () => {
         jobName?: string;
         softSkills?: string;
         duration?: string;
+        numQuestions?: string; // For training mode
         tags?: string;
         country?: string;
         form?: string;
@@ -127,9 +144,22 @@ const InterviewConfiguration: React.FC = () => {
         }
     };
 
+    const handleNumQuestionsChange = (_event: Event, newValue: number | number[]) => {
+        setNumQuestions(newValue as number);
+        // Clear error when field is updated
+        if (errors.numQuestions) {
+            setErrors(prev => ({ ...prev, numQuestions: undefined }));
+        }
+    };
+
     const handleAddTag = () => {
         if (newTag.trim() && !tags.includes(newTag.trim())) {
-            setTags([...tags, newTag.trim()]);
+            // In training mode, only allow one tag
+            if (isTraining) {
+                setTags([newTag.trim()]);
+            } else {
+                setTags([...tags, newTag.trim()]);
+            }
             setNewTag('');
             // Clear error when tags are updated
             if (errors.tags) {
@@ -177,22 +207,30 @@ const InterviewConfiguration: React.FC = () => {
             isValid = false;
         }
 
-        // Validate softSkills (already has a default value, but checking for completeness)
-        if (!["0", "25", "50"].includes(softSkills)) {
+        // Validate softSkills in interview mode
+        if (!isTraining && !["0", "25", "50"].includes(softSkills)) {
             newErrors.softSkills = "Please select a valid soft skills option";
             isValid = false;
         }
 
-        // Validate country
+        // Validate language
         if (!selectedCountry) {
-            newErrors.country = "Please select a country";
+            newErrors.country = "Please select a language";
             isValid = false;
         }
 
-        // Validate duration (already constrained by slider, but checking for completeness)
-        if (duration < 10 || duration > 90) {
-            newErrors.duration = "Duration must be between 10 and 90 minutes";
-            isValid = false;
+        if (isTraining) {
+            // Validate numQuestions in training mode
+            if (numQuestions < 5 || numQuestions > 30) {
+                newErrors.numQuestions = "Number of questions must be between 5 and 30";
+                isValid = false;
+            }
+        } else {
+            // Validate duration in interview mode
+            if (duration < 10 || duration > 90) {
+                newErrors.duration = "Duration must be between 10 and 90 minutes";
+                isValid = false;
+            }
         }
 
         // Validate tags
@@ -223,26 +261,44 @@ const InterviewConfiguration: React.FC = () => {
         const selectedCountryObj = countries.find(country => country.id === selectedCountry);
         const languageCode = selectedCountryObj ? selectedCountryObj.languageCode : '';
 
-        // Save values to session storage
-        sessionStorage.setItem('duration', duration.toString());
-        sessionStorage.setItem('jobName', jobName);
-        sessionStorage.setItem('softSkillsPercentage', softSkills);
-        sessionStorage.setItem('difficulty', difficultyLevel);
-        sessionStorage.setItem('tags', JSON.stringify(tags));
-        sessionStorage.setItem('languageCode', languageCode);
+        // Prepare values to pass as state
+        let stateToPass;
 
-        // Log the saved values
-        console.log('Saved to session storage:', {
-            duration,
-            jobName,
-            softSkillsPercentage: softSkills,
-            difficulty: difficultyLevel,
-            tags,
-            languageCode
+        if (isTraining) {
+            // For training mode, pass numQuestions instead of duration and set softSkillsPercentage to 0
+            stateToPass = {
+                duration: '0', // Not used in training mode
+                numQuestions: numQuestions.toString(),
+                jobName,
+                softSkillsPercentage: '0', // No soft skills in training mode
+                difficulty: difficultyLevel,
+                tags,
+                languageCode,
+                selectedInterviewer
+            };
+
+            // Log the values being passed
+            console.log('Passing as state (Training mode):', stateToPass);
+        } else {
+            // For interview mode, pass duration and softSkillsPercentage
+            stateToPass = {
+                duration: duration.toString(),
+                jobName,
+                softSkillsPercentage: softSkills,
+                difficulty: difficultyLevel,
+                tags,
+                languageCode,
+                selectedInterviewer
+            };
+
+            // Log the values being passed
+            console.log('Passing as state (Interview mode):', stateToPass);
+        }
+
+        // Navigate to the InterviewPage with all values in state
+        navigate('/interview/questions', {
+            state: stateToPass
         });
-
-        // Navigate to the InterviewPage
-        navigate('/interview/questions');
     };
 
     return (
@@ -314,52 +370,54 @@ const InterviewConfiguration: React.FC = () => {
                             />
                         </Box>
 
-                        {/* Soft Skills Chip Selection */}
-                        <Box>
-                            <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                <PsychologyIcon sx={{ mr: 1 }} />
-                                Soft Skills
-                            </Typography>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                                <Tooltip title="No soft skills questions">
-                                    <Chip
-                                        label="Purely Technical"
-                                        onClick={() => handleSoftSkillsChange("0")}
-                                        color={softSkills === "0" ? "primary" : "default"}
-                                        variant={softSkills === "0" ? "filled" : "outlined"}
-                                        sx={{ cursor: 'pointer' }}
-                                    />
-                                </Tooltip>
-                                <Tooltip title="Some soft skills questions">
-                                    <Chip
-                                        label="Mostly Technical"
-                                        onClick={() => handleSoftSkillsChange("25")}
-                                        color={softSkills === "25" ? "primary" : "default"}
-                                        variant={softSkills === "25" ? "filled" : "outlined"}
-                                        sx={{ cursor: 'pointer' }}
-                                    />
-                                </Tooltip>
-                                <Tooltip title="Mix of technical and soft skill questions">
-                                    <Chip
-                                        label="Mixed"
-                                        onClick={() => handleSoftSkillsChange("50")}
-                                        color={softSkills === "50" ? "primary" : "default"}
-                                        variant={softSkills === "50" ? "filled" : "outlined"}
-                                        sx={{ cursor: 'pointer' }}
-                                    />
-                                </Tooltip>
+                        {/* Soft Skills Chip Selection - Only show in interview mode */}
+                        {!isTraining && (
+                            <Box>
+                                <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <PsychologyIcon sx={{ mr: 1 }} />
+                                    Soft Skills
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                                    <Tooltip title="No soft skills questions">
+                                        <Chip
+                                            label="Purely Technical"
+                                            onClick={() => handleSoftSkillsChange("0")}
+                                            color={softSkills === "0" ? "primary" : "default"}
+                                            variant={softSkills === "0" ? "filled" : "outlined"}
+                                            sx={{ cursor: 'pointer' }}
+                                        />
+                                    </Tooltip>
+                                    <Tooltip title="Some soft skills questions">
+                                        <Chip
+                                            label="Mostly Technical"
+                                            onClick={() => handleSoftSkillsChange("25")}
+                                            color={softSkills === "25" ? "primary" : "default"}
+                                            variant={softSkills === "25" ? "filled" : "outlined"}
+                                            sx={{ cursor: 'pointer' }}
+                                        />
+                                    </Tooltip>
+                                    <Tooltip title="Mix of technical and soft skill questions">
+                                        <Chip
+                                            label="Mixed"
+                                            onClick={() => handleSoftSkillsChange("50")}
+                                            color={softSkills === "50" ? "primary" : "default"}
+                                            variant={softSkills === "50" ? "filled" : "outlined"}
+                                            sx={{ cursor: 'pointer' }}
+                                        />
+                                    </Tooltip>
+                                </Box>
+                                {isSubmitted && errors.softSkills && (
+                                    <FormHelperText error>{errors.softSkills}</FormHelperText>
+                                )}
                             </Box>
-                            {isSubmitted && errors.softSkills && (
-                                <FormHelperText error>{errors.softSkills}</FormHelperText>
-                            )}
-                        </Box>
+                        )}
 
-                        {/* Country Dropdown */}
+                        {/* Language Dropdown */}
                         <Box>
                             <Box sx={{ width: '50%' }}>
                                 <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
                                     <LanguageIcon sx={{ mr: 1 }} />
-                                    Country
+                                    Language
                                 </Typography>
                                 <FormControl fullWidth error={isSubmitted && !!errors.country}>
                                     <Select
@@ -368,11 +426,11 @@ const InterviewConfiguration: React.FC = () => {
                                         displayEmpty
                                         renderValue={(selected) => {
                                             if (!selected) {
-                                                return <em>Select a country</em>;
+                                                return <em>Select a language</em>;
                                             }
 
                                             const country = countries.find(c => c.id === selected);
-                                            if (!country) return <em>Select a country</em>;
+                                            if (!country) return <em>Select a language</em>;
 
                                             const countryCode = country.languageCode.split('-')[1] || country.languageCode;
 
@@ -390,11 +448,11 @@ const InterviewConfiguration: React.FC = () => {
                                     >
                                         {loading ? (
                                             <MenuItem value="" disabled>
-                                                Loading countries...
+                                                Loading languages...
                                             </MenuItem>
                                         ) : countries.length === 0 ? (
                                             <MenuItem value="" disabled>
-                                                No countries available
+                                                No languages available
                                             </MenuItem>
                                         ) : (
                                             countries.map((country) => {
@@ -420,23 +478,46 @@ const InterviewConfiguration: React.FC = () => {
                             </Box>
                         </Box>
 
-                        {/* Duration Slider */}
+                        {/* Duration Slider or Number of Questions Slider based on mode */}
                         <Box>
-                            <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                <AccessTimeIcon sx={{ mr: 1 }} />
-                                Duration: {duration} minutes
-                            </Typography>
-                            <Slider
-                                value={duration}
-                                onChange={handleDurationChange}
-                                step={10}
-                                marks
-                                min={10}
-                                max={90}
-                                valueLabelDisplay="auto"
-                            />
-                            {isSubmitted && errors.duration && (
-                                <FormHelperText error>{errors.duration}</FormHelperText>
+                            {isTraining ? (
+                                <>
+                                    <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <AccessTimeIcon sx={{ mr: 1 }} />
+                                        Number of Questions: {numQuestions}
+                                    </Typography>
+                                    <Slider
+                                        value={numQuestions}
+                                        onChange={handleNumQuestionsChange}
+                                        step={5}
+                                        marks
+                                        min={5}
+                                        max={30}
+                                        valueLabelDisplay="auto"
+                                    />
+                                    {isSubmitted && errors.numQuestions && (
+                                        <FormHelperText error>{errors.numQuestions}</FormHelperText>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <AccessTimeIcon sx={{ mr: 1 }} />
+                                        Duration: {duration} minutes
+                                    </Typography>
+                                    <Slider
+                                        value={duration}
+                                        onChange={handleDurationChange}
+                                        step={10}
+                                        marks
+                                        min={10}
+                                        max={90}
+                                        valueLabelDisplay="auto"
+                                    />
+                                    {isSubmitted && errors.duration && (
+                                        <FormHelperText error>{errors.duration}</FormHelperText>
+                                    )}
+                                </>
                             )}
                         </Box>
 
@@ -444,39 +525,83 @@ const InterviewConfiguration: React.FC = () => {
                         <Box>
                             <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
                                 <LocalOfferIcon sx={{ mr: 1 }} />
-                                Tags
+                                {isTraining ? 'Tag' : 'Tags'}
                             </Typography>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                                {tags.map((tag, index) => (
-                                    <Chip
-                                        key={index}
-                                        label={tag}
-                                        onDelete={() => handleRemoveTag(tag)}
-                                        deleteIcon={<CloseIcon />}
+                            {isTraining ? (
+                                <TextField
+                                    fullWidth
+                                    label="Enter a tag"
+                                    value={tags.length > 0 ? tags[0] : newTag}
+                                    onChange={(e) => {
+                                        if (stateTag) {
+                                            // Don't allow changes if stateTag exists
+                                            return;
+                                        }
+                                        if (tags.length > 0) {
+                                            setTags([e.target.value]);
+                                        } else {
+                                            setNewTag(e.target.value);
+                                        }
+                                        // Clear error when field is updated
+                                        if (errors.tags) {
+                                            setErrors(prev => ({ ...prev, tags: undefined }));
+                                        }
+                                    }}
+                                    onKeyPress={(e) => {
+                                        if (stateTag) {
+                                            // Don't allow changes if stateTag exists
+                                            return;
+                                        }
+                                        if (e.key === 'Enter' && newTag.trim()) {
+                                            e.preventDefault();
+                                            setTags([newTag.trim()]);
+                                            setNewTag('');
+                                            if (errors.tags) {
+                                                setErrors(prev => ({ ...prev, tags: undefined }));
+                                            }
+                                        }
+                                    }}
+                                    InputProps={{
+                                        readOnly: !!stateTag,
+                                    }}
+                                    error={isSubmitted && !!errors.tags}
+                                    helperText={isSubmitted && errors.tags ? errors.tags : stateTag ? "Tag is pre-filled and cannot be changed" : "Only one tag allowed in training mode"}
+                                />
+                            ) : (
+                                <>
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                                        {tags.map((tag, index) => (
+                                            <Chip
+                                                key={index}
+                                                label={tag}
+                                                onDelete={() => handleRemoveTag(tag)}
+                                                deleteIcon={<CloseIcon />}
+                                            />
+                                        ))}
+                                    </Box>
+                                    <TextField
+                                        fullWidth
+                                        label="Add a tag"
+                                        value={newTag}
+                                        onChange={handleTagInputChange}
+                                        onKeyPress={handleTagInputKeyPress}
+                                        error={isSubmitted && !!errors.tags}
+                                        InputProps={{
+                                            endAdornment: (
+                                                <Button
+                                                    variant="contained"
+                                                    size="small"
+                                                    onClick={handleAddTag}
+                                                    disabled={!newTag.trim()}
+                                                >
+                                                    Add
+                                                </Button>
+                                            ),
+                                        }}
                                     />
-                                ))}
-                            </Box>
-                            <TextField
-                                fullWidth
-                                label="Add a tag"
-                                value={newTag}
-                                onChange={handleTagInputChange}
-                                onKeyPress={handleTagInputKeyPress}
-                                error={isSubmitted && !!errors.tags}
-                                InputProps={{
-                                    endAdornment: (
-                                        <Button
-                                            variant="contained"
-                                            size="small"
-                                            onClick={handleAddTag}
-                                            disabled={!newTag.trim()}
-                                        >
-                                            Add
-                                        </Button>
-                                    ),
-                                }}
-                            />
-                            {isSubmitted && errors.tags && (
+                                </>
+                            )}
+                            {isSubmitted && errors.tags && !isTraining && (
                                 <FormHelperText error>{errors.tags}</FormHelperText>
                             )}
                         </Box>
