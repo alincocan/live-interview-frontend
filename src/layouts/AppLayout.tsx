@@ -1,4 +1,4 @@
-import { Box, Typography, Menu, MenuItem, Divider, Avatar, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip } from '@mui/material';
+import { Box, Typography, Menu, MenuItem, Divider, Avatar, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip, Container } from '@mui/material';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { AuthenticationService } from '../service/authenticationService';
 import { UserService, User } from '../service/userService';
@@ -179,29 +179,39 @@ const AppLayout: React.FC = () => {
                     position: 'fixed',
                     top: 0,
                     left: 0,
-                    width: '99%',
+                    width: '100%',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                    backgroundColor: 'transparent',
                     backdropFilter: 'blur(6px)',
-                    padding: '0.5rem 1rem',
+                    padding: '0.5rem 0',
                     zIndex: 100,
+                    maxWidth: 'lg',
+                    margin: '0 auto',
+                    right: 0,
                 }}
             >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography 
-                        variant="h6" 
+                <Box sx={{ display: 'flex', alignItems: 'center', pl: 3 }}>
+                    <Box 
                         sx={{ 
-                            color: '#fff',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center'
                         }}
                         onClick={() => navigate('/dashboard')}
                     >
-                        Live Interview AI
-                    </Typography>
+                        <img 
+                            src="/images/logo.png" 
+                            alt="Live Interview AI Logo" 
+                            style={{ 
+                                height: '40px',
+                                objectFit: 'contain'
+                            }} 
+                        />
+                    </Box>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', pr: 3 }}>
                     {/* Start Interview Menu Item */}
                     <Box 
                         onClick={() => navigate('/interview/choose')}
