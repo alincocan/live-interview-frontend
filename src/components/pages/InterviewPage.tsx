@@ -224,11 +224,11 @@ const InterviewPage: React.FC = () => {
             if (currentQuestionIndex > 0) {
                 // Check if the current question has a different tag from the previous question
                 const previousQuestion = questions[currentQuestionIndex - 1];
-                const currentTags = currentQuestion.tags || [];
-                const previousTags = previousQuestion.tags || [];
+                const currentTag = currentQuestion.tag || '';
+                const previousTag = previousQuestion.tag || '';
 
-                // Check if there's any overlap in tags
-                const hasTagChanged = !currentTags.some(tag => previousTags.includes(tag));
+                // Check if the tag has changed
+                const hasTagChanged = currentTag !== previousTag;
 
                 // Select the appropriate transition phrase
                 let transitionAudio: string | undefined;
@@ -466,7 +466,7 @@ const InterviewPage: React.FC = () => {
             jobName,
             softSkillsPercentage: parseInt(softSkillsPercentage, 10),
             difficulty,
-            tags: Array.isArray(tags) ? tags : JSON.parse(tags),
+            tags,
             languageCode
         };
 
@@ -557,7 +557,7 @@ const InterviewPage: React.FC = () => {
                 answer: userAnswer,
                 sessionId: sessionId || undefined,
                 jobName: jobName || undefined,
-                tags: currentQuestion.tags,
+                tag: currentQuestion.tag,
                 softSkill: currentQuestion.softSkill
             };
 
@@ -618,7 +618,7 @@ const InterviewPage: React.FC = () => {
                 answer: userAnswer,
                 sessionId: sessionId || undefined,
                 jobName: jobName || undefined,
-                tags: currentQuestion.tags,
+                tag: currentQuestion.tag,
                 softSkill: currentQuestion.softSkill
             };
 
@@ -747,6 +747,9 @@ const InterviewPage: React.FC = () => {
             // Create a copy of the data object to add the new properties
             const requestData: GenerateQuestionsRequest = { ...data };
 
+            // Use existing tags array if available, otherwise create one from tag
+            requestData.tags = data.tags;
+
             // Add language if available
             if (languageCode) {
                 requestData.language = languageCode;
@@ -757,7 +760,8 @@ const InterviewPage: React.FC = () => {
                 try {
                     const selectedInterviewer = JSON.parse(selectedInterviewerStr);
                     if (selectedInterviewer && selectedInterviewer.voiceId) {
-                        requestData.interviewerId = selectedInterviewer.voiceId;
+                        requestData.interviewerId = selectedInterviewer.interviewerId;
+                        requestData.voiceId = selectedInterviewer.voiceId;
                     }
                 } catch (error) {
                     console.error('Error parsing selectedInterviewer:', error);
@@ -936,9 +940,11 @@ const InterviewPage: React.FC = () => {
                                 Soft Skills: {interviewData.softSkillsPercentage}%
                             </Typography>
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                                {interviewData.tags.map((tag, index) => (
-                                    <Chip key={index} label={tag} variant="outlined" />
-                                ))}
+                                {interviewData.tags && interviewData.tags.length > 0 && (
+                                    interviewData.tags.map((tag, index) => (
+                                        <Chip key={`tag-${index}`} label={tag} variant="outlined" />
+                                    ))
+                                )}
                             </Box>
                         </Box>
                     )}
@@ -1043,13 +1049,12 @@ const InterviewPage: React.FC = () => {
                                                 color="text.secondary"
                                                 gutterBottom
                                             >
-                                                Tags:
+                                                Tag:
                                             </Typography>
                                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                                                {questions[currentQuestionIndex] && questions[currentQuestionIndex].tags &&
-                                                 questions[currentQuestionIndex].tags.map((tag, index) => (
-                                                    <Chip key={index} label={tag} variant="outlined" />
-                                                ))}
+                                                {questions[currentQuestionIndex] && questions[currentQuestionIndex].tag && (
+                                                    <Chip key="tag" label={questions[currentQuestionIndex].tag} variant="outlined" />
+                                                )}
                                             </Box>
                                         </Box>
 

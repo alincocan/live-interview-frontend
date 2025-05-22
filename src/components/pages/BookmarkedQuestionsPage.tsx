@@ -31,8 +31,8 @@ const BookmarkedQuestionsPage: React.FC = () => {
     // Track bookmarked questions
     const [bookmarkedQuestions, setBookmarkedQuestions] = useState<string[]>([]);
 
-    // Get current question's tags
-    const currentQuestionTags = questions[currentQuestionIndex]?.tags || [];
+    // Get current question's tag
+    const currentQuestionTag = questions[currentQuestionIndex]?.tag || '';
 
     useEffect(() => {
         const fetchBookmarkedQuestions = async () => {
@@ -132,12 +132,12 @@ const BookmarkedQuestionsPage: React.FC = () => {
 
     // Handle start training button click
     const handleStartTraining = () => {
-        // Get the first tag from the current question
-        if (currentQuestionTags.length > 0) {
+        // Use the tag from the current question
+        if (currentQuestionTag) {
             // Navigate to the training/choose route with the tag in state (not visible in URL)
-            navigate('/training/choose', { state: { tag: currentQuestionTags[0] } });
+            navigate('/training/choose', { state: { tag: currentQuestionTag } });
         } else {
-            console.error('No tags available for the current question');
+            console.error('No tag available for the current question');
         }
     };
 
@@ -165,17 +165,17 @@ const BookmarkedQuestionsPage: React.FC = () => {
 
                 {!isLoading && !errorMessage && questions.length > 0 && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        {/* Current question's tags */}
+                        {/* Current question's tag */}
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                            {currentQuestionTags.map((tag, index) => (
+                            {currentQuestionTag && (
                                 <Chip 
-                                    key={index} 
-                                    label={tag} 
+                                    key="tag" 
+                                    label={currentQuestionTag} 
                                     size="small" 
                                     color="primary" 
                                     variant="outlined"
                                 />
-                            ))}
+                            )}
                         </Box>
 
                         {/* Start training button */}
@@ -283,7 +283,7 @@ const BookmarkedQuestionsPage: React.FC = () => {
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={{ fontWeight: 'bold' }}>Question</TableCell>
-                                    <TableCell sx={{ fontWeight: 'bold' }}>Tags</TableCell>
+                                    <TableCell sx={{ fontWeight: 'bold' }}>Tag</TableCell>
                                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Score</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -326,15 +326,15 @@ const BookmarkedQuestionsPage: React.FC = () => {
                                             }
                                         }}>
                                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                                                {question.tags && question.tags.map((tag, tagIndex) => (
+                                                {question.tag && (
                                                     <Chip 
-                                                        key={tagIndex} 
-                                                        label={tag} 
+                                                        key="tag" 
+                                                        label={question.tag} 
                                                         size="small" 
                                                         color="primary" 
                                                         variant="outlined"
                                                     />
-                                                ))}
+                                                )}
                                             </Box>
                                         </TableCell>
                                         <TableCell align="right" sx={{
