@@ -5,7 +5,7 @@ export const darkGreyTheme = createTheme({
         mode: 'dark',
         background: {
             default: '#121212', // Dark grey background
-            paper: '#1e1e1e',   // Slightly lighter grey for paper components
+            paper: 'transparent',   // Slightly lighter grey for paper components
         },
         primary: {
             main: '#90caf9',    // Light blue primary color

@@ -27,10 +27,11 @@ function App() {
         <ThemeProvider theme={darkGreyTheme}>
             <Box
                 sx={{
-                    backgroundColor: (t) => t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
+                    //backgroundColor: (t) => t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
+                    background: 'linear-gradient(to bottom, #000000, #000846)',
                     backgroundSize: 'cover',
                     backgroundRepeat: 'no-repeat',
-                    height: '100vh',
+                    height: '100%',
                     width: '100%',
                     backgroundPosition: 'center',
                 }}>
