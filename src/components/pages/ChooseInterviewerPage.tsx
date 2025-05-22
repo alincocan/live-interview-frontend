@@ -10,14 +10,23 @@ import {
     Box,
 } from '@mui/material';
 import React, { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { InterviewService, Interviewer } from '../../service/InterviewService';
 
 const ChooseInterviewerPage: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Get the tag from location state if available
+    const tag = location.state?.tag;
+
+    // Determine if this is for interview or training based on the path
+    const isTraining = location.pathname.includes('/training/');
+    const sessionType = isTraining ? 'TRAINING' : 'INTERVIEW';
+    const pageTitle = isTraining ? 'Select Trainer' : 'Select Interviewer';
 
     useEffect(() => {
         const fetchInterviewers = async () => {
@@ -53,7 +62,7 @@ const ChooseInterviewerPage: React.FC = () => {
             }}
         >
             <Typography sx={{ mb: 5, color: 'text.secondary' }} variant="h4">
-                Select Interviewer
+                {pageTitle}
             </Typography>
 
             {loading ? (
@@ -92,9 +101,30 @@ const ChooseInterviewerPage: React.FC = () => {
                             }}
                         >
                             <CardActionArea onClick={() => {
-                                // Store the interviewer in session storage
-                                sessionStorage.setItem('selectedInterviewer', JSON.stringify(interviewer));
-                                navigate('/interview/upload');
+                                // Don't store sessionType in sessionStorage, pass it as state instead
+                                // No need to store in sessionStorage
+
+                                // If tag is available from location state and we're in training mode, we'll pass it as state
+                                // No need to store in sessionStorage
+
+                                // Navigate to the appropriate page based on session type
+                                if (isTraining) {
+                                    // Pass the tag, sessionType, and selectedInterviewer as state if available
+                                    navigate('/training/setup', { 
+                                        state: { 
+                                            tag: tag || undefined,
+                                            sessionType,
+                                            selectedInterviewer: interviewer 
+                                        } 
+                                    });
+                                } else {
+                                    navigate('/interview/upload', { 
+                                        state: { 
+                                            sessionType,
+                                            selectedInterviewer: interviewer 
+                                        } 
+                                    });
+                                }
                             }}>
                                 <CardMedia
                                     component="img"

@@ -224,7 +224,7 @@ const AppLayout: React.FC = () => {
 
                     {/* Trainings Menu Item */}
                     <Box 
-                        onClick={() => navigate('/trainings')}
+                        onClick={() => navigate('/training/choose')}
                         sx={{
                             mr: 2,
                             color: '#fff',
