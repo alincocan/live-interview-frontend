@@ -168,9 +168,9 @@ const BookmarkedQuestionsPage: React.FC = () => {
                         {/* Current question's tag */}
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                             {currentQuestionTag && (
-                                <Chip 
-                                    key="tag" 
-                                    label={currentQuestionTag} 
+                                <Chip
+                                    key="tag"
+                                    label={currentQuestionTag}
                                     size="small" 
                                     color="primary" 
                                     variant="outlined"
@@ -327,9 +327,9 @@ const BookmarkedQuestionsPage: React.FC = () => {
                                         }}>
                                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                                                 {question.tag && (
-                                                    <Chip 
-                                                        key="tag" 
-                                                        label={question.tag} 
+                                                    <Chip
+                                                        key="tag"
+                                                        label={question.tag}
                                                         size="small" 
                                                         color="primary" 
                                                         variant="outlined"

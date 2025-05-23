@@ -6,7 +6,6 @@ import {
     Card,
     CardContent,
     Chip,
-    Stack,
     TextField,
     Slider,
     Box,
@@ -17,6 +16,7 @@ import {
     Select,
     MenuItem,
     SelectChangeEvent,
+    Grid,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import TuneIcon from '@mui/icons-material/Tune';
@@ -303,7 +303,7 @@ const InterviewConfiguration: React.FC = () => {
 
     return (
         <Container
-            maxWidth="sm"
+            maxWidth="lg"
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -313,108 +313,114 @@ const InterviewConfiguration: React.FC = () => {
         >
             <Card sx={{ width: '100%', mb: 4 }}>
                 <CardContent>
-                    <Stack spacing={3}>
+                    <Grid container spacing={3}>
                         {/* Difficulty Level Chip Selection */}
-                        <Box>
-                            <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                <TuneIcon sx={{ mr: 1 }} />
-                                Difficulty Level
-                            </Typography>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                                <Chip
-                                    label="Junior"
-                                    onClick={() => handleDifficultyChange("JUNIOR")}
-                                    color={difficultyLevel === "JUNIOR" ? "success" : "success"}
-                                    variant={difficultyLevel === "JUNIOR" ? "filled" : "outlined"}
-                                    sx={{ cursor: 'pointer' }}
-                                />
-                                <Chip
-                                    label="Mid"
-                                    onClick={() => handleDifficultyChange("MIDLEVEL")}
-                                    color={difficultyLevel === "MIDLEVEL" ? "info" : "info"}
-                                    variant={difficultyLevel === "MIDLEVEL" ? "filled" : "outlined"}
-                                    sx={{ cursor: 'pointer' }}
-                                />
-                                <Chip
-                                    label="Senior"
-                                    onClick={() => handleDifficultyChange("SENIOR")}
-                                    color={difficultyLevel === "SENIOR" ? "warning" : "warning"}
-                                    variant={difficultyLevel === "SENIOR" ? "filled" : "outlined"}
-                                    sx={{ cursor: 'pointer' }}
-                                />
-                                <Chip
-                                    label="Expert"
-                                    onClick={() => handleDifficultyChange("EXPERT")}
-                                    color={difficultyLevel === "EXPERT" ? "error" : "error"}
-                                    variant={difficultyLevel === "EXPERT" ? "filled" : "outlined"}
-                                    sx={{ cursor: 'pointer' }}
-                                />
+                        <Grid item xs={12} md={6}>
+                            <Box>
+                                <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <TuneIcon sx={{ mr: 1 }} />
+                                    Difficulty Level
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                                    <Chip
+                                        label="Junior"
+                                        onClick={() => handleDifficultyChange("JUNIOR")}
+                                        color={difficultyLevel === "JUNIOR" ? "success" : "success"}
+                                        variant={difficultyLevel === "JUNIOR" ? "filled" : "outlined"}
+                                        sx={{ cursor: 'pointer' }}
+                                    />
+                                    <Chip
+                                        label="Mid"
+                                        onClick={() => handleDifficultyChange("MIDLEVEL")}
+                                        color={difficultyLevel === "MIDLEVEL" ? "info" : "info"}
+                                        variant={difficultyLevel === "MIDLEVEL" ? "filled" : "outlined"}
+                                        sx={{ cursor: 'pointer' }}
+                                    />
+                                    <Chip
+                                        label="Senior"
+                                        onClick={() => handleDifficultyChange("SENIOR")}
+                                        color={difficultyLevel === "SENIOR" ? "warning" : "warning"}
+                                        variant={difficultyLevel === "SENIOR" ? "filled" : "outlined"}
+                                        sx={{ cursor: 'pointer' }}
+                                    />
+                                    <Chip
+                                        label="Expert"
+                                        onClick={() => handleDifficultyChange("EXPERT")}
+                                        color={difficultyLevel === "EXPERT" ? "error" : "error"}
+                                        variant={difficultyLevel === "EXPERT" ? "filled" : "outlined"}
+                                        sx={{ cursor: 'pointer' }}
+                                    />
+                                </Box>
+                                {isSubmitted && errors.difficultyLevel && (
+                                    <FormHelperText error>{errors.difficultyLevel}</FormHelperText>
+                                )}
                             </Box>
-                            {isSubmitted && errors.difficultyLevel && (
-                                <FormHelperText error>{errors.difficultyLevel}</FormHelperText>
-                            )}
-                        </Box>
+                        </Grid>
 
                         {/* Job Name Input */}
-                        <Box>
-                            <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                <WorkIcon sx={{ mr: 1 }} />
-                                Job Title
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                value={jobName}
-                                onChange={handleJobNameChange}
-                                error={isSubmitted && !!errors.jobName}
-                                helperText={isSubmitted ? errors.jobName : ''}
-                            />
-                        </Box>
+                        <Grid item xs={12} md={6}>
+                            <Box>
+                                <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <WorkIcon sx={{ mr: 1 }} />
+                                    Job Title
+                                </Typography>
+                                <TextField
+                                    fullWidth
+                                    value={jobName}
+                                    onChange={handleJobNameChange}
+                                    error={isSubmitted && !!errors.jobName}
+                                    helperText={isSubmitted ? errors.jobName : ''}
+                                />
+                            </Box>
+                        </Grid>
 
                         {/* Soft Skills Chip Selection - Only show in interview mode */}
                         {!isTraining && (
-                            <Box>
-                                <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <PsychologyIcon sx={{ mr: 1 }} />
-                                    Soft Skills
-                                </Typography>
-                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                                    <Tooltip title="No soft skills questions">
-                                        <Chip
-                                            label="Purely Technical"
-                                            onClick={() => handleSoftSkillsChange("0")}
-                                            color={softSkills === "0" ? "primary" : "default"}
-                                            variant={softSkills === "0" ? "filled" : "outlined"}
-                                            sx={{ cursor: 'pointer' }}
-                                        />
-                                    </Tooltip>
-                                    <Tooltip title="Some soft skills questions">
-                                        <Chip
-                                            label="Mostly Technical"
-                                            onClick={() => handleSoftSkillsChange("25")}
-                                            color={softSkills === "25" ? "primary" : "default"}
-                                            variant={softSkills === "25" ? "filled" : "outlined"}
-                                            sx={{ cursor: 'pointer' }}
-                                        />
-                                    </Tooltip>
-                                    <Tooltip title="Mix of technical and soft skill questions">
-                                        <Chip
-                                            label="Mixed"
-                                            onClick={() => handleSoftSkillsChange("50")}
-                                            color={softSkills === "50" ? "primary" : "default"}
-                                            variant={softSkills === "50" ? "filled" : "outlined"}
-                                            sx={{ cursor: 'pointer' }}
-                                        />
-                                    </Tooltip>
+                            <Grid item xs={12} md={6}>
+                                <Box>
+                                    <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <PsychologyIcon sx={{ mr: 1 }} />
+                                        Soft Skills
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                                        <Tooltip title="No soft skills questions">
+                                            <Chip
+                                                label="Purely Technical"
+                                                onClick={() => handleSoftSkillsChange("0")}
+                                                color={softSkills === "0" ? "primary" : "default"}
+                                                variant={softSkills === "0" ? "filled" : "outlined"}
+                                                sx={{ cursor: 'pointer' }}
+                                            />
+                                        </Tooltip>
+                                        <Tooltip title="Some soft skills questions">
+                                            <Chip
+                                                label="Mostly Technical"
+                                                onClick={() => handleSoftSkillsChange("25")}
+                                                color={softSkills === "25" ? "primary" : "default"}
+                                                variant={softSkills === "25" ? "filled" : "outlined"}
+                                                sx={{ cursor: 'pointer' }}
+                                            />
+                                        </Tooltip>
+                                        <Tooltip title="Mix of technical and soft skill questions">
+                                            <Chip
+                                                label="Mixed"
+                                                onClick={() => handleSoftSkillsChange("50")}
+                                                color={softSkills === "50" ? "primary" : "default"}
+                                                variant={softSkills === "50" ? "filled" : "outlined"}
+                                                sx={{ cursor: 'pointer' }}
+                                            />
+                                        </Tooltip>
+                                    </Box>
+                                    {isSubmitted && errors.softSkills && (
+                                        <FormHelperText error>{errors.softSkills}</FormHelperText>
+                                    )}
                                 </Box>
-                                {isSubmitted && errors.softSkills && (
-                                    <FormHelperText error>{errors.softSkills}</FormHelperText>
-                                )}
-                            </Box>
+                            </Grid>
                         )}
 
                         {/* Language Dropdown */}
-                        <Box>
-                            <Box sx={{ width: '50%' }}>
+                        <Grid item xs={12} md={6}>
+                            <Box>
                                 <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
                                     <LanguageIcon sx={{ mr: 1 }} />
                                     Language
@@ -476,147 +482,153 @@ const InterviewConfiguration: React.FC = () => {
                                     )}
                                 </FormControl>
                             </Box>
-                        </Box>
+                        </Grid>
 
                         {/* Duration Slider or Number of Questions Slider based on mode */}
-                        <Box>
-                            {isTraining ? (
-                                <>
-                                    <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <AccessTimeIcon sx={{ mr: 1 }} />
-                                        Number of Questions: {numQuestions}
-                                    </Typography>
-                                    <Slider
-                                        value={numQuestions}
-                                        onChange={handleNumQuestionsChange}
-                                        step={5}
-                                        marks
-                                        min={5}
-                                        max={30}
-                                        valueLabelDisplay="auto"
-                                    />
-                                    {isSubmitted && errors.numQuestions && (
-                                        <FormHelperText error>{errors.numQuestions}</FormHelperText>
-                                    )}
-                                </>
-                            ) : (
-                                <>
-                                    <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <AccessTimeIcon sx={{ mr: 1 }} />
-                                        Duration: {duration} minutes
-                                    </Typography>
-                                    <Slider
-                                        value={duration}
-                                        onChange={handleDurationChange}
-                                        step={10}
-                                        marks
-                                        min={10}
-                                        max={90}
-                                        valueLabelDisplay="auto"
-                                    />
-                                    {isSubmitted && errors.duration && (
-                                        <FormHelperText error>{errors.duration}</FormHelperText>
-                                    )}
-                                </>
-                            )}
-                        </Box>
+                        <Grid item xs={12} md={6}>
+                            <Box>
+                                {isTraining ? (
+                                    <>
+                                        <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <AccessTimeIcon sx={{ mr: 1 }} />
+                                            Number of Questions: {numQuestions}
+                                        </Typography>
+                                        <Slider
+                                            value={numQuestions}
+                                            onChange={handleNumQuestionsChange}
+                                            step={5}
+                                            marks
+                                            min={5}
+                                            max={30}
+                                            valueLabelDisplay="auto"
+                                        />
+                                        {isSubmitted && errors.numQuestions && (
+                                            <FormHelperText error>{errors.numQuestions}</FormHelperText>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <AccessTimeIcon sx={{ mr: 1 }} />
+                                            Duration: {duration} minutes
+                                        </Typography>
+                                        <Slider
+                                            value={duration}
+                                            onChange={handleDurationChange}
+                                            step={10}
+                                            marks
+                                            min={10}
+                                            max={90}
+                                            valueLabelDisplay="auto"
+                                        />
+                                        {isSubmitted && errors.duration && (
+                                            <FormHelperText error>{errors.duration}</FormHelperText>
+                                        )}
+                                    </>
+                                )}
+                            </Box>
+                        </Grid>
 
                         {/* Tags Section */}
-                        <Box>
-                            <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                                <LocalOfferIcon sx={{ mr: 1 }} />
-                                {isTraining ? 'Tag' : 'Tags'}
-                            </Typography>
-                            {isTraining ? (
-                                <TextField
-                                    fullWidth
-                                    label="Enter a tag"
-                                    value={tags.length > 0 ? tags[0] : newTag}
-                                    onChange={(e) => {
-                                        if (stateTag) {
-                                            // Don't allow changes if stateTag exists
-                                            return;
-                                        }
-                                        if (tags.length > 0) {
-                                            setTags([e.target.value]);
-                                        } else {
-                                            setNewTag(e.target.value);
-                                        }
-                                        // Clear error when field is updated
-                                        if (errors.tags) {
-                                            setErrors(prev => ({ ...prev, tags: undefined }));
-                                        }
-                                    }}
-                                    onKeyPress={(e) => {
-                                        if (stateTag) {
-                                            // Don't allow changes if stateTag exists
-                                            return;
-                                        }
-                                        if (e.key === 'Enter' && newTag.trim()) {
-                                            e.preventDefault();
-                                            setTags([newTag.trim()]);
-                                            setNewTag('');
+                        <Grid item xs={12} md={6}>
+                            <Box>
+                                <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <LocalOfferIcon sx={{ mr: 1 }} />
+                                    {isTraining ? 'Tag' : 'Tags'}
+                                </Typography>
+                                {isTraining ? (
+                                    <TextField
+                                        fullWidth
+                                        label="Enter a tag"
+                                        value={tags.length > 0 ? tags[0] : newTag}
+                                        onChange={(e) => {
+                                            if (stateTag) {
+                                                // Don't allow changes if stateTag exists
+                                                return;
+                                            }
+                                            if (tags.length > 0) {
+                                                setTags([e.target.value]);
+                                            } else {
+                                                setNewTag(e.target.value);
+                                            }
+                                            // Clear error when field is updated
                                             if (errors.tags) {
                                                 setErrors(prev => ({ ...prev, tags: undefined }));
                                             }
-                                        }
-                                    }}
-                                    InputProps={{
-                                        readOnly: !!stateTag,
-                                    }}
-                                    error={isSubmitted && !!errors.tags}
-                                    helperText={isSubmitted && errors.tags ? errors.tags : stateTag ? "Tag is pre-filled and cannot be changed" : "Only one tag allowed in training mode"}
-                                />
-                            ) : (
-                                <>
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                                        {tags.map((tag, index) => (
-                                            <Chip
-                                                key={index}
-                                                label={tag}
-                                                onDelete={() => handleRemoveTag(tag)}
-                                                deleteIcon={<CloseIcon />}
-                                            />
-                                        ))}
-                                    </Box>
-                                    <TextField
-                                        fullWidth
-                                        label="Add a tag"
-                                        value={newTag}
-                                        onChange={handleTagInputChange}
-                                        onKeyPress={handleTagInputKeyPress}
-                                        error={isSubmitted && !!errors.tags}
-                                        InputProps={{
-                                            endAdornment: (
-                                                <Button
-                                                    variant="contained"
-                                                    size="small"
-                                                    onClick={handleAddTag}
-                                                    disabled={!newTag.trim()}
-                                                >
-                                                    Add
-                                                </Button>
-                                            ),
                                         }}
+                                        onKeyPress={(e) => {
+                                            if (stateTag) {
+                                                // Don't allow changes if stateTag exists
+                                                return;
+                                            }
+                                            if (e.key === 'Enter' && newTag.trim()) {
+                                                e.preventDefault();
+                                                setTags([newTag.trim()]);
+                                                setNewTag('');
+                                                if (errors.tags) {
+                                                    setErrors(prev => ({ ...prev, tags: undefined }));
+                                                }
+                                            }
+                                        }}
+                                        InputProps={{
+                                            readOnly: !!stateTag,
+                                        }}
+                                        error={isSubmitted && !!errors.tags}
+                                        helperText={isSubmitted && errors.tags ? errors.tags : stateTag ? "Tag is pre-filled and cannot be changed" : "Only one tag allowed in training mode"}
                                     />
-                                </>
-                            )}
-                            {isSubmitted && errors.tags && !isTraining && (
-                                <FormHelperText error>{errors.tags}</FormHelperText>
-                            )}
-                        </Box>
+                                ) : (
+                                    <>
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                                            {tags.map((tag, index) => (
+                                                <Chip
+                                                    key={index}
+                                                    label={tag}
+                                                    onDelete={() => handleRemoveTag(tag)}
+                                                    deleteIcon={<CloseIcon />}
+                                                />
+                                            ))}
+                                        </Box>
+                                        <TextField
+                                            fullWidth
+                                            label="Add a tag"
+                                            value={newTag}
+                                            onChange={handleTagInputChange}
+                                            onKeyPress={handleTagInputKeyPress}
+                                            error={isSubmitted && !!errors.tags}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <Button
+                                                        variant="contained"
+                                                        size="small"
+                                                        onClick={handleAddTag}
+                                                        disabled={!newTag.trim()}
+                                                    >
+                                                        Add
+                                                    </Button>
+                                                ),
+                                            }}
+                                        />
+                                    </>
+                                )}
+                                {isSubmitted && errors.tags && !isTraining && (
+                                    <FormHelperText error>{errors.tags}</FormHelperText>
+                                )}
+                            </Box>
+                        </Grid>
 
                         {/* Submit Button */}
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleSubmit}
-                            >
-                                Submit
-                            </Button>
-                        </Box>
-                    </Stack>
+                        <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleSubmit}
+                                >
+                                    Submit
+                                </Button>
+                            </Box>
+                        </Grid>
+                    </Grid>
                 </CardContent>
             </Card>
         </Container>

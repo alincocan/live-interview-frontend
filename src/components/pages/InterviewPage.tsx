@@ -755,7 +755,7 @@ const InterviewPage: React.FC = () => {
                 requestData.language = languageCode;
             }
 
-            // Add interviewerId if available
+            // Add interviewerId and voiceId if available
             if (selectedInterviewerStr) {
                 try {
                     const selectedInterviewer = JSON.parse(selectedInterviewerStr);
@@ -880,12 +880,8 @@ const InterviewPage: React.FC = () => {
                 </Paper>
             )}
 
-            {!interviewCompleted && (
+            {!interviewCompleted && interviewStarted && (
                 <>
-                    <Typography variant="h4" component="h1" gutterBottom align="center" color="text.primary">
-                        Interview Questions
-                    </Typography>
-
                     {interviewData.jobName && (
                         <Typography variant="h6" gutterBottom align="center" color="text.secondary" sx={{ mb: 3 }}>
                             Job: {interviewData.jobName}
@@ -931,52 +927,72 @@ const InterviewPage: React.FC = () => {
                 </Alert>
             ) : (
                 <>
-                    {!interviewCompleted && (
-                        <Box sx={{ mb: 3 }}>
-                            <Typography variant="body1" gutterBottom>
-                                Duration: {interviewData.duration} minutes
-                            </Typography>
-                            <Typography variant="body1" gutterBottom>
-                                Soft Skills: {interviewData.softSkillsPercentage}%
-                            </Typography>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                                {interviewData.tags && interviewData.tags.length > 0 && (
-                                    interviewData.tags.map((tag, index) => (
-                                        <Chip key={`tag-${index}`} label={tag} variant="outlined" />
-                                    ))
-                                )}
-                            </Box>
+                    {!interviewCompleted && !interviewStarted && (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                            <Card sx={{ mb: 4, borderRadius: 2, boxShadow: 3, width: '100%', minWidth: { xs: '380px', sm: '600px', md: '800px' }, maxWidth: { xs: '95%', sm: '90%', md: '1000px' } }}>
+                                <CardContent sx={{ p: 3 }}>
+                                    <Typography variant="h5" component="h2" gutterBottom color="text.primary" sx={{ fontWeight: 'medium', mb: 2, textAlign: 'center' }}>
+                                        <Box component="span" sx={{ fontWeight: 'bold' }}>Job name:</Box> {interviewData.jobName}
+                                    </Typography>
+                                    <Typography variant="body1" gutterBottom color="text.primary" sx={{ textAlign: 'center' }}>
+                                        Duration: {interviewData.duration} minutes
+                                    </Typography>
+                                    <Typography variant="body1" gutterBottom color="text.primary" sx={{ textAlign: 'center' }}>
+                                        Soft Skills: {interviewData.softSkillsPercentage}%
+                                    </Typography>
+                                    <Typography variant="body1" gutterBottom color="text.primary" sx={{ textAlign: 'center' }}>
+                                        Difficulty: {interviewData.difficulty}
+                                    </Typography>
+                                    {interviewData.languageCode && (
+                                        <Typography variant="body1" gutterBottom color="text.primary" sx={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            Language: {interviewData.languageCode === 'en-US' ? '🇺🇸' :
+                                                      interviewData.languageCode === 'en-GB' ? '🇬🇧' :
+                                                      interviewData.languageCode === 'fr-FR' ? '🇫🇷' :
+                                                      interviewData.languageCode === 'de-DE' ? '🇩🇪' :
+                                                      interviewData.languageCode === 'es-ES' ? '🇪🇸' :
+                                                      interviewData.languageCode === 'it-IT' ? '🇮🇹' :
+                                                      interviewData.languageCode === 'ja-JP' ? '🇯🇵' :
+                                                      interviewData.languageCode === 'ko-KR' ? '🇰🇷' :
+                                                      interviewData.languageCode === 'pt-BR' ? '🇧🇷' :
+                                                      interviewData.languageCode === 'zh-CN' ? '🇨🇳' :
+                                                      interviewData.languageCode} {interviewData.languageCode}
+                                        </Typography>
+                                    )}
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2, justifyContent: 'center' }}>
+                                        {interviewData.tags && interviewData.tags.length > 0 && (
+                                            <>
+                                                <Typography variant="body1" color="text.primary" sx={{ mr: 1 }}>
+                                                    Topics:
+                                                </Typography>
+                                                {interviewData.tags.map((tag, index) => (
+                                                    <Chip key={`tag-${index}`} label={tag} variant="outlined" />
+                                                ))}
+                                            </>
+                                        )}
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            size="large"
+                                            onClick={startInterview}
+                                            sx={{
+                                                px: 4,
+                                                py: 1.5,
+                                                fontSize: '1.2rem',
+                                                borderRadius: '8px'
+                                            }}
+                                        >
+                                            Start Interview
+                                        </Button>
+                                    </Box>
+                                </CardContent>
+                            </Card>
                         </Box>
                     )}
 
                     {!interviewStarted ? (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                            <Box 
-                                component="button"
-                                onClick={startInterview}
-                                sx={{
-                                    backgroundColor: 'primary.main',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    padding: '16px 32px',
-                                    fontSize: '1.5rem',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer',
-                                    boxShadow: 3,
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                        backgroundColor: 'primary.dark',
-                                        transform: 'scale(1.05)',
-                                    },
-                                    '&:active': {
-                                        transform: 'scale(0.98)',
-                                    },
-                                }}
-                            >
-                                Start
-                            </Box>
-                        </Box>
+                        null
                     ) : interviewCompleted ? (
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, my: 4 }}>
                             <Typography variant="h4" align="center" color="primary" sx={{ fontWeight: 'bold' }}>
