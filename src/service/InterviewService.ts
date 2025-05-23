@@ -79,6 +79,7 @@ export interface BookmarkedQuestionsResponse {
 }
 
 export interface Interviewer {
+  id: string;
   name: string;
   voiceId: string;
   glbPath: string;

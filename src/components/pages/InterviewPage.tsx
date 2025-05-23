@@ -760,7 +760,7 @@ const InterviewPage: React.FC = () => {
                 try {
                     const selectedInterviewer = JSON.parse(selectedInterviewerStr);
                     if (selectedInterviewer && selectedInterviewer.voiceId) {
-                        requestData.interviewerId = selectedInterviewer.interviewerId;
+                        requestData.interviewerId = selectedInterviewer.id;
                         requestData.voiceId = selectedInterviewer.voiceId;
                     }
                 } catch (error) {
@@ -879,17 +879,6 @@ const InterviewPage: React.FC = () => {
                     </Typography>
                 </Paper>
             )}
-
-            {!interviewCompleted && interviewStarted && (
-                <>
-                    {interviewData.jobName && (
-                        <Typography variant="h6" gutterBottom align="center" color="text.secondary" sx={{ mb: 3 }}>
-                            Job: {interviewData.jobName}
-                        </Typography>
-                    )}
-                </>
-            )}
-
             {isGeneratingInterview ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 4 }}>
                     <Typography variant="h5" color="primary" sx={{ mb: 3, fontWeight: 500 }}>
@@ -922,9 +911,19 @@ const InterviewPage: React.FC = () => {
                     <CircularProgress />
                 </Box>
             ) : errorMessage ? (
-                <Alert severity="error" sx={{ my: 2 }}>
-                    {errorMessage}
-                </Alert>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 4 }}>
+                    <Alert severity="error" sx={{ my: 2, width: '100%' }}>
+                        We are having issues starting the interview. Please try again!
+                    </Alert>
+                    <Button 
+                        variant="contained" 
+                        color="primary" 
+                        onClick={startInterview} 
+                        sx={{ mt: 2 }}
+                    >
+                        Try Again
+                    </Button>
+                </Box>
             ) : (
                 <>
                     {!interviewCompleted && !interviewStarted && (
@@ -991,9 +990,7 @@ const InterviewPage: React.FC = () => {
                         </Box>
                     )}
 
-                    {!interviewStarted ? (
-                        null
-                    ) : interviewCompleted ? (
+                    {!interviewStarted ? null : interviewCompleted ? (
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, my: 4 }}>
                             <Typography variant="h4" align="center" color="primary" sx={{ fontWeight: 'bold' }}>
                                 Congratulations. You have finished the interview! 🎉
