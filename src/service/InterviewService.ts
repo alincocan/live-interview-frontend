@@ -5,7 +5,7 @@ export interface InterviewQuestion {
   id: string;
   question: string;
   softSkill: boolean;
-  tags: string[];
+  tag: string;
   answer?: string;
   score?: number;
   correctAnswer?: string;
@@ -25,9 +25,10 @@ export interface GenerateQuestionsRequest {
   duration: number;
   jobName: string;
   softSkillsPercentage: number;
-  tags: string[];
+  tags?: string[];
   language?: string;
   interviewerId?: string;
+  voiceId?: string;
 }
 
 export interface ValidateAnswerRequest {
@@ -36,7 +37,7 @@ export interface ValidateAnswerRequest {
   answer: string;
   sessionId?: string;
   jobName?: string;
-  tags?: string[];
+  tag?: string;
   softSkill?: boolean;
 }
 
