@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useState } from 'react';
-import { AuthenticationService } from '../../service/authenticationService';
+import { AuthenticationService } from '../service/authenticationService.ts';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 type Inputs = {

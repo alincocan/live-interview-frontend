@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { AuthenticationService } from '../../service/authenticationService';
+import { AuthenticationService } from '../service/authenticationService.ts';
 import { Box, CircularProgress, Typography, Alert } from '@mui/material';
 
 const OAuth2RedirectPage: React.FC = () => {

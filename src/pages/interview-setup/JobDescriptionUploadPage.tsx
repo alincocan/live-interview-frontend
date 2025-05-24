@@ -15,7 +15,7 @@ import {
     IconButton,
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { JobDescriptionParserService } from '../../../service/jobDescriptionParserService.ts';
+import { JobDescriptionParserService } from '../../service/jobDescriptionParserService.ts';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import SkipNextIcon from '@mui/icons-material/SkipNext';

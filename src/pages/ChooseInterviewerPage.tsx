@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
-import { InterviewService, Interviewer } from '../../service/InterviewService';
+import { InterviewService, Interviewer } from '../service/InterviewService.ts';
 
 const ChooseInterviewerPage: React.FC = () => {
     const navigate = useNavigate();

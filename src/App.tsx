@@ -1,26 +1,26 @@
 import './App.css';
-import LoginPage from "./components/pages/LoginPage";
+import LoginPage from "./pages/LoginPage.tsx";
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import SignUpPage from "./components/pages/SignUpPage";
-import ForgotPasswordPage from "./components/pages/ForgotPasswordPage";
-import ResetPasswordPage from "./components/pages/ResetPasswordPage";
-import ConfirmUserPage from "./components/pages/ConfirmUserPage";
-import OAuth2RedirectPage from "./components/pages/OAuth2RedirectPage";
-import ProfileUpdatePage from "./components/pages/ProfileUpdatePage";
-import DashboardHome from "./components/pages/DeshboardHome";
-import ProfilePage from "./components/pages/ProfilePage";
-import ChooseInterviewerPage from "./components/pages/ChooseInterviewerPage";
+import SignUpPage from "./pages/SignUpPage.tsx";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.tsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
+import ConfirmUserPage from "./pages/ConfirmUserPage.tsx";
+import OAuth2RedirectPage from "./pages/OAuth2RedirectPage.tsx";
+import ProfileUpdatePage from "./pages/ProfileUpdatePage.tsx";
+import DashboardHome from "./pages/DeshboardHome.tsx";
+import ProfilePage from "./pages/ProfilePage.tsx";
+import ChooseInterviewerPage from "./pages/ChooseInterviewerPage.tsx";
 import { darkGreyTheme } from "./config/theme";
 import { Box, ThemeProvider } from "@mui/material";
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './layouts/AppLayout';
-import PageNotFound from './components/pages/PageNotFound';
-import JobDescriptionUploadPage from './components/pages/interview-setup/JobDescriptionUploadPage';
-import InterviewConfigurationPage from './components/pages/interview-setup/InterviewConfigurationPage';
-import InterviewPage from './components/pages/InterviewPage';
-import InterviewResultPage from './components/pages/InterviewResultPage';
-import InterviewListPage from './components/pages/InterviewListPage';
-import BookmarkedQuestionsPage from './components/pages/BookmarkedQuestionsPage';
+import PageNotFound from './pages/PageNotFound.tsx';
+import JobDescriptionUploadPage from './pages/interview-setup/JobDescriptionUploadPage';
+import InterviewConfigurationPage from './pages/interview-setup/InterviewConfigurationPage';
+import InterviewPage from './pages/InterviewPage.tsx';
+import InterviewResultPage from './pages/InterviewResultPage.tsx';
+import InterviewListPage from './pages/InterviewListPage.tsx';
+import BookmarkedQuestionsPage from './pages/BookmarkedQuestionsPage.tsx';
 
 function App() {
 

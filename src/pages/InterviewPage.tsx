@@ -24,7 +24,7 @@ import {
     GetAudioResponse,
     TransitionPhrase,
     GenerateQuestionsRequest
-} from '../../service/InterviewService';
+} from '../service/InterviewService.ts';
 
 
 const InterviewPage: React.FC = () => {

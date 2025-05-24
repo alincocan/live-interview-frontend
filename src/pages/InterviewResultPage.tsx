@@ -12,8 +12,8 @@ import {
 } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { InterviewService, InterviewDetailsResponse } from '../../service/InterviewService';
-import QuestionDisplay from '../QuestionDisplay';
+import { InterviewService, InterviewDetailsResponse } from '../service/InterviewService.ts';
+import QuestionDisplay from '../components/QuestionDisplay.tsx';
 
 const InterviewResultPage: React.FC = () => {
     const { interviewId: sessionId } = useParams<{ interviewId: string }>();

@@ -17,9 +17,9 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useState, useEffect, useRef } from 'react';
-import { AuthenticationService } from '../../service/authenticationService';
-import {SignUpData} from "../../bo/SignUpData.ts";
-import GoogleLogo from '../../components/icons/GoogleLogo';
+import { AuthenticationService } from '../service/authenticationService.ts';
+import {SignUpData} from "../bo/SignUpData.ts";
+import GoogleLogo from '../components/icons/GoogleLogo.tsx';
 
 const SignUpPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);

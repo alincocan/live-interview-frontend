@@ -14,7 +14,7 @@ import {
     TextField, 
     CircularProgress
 } from '@mui/material';
-import { UserService, User } from '../../service/userService';
+import { UserService, User } from '../service/userService.ts';
 import { format } from 'date-fns';
 
 const ProfilePage: React.FC = () => {

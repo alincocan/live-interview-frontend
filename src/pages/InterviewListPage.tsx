@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { format } from 'date-fns';
-import { InterviewService, InterviewListItem } from '../../service/InterviewService';
+import { InterviewService, InterviewListItem } from '../service/InterviewService.ts';
 
 const InterviewListPage: React.FC = () => {
     const navigate = useNavigate();

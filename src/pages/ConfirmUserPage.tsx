@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { AuthenticationService } from '../../service/authenticationService';
+import { AuthenticationService } from '../service/authenticationService.ts';
 
 const ConfirmUserPage: React.FC = () => {
     const [searchParams] = useSearchParams();

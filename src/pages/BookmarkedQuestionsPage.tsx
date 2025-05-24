@@ -16,8 +16,8 @@ import {
     Button
 } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
-import { InterviewService, InterviewQuestion } from '../../service/InterviewService';
-import QuestionDisplay from '../QuestionDisplay';
+import { InterviewService, InterviewQuestion } from '../service/InterviewService.ts';
+import QuestionDisplay from '../components/QuestionDisplay.tsx';
 
 const BookmarkedQuestionsPage: React.FC = () => {
     const navigate = useNavigate();

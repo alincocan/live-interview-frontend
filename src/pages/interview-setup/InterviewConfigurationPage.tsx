@@ -25,7 +25,7 @@ import PsychologyIcon from '@mui/icons-material/Psychology';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import LanguageIcon from '@mui/icons-material/Language';
-import { InterviewService, Country } from '../../../service/InterviewService';
+import { InterviewService, Country } from '../../service/InterviewService.ts';
 
 const InterviewConfiguration: React.FC = () => {
     const navigate = useNavigate();

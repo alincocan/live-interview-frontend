@@ -15,9 +15,9 @@ import {
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { AuthenticationService } from '../../service/authenticationService';
-import {LoginCredentials} from "../../bo/LoginCredentials.ts";
-import GoogleLogo from '../../components/icons/GoogleLogo';
+import { AuthenticationService } from '../service/authenticationService.ts';
+import {LoginCredentials} from "../bo/LoginCredentials.ts";
+import GoogleLogo from '../components/icons/GoogleLogo.tsx';
 
 const boxStyles = {
     my: 8,
