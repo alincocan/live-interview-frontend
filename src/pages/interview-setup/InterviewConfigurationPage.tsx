@@ -295,8 +295,8 @@ const InterviewConfiguration: React.FC = () => {
             console.log('Passing as state (Interview mode):', stateToPass);
         }
 
-        // Navigate to the InterviewPage with all values in state
-        navigate('/interview/questions', {
+        // Navigate to the InterviewPreview page with all values in state
+        navigate('/interview/preview', {
             state: stateToPass
         });
     };

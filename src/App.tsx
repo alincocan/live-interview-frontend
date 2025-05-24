@@ -17,10 +17,13 @@ import AppLayout from './layouts/AppLayout';
 import PageNotFound from './pages/PageNotFound.tsx';
 import JobDescriptionUploadPage from './pages/interview-setup/JobDescriptionUploadPage';
 import InterviewConfigurationPage from './pages/interview-setup/InterviewConfigurationPage';
+import InterviewPageOld from './pages/InterviewPageOld.tsx';
 import InterviewPage from './pages/InterviewPage.tsx';
+import InterviewPreview from './pages/InterviewPreview.tsx';
 import InterviewResultPage from './pages/InterviewResultPage.tsx';
 import InterviewListPage from './pages/InterviewListPage.tsx';
 import BookmarkedQuestionsPage from './pages/BookmarkedQuestionsPage.tsx';
+import FinishInterviewPage from './pages/FinishInterviewPage.tsx';
 
 function App() {
 
@@ -59,7 +62,10 @@ function App() {
                             <Route path="interview/upload" element={<JobDescriptionUploadPage />} />
                             <Route path="interview/setup" element={<InterviewConfigurationPage />} />
                             <Route path="training/setup" element={<InterviewConfigurationPage />} />
-                            <Route path="interview/questions" element={<InterviewPage />} />
+                            <Route path="interview/preview" element={<InterviewPreview />} />
+                            <Route path="interview/questions" element={<InterviewPageOld />} />
+                            <Route path="interview/session" element={<InterviewPage />} />
+                            <Route path="interview/finish" element={<FinishInterviewPage />} />
                             <Route path="interview/list" element={<InterviewListPage />} />
                             <Route path="interview/:interviewId" element={<InterviewResultPage />} />
                             <Route path="questions/bookmarked" element={<BookmarkedQuestionsPage />} />
