@@ -93,17 +93,13 @@ const InterviewPreview: React.FC = () => {
                 voiceId: selectedInterviewer.voiceId
             };
 
-            // Execute all 4 API calls in parallel
+            // Execute 2 API calls in parallel
             const [
                 questionsResponse,
-                welcomeAudioResponse,
-                sectionChangerResponse,
-                transitionResponse
+                audioPhrasesResponse
             ] = await Promise.all([
                 interviewService.generateQuestions(requestData),
-                interviewService.getAudio(languageCode, voiceId),
-                interviewService.getSectionChangerPhrases(languageCode, voiceId),
-                interviewService.getTransitionPhrases(languageCode, voiceId)
+                interviewService.getAudioPhrases(languageCode, voiceId)
             ]);
 
             // Process questions response
@@ -116,21 +112,9 @@ const InterviewPreview: React.FC = () => {
                 throw new Error("We couldn't load the interview. Please try again!");
             }
 
-            // Process welcome audio response
-            if (!welcomeAudioResponse.success || !welcomeAudioResponse.audio) {
-                console.error('Failed to fetch welcome audio:', welcomeAudioResponse.message);
-                setHasPartialFailure(true);
-            }
-
-            // Process section changer phrases response
-            if (!sectionChangerResponse.success || !sectionChangerResponse.transitionPhrases) {
-                console.error('Failed to fetch section changer phrases:', sectionChangerResponse.message);
-                setHasPartialFailure(true);
-            }
-
-            // Process transition phrases response
-            if (!transitionResponse.success || !transitionResponse.transitionPhrases) {
-                console.error('Failed to fetch transition phrases:', transitionResponse.message);
+            // Process audio phrases response
+            if (!audioPhrasesResponse.success) {
+                console.error('Failed to fetch audio phrases:', audioPhrasesResponse.message);
                 setHasPartialFailure(true);
             }
 
@@ -144,9 +128,11 @@ const InterviewPreview: React.FC = () => {
                     state: {
                         ...location.state,
                         questions: questionsResponse.questions,
-                        welcomeAudio: welcomeAudioResponse,
-                        sectionChangerPhrases: sectionChangerResponse.transitionPhrases,
-                        transitionPhrases: transitionResponse.transitionPhrases
+                        welcomeAudio: audioPhrasesResponse.introPhrase,
+                        sectionChangerPhrases: audioPhrasesResponse.sectionChangerPhrases,
+                        transitionPhrases: audioPhrasesResponse.transitionPhrases,
+                        outroPhrase: audioPhrasesResponse.outroPhrase,
+                        repeatQuestionPhrases: audioPhrasesResponse.repeatQuestionPhrases
                     }
                 });
             }

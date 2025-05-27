@@ -109,8 +109,21 @@ export interface TransitionPhrase {
   text: string;
 }
 
+// Alias TransitionPhrase as AudioResponse for clarity in the new interface
+export type AudioResponse = TransitionPhrase;
+
 export interface AudioApiResponse {
   transitionPhrases?: TransitionPhrase[];
+}
+
+export interface AudioPhrasesResponse {
+  transitionPhrases: AudioResponse[];
+  sectionChangerPhrases: AudioResponse[];
+  introPhrase: AudioResponse;
+  outroPhrase: AudioResponse;
+  repeatQuestionPhrases: AudioResponse[];
+  success: boolean;
+  message?: string;
 }
 
 export interface GetAudioResponse {
@@ -499,193 +512,70 @@ export class InterviewService {
     }
   }
 
-  public async getAudio(language: string, voiceId: string): Promise<GetAudioResponse> {
+  public async getAudioPhrases(language: string, voiceId: string): Promise<AudioPhrasesResponse> {
     try {
       const token = this.getAuthToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const response = await axios.get<AudioApiResponse>(
-        `${this.baseUrl}/interview-intro-phrases?language=${language}&voiceId=${voiceId}`,
+      const response = await axios.get<AudioPhrasesResponse>(
+        `${this.baseUrl}/interview/audio-phrases?language=${language}&voiceId=${voiceId}`,
         { headers }
       );
 
-      // Check if response contains transitionPhrases and extract the first element
-      if (response.data && Array.isArray(response.data.transitionPhrases) && response.data.transitionPhrases.length > 0) {
+      if (response.data) {
         return {
-          audio: response.data.transitionPhrases[0].audio,
-          success: true
-        };
-      } else if (response.data && Array.isArray(response.data) && response.data.length > 0 &&
-               response.data[0].transitionPhrases && Array.isArray(response.data[0].transitionPhrases) &&
-               response.data[0].transitionPhrases.length > 0) {
-        // Handle case where response is an array of objects with transitionPhrases
-        return {
-          audio: response.data[0].transitionPhrases[0].audio,
-          success: true
-        };
-      } else if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-        // Fallback to previous implementation
-        return {
-          ...response.data[0],
+          ...response.data,
           success: true
         };
       }
 
       // Default case: no valid audio data found
       return {
+        transitionPhrases: [],
+        sectionChangerPhrases: [],
+        introPhrase: { audio: '', text: '' },
+        outroPhrase: { audio: '', text: '' },
+        repeatQuestionPhrases: [],
         success: false,
-        message: 'No valid audio data found in the response.'
+        message: 'No valid audio phrases found in the response.'
       };
     } catch (error: unknown) {
-      console.error('Get audio error:', error);
+      console.error('Get audio phrases error:', error);
 
       // Handle different types of errors
       if (axios.isAxiosError(error) && error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
         return {
+          transitionPhrases: [],
+          sectionChangerPhrases: [],
+          introPhrase: { audio: '', text: '' },
+          outroPhrase: { audio: '', text: '' },
+          repeatQuestionPhrases: [],
           success: false,
-          message: error.response.data?.message || 'Failed to fetch audio. Please try again.'
+          message: error.response.data?.message || 'Failed to fetch audio phrases. Please try again.'
         };
       } else if (axios.isAxiosError(error) && error.request) {
         // The request was made but no response was received
         return {
+          transitionPhrases: [],
+          sectionChangerPhrases: [],
+          introPhrase: { audio: '', text: '' },
+          outroPhrase: { audio: '', text: '' },
+          repeatQuestionPhrases: [],
           success: false,
           message: 'No response from server. Please try again later.'
         };
       } else {
         // Something happened in setting up the request that triggered an Error
         return {
+          transitionPhrases: [],
+          sectionChangerPhrases: [],
+          introPhrase: { audio: '', text: '' },
+          outroPhrase: { audio: '', text: '' },
+          repeatQuestionPhrases: [],
           success: false,
-          message: 'An error occurred while fetching audio. Please try again.'
-        };
-      }
-    }
-  }
-
-  public async getSectionChangerPhrases(language: string, voiceId: string): Promise<GetAudioResponse> {
-    try {
-      const token = this.getAuthToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await axios.get<AudioApiResponse>(
-        `${this.baseUrl}/section-changer-phrases?language=${language}&voiceId=${voiceId}`,
-        { headers }
-      );
-
-      // Check if response contains transitionPhrases and extract all elements
-      if (response.data && Array.isArray(response.data.transitionPhrases) && response.data.transitionPhrases.length > 0) {
-        return {
-          transitionPhrases: response.data.transitionPhrases,
-          success: true
-        };
-      } else if (response.data && Array.isArray(response.data) && response.data.length > 0 &&
-               response.data[0].transitionPhrases && Array.isArray(response.data[0].transitionPhrases) &&
-               response.data[0].transitionPhrases.length > 0) {
-        // Handle case where response is an array of objects with transitionPhrases
-        return {
-          transitionPhrases: response.data[0].transitionPhrases,
-          success: true
-        };
-      } else if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-        // Fallback to previous implementation
-        return {
-          ...response.data[0],
-          success: true
-        };
-      }
-
-      // Default case: no valid audio data found
-      return {
-        success: false,
-        message: 'No valid section changer phrases found in the response.'
-      };
-    } catch (error: unknown) {
-      console.error('Get section changer phrases error:', error);
-
-      // Handle different types of errors
-      if (axios.isAxiosError(error) && error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        return {
-          success: false,
-          message: error.response.data?.message || 'Failed to fetch section changer phrases. Please try again.'
-        };
-      } else if (axios.isAxiosError(error) && error.request) {
-        // The request was made but no response was received
-        return {
-          success: false,
-          message: 'No response from server. Please try again later.'
-        };
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        return {
-          success: false,
-          message: 'An error occurred while fetching section changer phrases. Please try again.'
-        };
-      }
-    }
-  }
-
-  public async getTransitionPhrases(language: string, voiceId: string): Promise<GetAudioResponse> {
-    try {
-      const token = this.getAuthToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await axios.get<AudioApiResponse>(
-        `${this.baseUrl}/transition-phrases?language=${language}&voiceId=${voiceId}`,
-        { headers }
-      );
-
-      // Check if response contains transitionPhrases and extract all elements
-      if (response.data && Array.isArray(response.data.transitionPhrases) && response.data.transitionPhrases.length > 0) {
-        return {
-          transitionPhrases: response.data.transitionPhrases,
-          success: true
-        };
-      } else if (response.data && Array.isArray(response.data) && response.data.length > 0 &&
-               response.data[0].transitionPhrases && Array.isArray(response.data[0].transitionPhrases) &&
-               response.data[0].transitionPhrases.length > 0) {
-        // Handle case where response is an array of objects with transitionPhrases
-        return {
-          transitionPhrases: response.data[0].transitionPhrases,
-          success: true
-        };
-      } else if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-        // Fallback to previous implementation
-        return {
-          ...response.data[0],
-          success: true
-        };
-      }
-
-      // Default case: no valid audio data found
-      return {
-        success: false,
-        message: 'No valid transition phrases found in the response.'
-      };
-    } catch (error: unknown) {
-      console.error('Get transition phrases error:', error);
-
-      // Handle different types of errors
-      if (axios.isAxiosError(error) && error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        return {
-          success: false,
-          message: error.response.data?.message || 'Failed to fetch transition phrases. Please try again.'
-        };
-      } else if (axios.isAxiosError(error) && error.request) {
-        // The request was made but no response was received
-        return {
-          success: false,
-          message: 'No response from server. Please try again later.'
-        };
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        return {
-          success: false,
-          message: 'An error occurred while fetching transition phrases. Please try again.'
+          message: 'An error occurred while fetching audio phrases. Please try again.'
         };
       }
     }
