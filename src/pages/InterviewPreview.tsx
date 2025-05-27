@@ -132,7 +132,7 @@ const InterviewPreview: React.FC = () => {
                         sectionChangerPhrases: audioPhrasesResponse.sectionChangerPhrases,
                         transitionPhrases: audioPhrasesResponse.transitionPhrases,
                         outroPhrase: audioPhrasesResponse.outroPhrase,
-                        repeatQuestionPhrases: audioPhrasesResponse.repeatQuestionPhrases
+                        repeatQuestionPhrases: audioPhrasesResponse.repeatQuestionPhrases,
                     }
                 });
             }

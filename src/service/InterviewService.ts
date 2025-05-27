@@ -41,6 +41,10 @@ export interface ValidateAnswerRequest {
   softSkill?: boolean;
 }
 
+export interface ValidateAnswerResponse extends Response {
+  answerType?: string;
+}
+
 export interface FinalizeInterviewRequest {
   sessionId: string;
 }
@@ -104,16 +108,9 @@ export interface CountriesResponse {
   message?: string;
 }
 
-export interface TransitionPhrase {
+export interface AudioResponse {
   audio: string;
   text: string;
-}
-
-// Alias TransitionPhrase as AudioResponse for clarity in the new interface
-export type AudioResponse = TransitionPhrase;
-
-export interface AudioApiResponse {
-  transitionPhrases?: TransitionPhrase[];
 }
 
 export interface AudioPhrasesResponse {
@@ -122,13 +119,6 @@ export interface AudioPhrasesResponse {
   introPhrase: AudioResponse;
   outroPhrase: AudioResponse;
   repeatQuestionPhrases: AudioResponse[];
-  success: boolean;
-  message?: string;
-}
-
-export interface GetAudioResponse {
-  audio?: string; // Base64 encoded audio
-  transitionPhrases?: TransitionPhrase[]; // List of transition phrases with audio
   success: boolean;
   message?: string;
 }
@@ -195,12 +185,12 @@ export class InterviewService {
     }
   }
 
-  public async validateAnswer(request: ValidateAnswerRequest): Promise<Response> {
+  public async validateAnswer(request: ValidateAnswerRequest): Promise<ValidateAnswerResponse> {
     try {
       const token = this.getAuthToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const response = await axios.post<Response>(
+      const response = await axios.post<ValidateAnswerResponse>(
         `${this.baseUrl}/interviews/questions/validate`,
         request,
         { headers }

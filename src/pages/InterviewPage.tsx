@@ -32,6 +32,7 @@ const InterviewPage: React.FC = () => {
 
     const [isValidating, setIsValidating] = useState(false);
     const [index, setIndex] = useState(0);
+    const [questionIndex, setQuestionIndex] = useState(0);
     const [duration, setDuration] = useState(0);
     const [remainingTime, setRemainingTime] = useState(0);
 
@@ -116,13 +117,6 @@ const InterviewPage: React.FC = () => {
                 return;
             }
 
-            // Calculate the current question index based on the index
-            // Index 0 is welcome, index 1 is first question, so we need to subtract 1
-            const questionIndex = Math.max(0, index - 1);
-            if (questionIndex >= questions.length) {
-                return;
-            }
-
             const currentQuestion = questions[questionIndex];
 
             const request: ValidateAnswerRequest = {
@@ -139,8 +133,30 @@ const InterviewPage: React.FC = () => {
 
             if (response.success) {
                 // Continue with the next audio after recording is finished
-                if (index < audioList.length) {
-                    setIndex(index + 1);
+                if(response.answerType === 'SUCCESS') {
+                    if (index < audioList.length) {
+                        setIndex(index + 1);
+                        setQuestionIndex(questionIndex + 1);
+                    }
+                } else if(response.answerType === 'REPEAT') {
+                    // Get the current question from location state
+                    const { questions, repeatQuestionPhrases } = location.state || {};
+                    if (questions && repeatQuestionPhrases && repeatQuestionPhrases.length > 0) {
+                        // Select a random phrase from repeatQuestionPhrases
+                        const randomPhrase = repeatQuestionPhrases[Math.floor(Math.random() * repeatQuestionPhrases.length)];
+
+                        // Create a new audioList with the repeat phrase and the question
+                        const newAudioList = [...audioList];
+
+                        // Insert the repeat phrase and the question at the current index
+                        newAudioList.splice(index + 1, 0,
+                            new Map([[randomPhrase.text, randomPhrase.audio], [currentQuestion.question, currentQuestion.audio]]),
+                        );
+
+                        // Update the audioList and set the index to the first new entry
+                        setAudioList(newAudioList);
+                        setIndex(index + 1);
+                    }
                 }
             } 
         } catch (error) {
