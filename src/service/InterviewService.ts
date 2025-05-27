@@ -32,11 +32,11 @@ export interface GenerateQuestionsRequest {
 }
 
 export interface ValidateAnswerRequest {
-  questionId: string;
   question: string;
   answer: string;
-  sessionId?: string;
+  sessionId?: string | null;
   jobName?: string;
+  language?: string;
   tag?: string;
   softSkill?: boolean;
 }
@@ -106,6 +106,7 @@ export interface CountriesResponse {
 
 export interface TransitionPhrase {
   audio: string;
+  text: string;
 }
 
 export interface AudioApiResponse {
