@@ -26,7 +26,6 @@ const InterviewPage: React.FC = () => {
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1); // -1 means welcome message
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [jobName, setJobName] = useState<string | undefined>(undefined);
     const [language, setLanguage] = useState<string | undefined>(undefined);
@@ -140,10 +139,8 @@ const InterviewPage: React.FC = () => {
 
             if (response.success) {
                 // Continue with the next audio after recording is finished
-                if (index < audioList.length - 1) {
+                if (index < audioList.length) {
                     setIndex(index + 1);
-                } else {
-                    finalizeInterview();
                 }
             } 
         } catch (error) {
@@ -188,22 +185,21 @@ const InterviewPage: React.FC = () => {
 
     useEffect(() => {
         // Initialize interview data from location state
-        const { questions, sectionChangerPhrases, transitionPhrases, jobName, languageCode, welcomeAudio, duration } = location.state || {};
+        const { questions, sectionChangerPhrases, transitionPhrases, jobName, languageCode, welcomeAudio, outroPhrase, repeatQuestionPhrases, duration } = location.state || {};
 
-        if (!questions || !sectionChangerPhrases || !transitionPhrases || !welcomeAudio) {
+        if (!questions || !sectionChangerPhrases || !transitionPhrases || !welcomeAudio || !outroPhrase || !repeatQuestionPhrases) {
             setErrorMessage('Missing interview data. Please set up the interview first.');
         } else {
             setSessionId(sessionStorage.getItem("sessionId"));
             setJobName(jobName);
             setLanguage(languageCode);
             setDuration(duration);
-            setCurrentQuestionIndex(-1); // Start with welcome message
 
             const result: Map<string, string>[] = [];
 
             // Start with welcome
             result.push(new Map([[welcomeAudio.text, welcomeAudio.audio]]));
-            result.push(new Map([[questions[0].text, questions[0].audio]]));
+            result.push(new Map([[questions[0].question, questions[0].audio]]));
 
             let previousTag: string | null = null;
 
@@ -225,6 +221,8 @@ const InterviewPage: React.FC = () => {
                     previousTag = currentTag;
                 }
             });
+
+            result.push(new Map([[outroPhrase.text, outroPhrase.audio]]));
 
             setAudioList(result);
             setIndex(0);
@@ -286,6 +284,10 @@ const InterviewPage: React.FC = () => {
                                             if(index === 1) {
                                                 setShouldStartRecording(true);
                                                 startRecording();
+                                                return;
+                                            }
+                                            if(index === audioList.length-1) {
+                                                finalizeInterview();
                                                 return;
                                             }
                                             if (shouldStartRecording) {
