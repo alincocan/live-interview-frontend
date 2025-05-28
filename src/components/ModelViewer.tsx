@@ -179,14 +179,19 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
         // Set up animation for this audio segment
         const text = texts[index];
         const duration = buffer.duration;
-        const letterDuration = duration / text.length;
+        // Slow down mouth movement by reducing the frequency of updates (using a factor of 0.5)
+        // This means we'll update the mouth position less frequently, making it appear to move slower
+        const slowdownFactor = 0.2; // Lower value = slower mouth movement
+        const effectiveTextLength = Math.max(1, Math.floor(text.length * slowdownFactor));
+        const letterDuration = duration / effectiveTextLength;
 
         // Schedule letter updates for this segment
-        for (let i = 0; i < text.length; i++) {
+        for (let i = 0; i < effectiveTextLength; i++) {
+          const letterIndex = Math.min(Math.floor(i / slowdownFactor), text.length - 1);
           const letterTime = i * letterDuration;
           setTimeout(() => {
             if (!cancelled) {
-              setCurrentLetter(text[i]);
+              setCurrentLetter(text[letterIndex]);
             }
           }, (currentTime - ctx.currentTime + letterTime) * 1000);
         }
