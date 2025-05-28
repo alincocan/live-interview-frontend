@@ -110,6 +110,31 @@ export class UserService {
     return null;
   }
 
+  public deductTokens(amount: number): boolean {
+    const user = this.getUserFromStorage();
+    if (user) {
+      if (user.tokens === undefined) {
+        user.tokens = 0;
+      }
+      user.tokens -= amount;
+
+      // Save updated user data back to storage
+      const updatedUserData = JSON.stringify(user);
+      if (localStorage.getItem('authToken')) {
+        localStorage.setItem('userData', updatedUserData);
+      } else {
+        sessionStorage.setItem('userData', updatedUserData);
+      }
+
+      // Dispatch a custom event to notify components about token changes
+      const event = new CustomEvent('tokenUpdate', { detail: { tokens: user.tokens } });
+      window.dispatchEvent(event);
+
+      return true;
+    }
+    return false;
+  }
+
   public clearUserData(): void {
     localStorage.removeItem('userData');
     sessionStorage.removeItem('userData');
