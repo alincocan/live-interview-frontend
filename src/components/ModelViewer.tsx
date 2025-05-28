@@ -4,9 +4,20 @@ import {OrbitControls, useGLTF, Environment, useAnimations} from '@react-three/d
 import { Box, CircularProgress } from '@mui/material';
 
 // Model component that loads and displays the 3D model
-function Model({ url }: { url: string }) {
+function Model({ url, currentText }: { url: string, currentText?: string }) {
   const modelRef = useRef<THREE.Group>(null);
   const [blinking, setBlinking] = useState(false);
+
+  // Mapping of letters to mouth opening values (0 to 1)
+  const letterToMouthOpenValue: {[key: string]: number} = {
+    'a': 1.0, 'b': 0.7, 'c': 0.6, 'd': 0.7, 'e': 0.8,
+    'f': 0.6, 'g': 0.7, 'h': 0.6, 'i': 0.5, 'j': 0.6,
+    'k': 0.7, 'l': 0.6, 'm': 0.3, 'n': 0.6, 'o': 1.0,
+    'p': 0.7, 'q': 0.8, 'r': 0.6, 's': 0.6, 't': 0.6,
+    'u': 0.9, 'v': 0.6, 'w': 0.9, 'x': 0.7, 'y': 0.7,
+    'z': 0.6, ' ': 0.1, '.': 0.1, ',': 0.1, '!': 0.1,
+    '?': 0.5, ':': 0.1, ';': 0.1, '-': 0.1, '_': 0.1
+  };
 
   const { scene, animations } = useGLTF(url);
   const { actions } = useAnimations(animations, modelRef);
@@ -84,6 +95,28 @@ function Model({ url }: { url: string }) {
     };
   }, [actions]);
 
+  // Handle mouth movement based on current text
+  useEffect(() => {
+    if (!currentText) return;
+
+    const bodyMesh = findMeshByName("CC_Base_Body004");
+
+    if (bodyMesh && 'morphTargetDictionary' in bodyMesh && 'morphTargetInfluences' in bodyMesh) {
+      const lipOpenIndex = bodyMesh.morphTargetDictionary?.V_Lip_Open;
+
+      if (lipOpenIndex !== undefined) {
+        // Get the current letter (lowercase for consistency)
+        const currentLetter = currentText.toLowerCase();
+
+        // Get mouth open value for the current letter, default to 0.1 if not found
+        const openValue = letterToMouthOpenValue[currentLetter] || 0.1;
+
+        // Set the mouth open value
+        bodyMesh.morphTargetInfluences[lipOpenIndex] = openValue;
+      }
+    }
+  }, [currentText]);
+
   return <primitive ref={modelRef} object={scene} scale={0.6} position={[0, -0.7, 0]} />;
 }
 
@@ -99,11 +132,14 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
   audioMap,
   onAudioFinished,
 }) => {
+  // State to track the current letter being spoken
+  const [currentLetter, setCurrentLetter] = useState<string>('');
 
   useEffect(() => {
     if (!audioMap || audioMap.size === 0) return;
 
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    // Use AudioContext with proper type
+    const ctx = new (window.AudioContext || (window as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     let cancelled = false;
 
     const decodeBase64ToBuffer = async (base64: string): Promise<AudioBuffer> => {
@@ -117,31 +153,62 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
 
     const playAllAudioSequentially = async () => {
       const buffers: AudioBuffer[] = [];
+      const texts: string[] = [];
 
       for (const [text, base64] of audioMap.entries()) {
         if (cancelled) return;
         try {
           const buffer = await decodeBase64ToBuffer(base64);
           buffers.push(buffer);
+          texts.push(text);
         } catch (e) {
           console.error(`Error decoding audio for ${text}`, e);
         }
       }
 
       let currentTime = ctx.currentTime;
-      buffers.forEach(buffer => {
+
+      // Reset mouth at the beginning
+      setCurrentLetter('');
+
+      buffers.forEach((buffer, index) => {
         const source = ctx.createBufferSource();
         source.buffer = buffer;
         source.connect(ctx.destination);
+
+        // Set up animation for this audio segment
+        const text = texts[index];
+        const duration = buffer.duration;
+        // Slow down mouth movement by reducing the frequency of updates (using a factor of 0.5)
+        // This means we'll update the mouth position less frequently, making it appear to move slower
+        const slowdownFactor = 0.2; // Lower value = slower mouth movement
+        const effectiveTextLength = Math.max(1, Math.floor(text.length * slowdownFactor));
+        const letterDuration = duration / effectiveTextLength;
+
+        // Schedule letter updates for this segment
+        for (let i = 0; i < effectiveTextLength; i++) {
+          const letterIndex = Math.min(Math.floor(i / slowdownFactor), text.length - 1);
+          const letterTime = i * letterDuration;
+          setTimeout(() => {
+            if (!cancelled) {
+              setCurrentLetter(text[letterIndex]);
+            }
+          }, (currentTime - ctx.currentTime + letterTime) * 1000);
+        }
+
         source.start(currentTime);
-        currentTime += buffer.duration;
+        currentTime += duration;
       });
 
       const totalDuration = buffers.reduce((sum, b) => sum + b.duration, 0);
 
       setTimeout(() => {
-        if (!cancelled && onAudioFinished) {
-          onAudioFinished();
+        if (!cancelled) {
+          // Reset mouth at the end
+          setCurrentLetter('');
+          if (onAudioFinished) {
+            onAudioFinished();
+          }
         }
       }, totalDuration * 1000);
     };
@@ -171,7 +238,7 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
         <Canvas camera={{ position: [0, 1, 5], fov: 10  }}>
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 5, 5]} />
-          <Model url={url} />
+          <Model url={url} currentText={currentLetter} />
 
           <OrbitControls 
             enablePan={true} 
