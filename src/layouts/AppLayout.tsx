@@ -1,4 +1,4 @@
-import { Box, Typography, Menu, MenuItem, Divider, Avatar, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip, Container } from '@mui/material';
+import { Box, Typography, Menu, MenuItem, Divider, Avatar, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip } from '@mui/material';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { AuthenticationService } from '../service/authenticationService';
 import { UserService, User } from '../service/userService';
@@ -82,6 +82,27 @@ const AppLayout: React.FC = () => {
         };
 
         fetchUserData();
+
+        // Add event listener for token updates
+        const handleTokenUpdate = (event: CustomEvent<{ tokens: number }>) => {
+            setUser(currentUser => {
+                if (currentUser) {
+                    return {
+                        ...currentUser,
+                        tokens: event.detail.tokens
+                    };
+                }
+                return currentUser;
+            });
+        };
+
+        // Add event listener
+        window.addEventListener('tokenUpdate', handleTokenUpdate as EventListener);
+
+        // Clean up event listener when component unmounts
+        return () => {
+            window.removeEventListener('tokenUpdate', handleTokenUpdate as EventListener);
+        };
     }, [navigate]);
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {

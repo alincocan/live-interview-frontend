@@ -18,7 +18,9 @@ import ModelViewer from '../components/ModelViewer';
 import { 
     InterviewService, 
     FinalizeInterviewRequest,
-    ValidateAnswerRequest
+    ValidateAnswerRequest,
+    InterviewQuestion,
+    AudioResponse
 } from '../service/InterviewService';
 
 const InterviewPage: React.FC = () => {
@@ -99,25 +101,51 @@ const InterviewPage: React.FC = () => {
         reader.readAsDataURL(blob);
     };
 
+    // Function to handle repeat question scenario
+    const handleRepeatQuestion = (currentQuestion: InterviewQuestion) => {
+        // Get the current question from location state
+        const { questions, repeatQuestionPhrases } = location.state || {};
+        if (questions && repeatQuestionPhrases && repeatQuestionPhrases.length > 0) {
+            // Select a random phrase from repeatQuestionPhrases
+            const randomPhrase: AudioResponse =
+                repeatQuestionPhrases[Math.floor(Math.random() * repeatQuestionPhrases.length)];
+
+            // Create a new audioList with the repeat phrase and the question
+            const newAudioList = [...audioList];
+
+            // Insert the repeat phrase and the question at the current index
+            newAudioList.splice(index + 1, 0,
+                new Map([[randomPhrase.text, randomPhrase.audio], [currentQuestion.question, currentQuestion.audio]]),
+            );
+
+            // Update the audioList and set the index to the first new entry
+            setAudioList(newAudioList);
+            setIndex(index + 1);
+        }
+    };
+
     // Function to validate the answer
     const validateAnswer = async (userAnswer: string) => {
+        const { questions } = location.state || {};
+        const currentQuestion = questions[questionIndex];
+
         if (!userAnswer) {
+            handleRepeatQuestion(currentQuestion);
             return;
         }
 
         setIsValidating(true);
 
+
         try {
             const interviewService = InterviewService.getInstance();
 
             // Get the current question from the location state
-            const { questions } = location.state || {};
             if (!questions || questions.length === 0) {
                 console.error('No questions found');
                 return;
             }
 
-            const currentQuestion = questions[questionIndex];
 
             const request: ValidateAnswerRequest = {
                 question: currentQuestion.question,
@@ -131,36 +159,18 @@ const InterviewPage: React.FC = () => {
 
             const response = await interviewService.validateAnswer(request);
 
-            if (response.success) {
+            if (response.success && response.answerType === 'SUCCESS') {
                 // Continue with the next audio after recording is finished
-                if(response.answerType === 'SUCCESS') {
-                    if (index < audioList.length) {
-                        setIndex(index + 1);
-                        setQuestionIndex(questionIndex + 1);
-                    }
-                } else if(response.answerType === 'REPEAT') {
-                    // Get the current question from location state
-                    const { questions, repeatQuestionPhrases } = location.state || {};
-                    if (questions && repeatQuestionPhrases && repeatQuestionPhrases.length > 0) {
-                        // Select a random phrase from repeatQuestionPhrases
-                        const randomPhrase = repeatQuestionPhrases[Math.floor(Math.random() * repeatQuestionPhrases.length)];
-
-                        // Create a new audioList with the repeat phrase and the question
-                        const newAudioList = [...audioList];
-
-                        // Insert the repeat phrase and the question at the current index
-                        newAudioList.splice(index + 1, 0,
-                            new Map([[randomPhrase.text, randomPhrase.audio], [currentQuestion.question, currentQuestion.audio]]),
-                        );
-
-                        // Update the audioList and set the index to the first new entry
-                        setAudioList(newAudioList);
-                        setIndex(index + 1);
-                    }
+                if (index < audioList.length) {
+                    setIndex(index + 1);
+                    setQuestionIndex(questionIndex + 1);
                 }
-            } 
+            } else {
+                handleRepeatQuestion(currentQuestion);
+            }
         } catch (error) {
             console.error('Error validating answer:', error);
+            handleRepeatQuestion(currentQuestion);
         } finally {
             setIsValidating(false);
         }

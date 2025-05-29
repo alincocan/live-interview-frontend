@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {Response} from "../bo/Response.ts";
+import { UserService } from "./userService";
 
 export interface InterviewQuestion {
   id: string;
@@ -142,6 +143,7 @@ export class InterviewService {
 
   public async generateQuestions(request: GenerateQuestionsRequest): Promise<GenerateQuestionsResponse> {
     try {
+
       const token = this.getAuthToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
@@ -150,6 +152,10 @@ export class InterviewService {
         request,
         { headers }
       );
+
+      // Deduct tokens using the UserService
+      const userService = UserService.getInstance();
+      userService.deductTokens(10);
 
       return {
         ...response.data,
@@ -187,6 +193,7 @@ export class InterviewService {
 
   public async validateAnswer(request: ValidateAnswerRequest): Promise<ValidateAnswerResponse> {
     try {
+
       const token = this.getAuthToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
@@ -195,6 +202,10 @@ export class InterviewService {
         request,
         { headers }
       );
+
+      // Deduct tokens using the UserService
+      const userService = UserService.getInstance();
+      userService.deductTokens(5);
 
       return {
         ...response.data,
