@@ -1,4 +1,4 @@
-import { Box, Typography, Menu, MenuItem, Divider, Avatar, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip } from '@mui/material';
+import { Box, Typography, Menu, MenuItem, Divider, Avatar, Button, Tooltip } from '@mui/material';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { AuthenticationService } from '../service/authenticationService';
 import { UserService, User } from '../service/userService';
@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import AddIcon from '@mui/icons-material/Add';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SchoolIcon from '@mui/icons-material/School';
 import ListAltIcon from '@mui/icons-material/ListAlt';
@@ -18,13 +17,7 @@ const AppLayout: React.FC = () => {
     const open = Boolean(anchorEl);
     const [user, setUser] = useState<User | null>(null);
 
-    // State for token purchase dialog
-    const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
-    const [tokenAmount, setTokenAmount] = useState<number>(100);
-    const [purchaseError, setPurchaseError] = useState<string>('');
-    const [purchaseSuccess, setPurchaseSuccess] = useState<boolean>(false);
-
-    // Form handling for token purchase is not needed here
+    // No state for token purchase dialog as it's now a separate page
 
     // Function to check if required fields are missing
     const checkMissingFields = (userData: User | null): string[] => {
@@ -131,54 +124,6 @@ const AppLayout: React.FC = () => {
     const handleBookmarkedQuestionsClick = () => {
         handleMenuClose();
         navigate('/questions/bookmarked');
-    };
-
-    const handleOpenPurchaseDialog = () => {
-        setPurchaseDialogOpen(true);
-        setPurchaseError('');
-        setPurchaseSuccess(false);
-    };
-
-    const handleClosePurchaseDialog = () => {
-        setPurchaseDialogOpen(false);
-    };
-
-    const handleTokenAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = parseInt(event.target.value);
-        if (!isNaN(value) && value > 0) {
-            setTokenAmount(value);
-        }
-    };
-
-    const handlePurchaseTokens = async () => {
-        try {
-            setPurchaseError('');
-            setPurchaseSuccess(false);
-
-            const userService = UserService.getInstance();
-            const response = await userService.purchaseTokens(tokenAmount);
-
-            if (response.success) {
-                setPurchaseSuccess(true);
-                // Update user state with new token balance
-                if (user && response.newTokenBalance !== undefined) {
-                    setUser({
-                        ...user,
-                        tokens: response.newTokenBalance
-                    });
-                }
-
-                // Close dialog after a short delay
-                setTimeout(() => {
-                    setPurchaseDialogOpen(false);
-                }, 1500);
-            } else {
-                setPurchaseError(response.message || 'Failed to purchase tokens');
-            }
-        } catch (error) {
-            console.error('Error purchasing tokens:', error);
-            setPurchaseError('An unexpected error occurred');
-        }
     };
 
     return (
@@ -295,11 +240,11 @@ const AppLayout: React.FC = () => {
 
                     {/* Token Balance Button */}
                     {user && (
-                        <Tooltip title="Click to buy more tokens">
+                        <Tooltip title="Go to payment and subscriptions">
                             <Button
                                 variant="contained"
                                 startIcon={<AccountBalanceWalletIcon />}
-                                onClick={handleOpenPurchaseDialog}
+                                onClick={() => navigate('/payment')}
                                 sx={{
                                     mr: 2,
                                     backgroundColor: '#FFD700', // Yellow color
@@ -396,64 +341,6 @@ const AppLayout: React.FC = () => {
             <Box sx={{ pt: '64px' }}>
                 <Outlet />
             </Box>
-
-            {/* Token Purchase Dialog */}
-            <Dialog open={purchaseDialogOpen} onClose={handleClosePurchaseDialog}>
-                <DialogTitle>Purchase Tokens</DialogTitle>
-                <DialogContent>
-                    <Box sx={{ p: 2 }}>
-                        {purchaseSuccess ? (
-                            <Typography color="success.main" sx={{ mb: 2 }}>
-                                Tokens purchased successfully!
-                            </Typography>
-                        ) : (
-                            <>
-                                <Typography variant="body1" sx={{ mb: 2 }}>
-                                    How many tokens would you like to purchase?
-                                </Typography>
-                                <TextField
-                                    label="Token Amount"
-                                    type="number"
-                                    fullWidth
-                                    value={tokenAmount}
-                                    onChange={handleTokenAmountChange}
-                                    InputProps={{
-                                        endAdornment: (
-                                            <IconButton 
-                                                size="small" 
-                                                onClick={() => setTokenAmount(tokenAmount + 100)}
-                                            >
-                                                <AddIcon />
-                                            </IconButton>
-                                        ),
-                                    }}
-                                    sx={{ mb: 2 }}
-                                />
-                                {purchaseError && (
-                                    <Typography color="error" sx={{ mb: 2 }}>
-                                        {purchaseError}
-                                    </Typography>
-                                )}
-                            </>
-                        )}
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClosePurchaseDialog} color="primary">
-                        Cancel
-                    </Button>
-                    {!purchaseSuccess && (
-                        <Button 
-                            onClick={handlePurchaseTokens} 
-                            variant="contained" 
-                            color="primary"
-                            disabled={tokenAmount <= 0}
-                        >
-                            Purchase
-                        </Button>
-                    )}
-                </DialogActions>
-            </Dialog>
 
         </Box>
     );

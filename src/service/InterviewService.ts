@@ -30,6 +30,7 @@ export interface GenerateQuestionsRequest {
   language?: string;
   interviewerId?: string;
   voiceId?: string;
+  jobDescription?: string;
 }
 
 export interface ValidateAnswerRequest {

@@ -7,22 +7,16 @@ import {
     Card, 
     CardContent, 
     CardHeader, 
-    Dialog, 
-    DialogTitle, 
-    DialogContent, 
-    DialogActions, 
-    TextField, 
     CircularProgress
 } from '@mui/material';
 import { UserService, User } from '../service/userService.ts';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 const ProfilePage: React.FC = () => {
+    const navigate = useNavigate();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [openTokenDialog, setOpenTokenDialog] = useState<boolean>(false);
-    const [tokenAmount, setTokenAmount] = useState<number>(10);
-    const [purchaseLoading, setPurchaseLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -46,31 +40,7 @@ const ProfilePage: React.FC = () => {
         fetchUserData();
     }, []);
 
-    const handleOpenTokenDialog = () => {
-        setOpenTokenDialog(true);
-    };
-
-    const handleCloseTokenDialog = () => {
-        setOpenTokenDialog(false);
-    };
-
-    const handlePurchaseTokens = async () => {
-        if (tokenAmount <= 0) return;
-
-        setPurchaseLoading(true);
-        const userService = UserService.getInstance();
-        const response = await userService.purchaseTokens(tokenAmount);
-
-        if (response.success && response.newTokenBalance !== undefined && user) {
-            setUser({
-                ...user,
-                tokens: response.newTokenBalance
-            });
-        }
-
-        setPurchaseLoading(false);
-        handleCloseTokenDialog();
-    };
+    // Format date for display
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return 'N/A';
@@ -179,7 +149,7 @@ const ProfilePage: React.FC = () => {
                                     variant="contained" 
                                     fullWidth 
                                     size="large"
-                                    onClick={handleOpenTokenDialog}
+                                    onClick={() => navigate('/payment')}
                                 >
                                     Buy More Tokens
                                 </Button>
@@ -189,36 +159,6 @@ const ProfilePage: React.FC = () => {
                 </Grid>
             </Grid>
 
-            {/* Token Purchase Dialog */}
-            <Dialog open={openTokenDialog} onClose={handleCloseTokenDialog}>
-                <DialogTitle>Purchase Tokens</DialogTitle>
-                <DialogContent>
-                    <Typography variant="body2" sx={{ mb: 2 }}>
-                        Enter the number of tokens you would like to purchase:
-                    </Typography>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Token Amount"
-                        type="number"
-                        fullWidth
-                        value={tokenAmount}
-                        onChange={(e) => setTokenAmount(parseInt(e.target.value) || 0)}
-                        inputProps={{ min: 1 }}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseTokenDialog}>Cancel</Button>
-                    <Button 
-                        onClick={handlePurchaseTokens} 
-                        variant="contained" 
-                        disabled={purchaseLoading || tokenAmount <= 0}
-                    >
-                        {purchaseLoading ? <CircularProgress size={24} sx={{ mr: 1 }} /> : null}
-                        Purchase
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </Box>
     );
 };
