@@ -28,14 +28,15 @@ const InterviewPreview: React.FC = () => {
         softSkillsPercentage: 0,
         difficulty: '',
         tags: [] as string[],
-        languageCode: ''
+        languageCode: '',
+        jobDescription: ''
     });
 
     // No need for state variables as we're using response values directly
 
     useEffect(() => {
         // Fetch data from location state
-        const { duration, jobName, softSkillsPercentage, difficulty, tags, languageCode } = location.state || {};
+        const { duration, jobName, softSkillsPercentage, difficulty, tags, languageCode, jobDescription } = location.state || {};
 
         if (!duration || !jobName || !softSkillsPercentage || !tags || !difficulty) {
             setErrorMessage("We couldn't load the interview. Please try again!");
@@ -49,7 +50,8 @@ const InterviewPreview: React.FC = () => {
             softSkillsPercentage: parseInt(softSkillsPercentage, 10),
             difficulty,
             tags,
-            languageCode
+            languageCode,
+            jobDescription
         };
 
         setInterviewData(parsedData);
@@ -90,7 +92,8 @@ const InterviewPreview: React.FC = () => {
                 ...interviewData,
                 language: languageCode,
                 interviewerId: selectedInterviewer.id,
-                voiceId: selectedInterviewer.voiceId
+                voiceId: selectedInterviewer.voiceId,
+                jobDescription: interviewData.jobDescription
             };
 
             // Execute 2 API calls in parallel

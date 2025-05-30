@@ -51,18 +51,62 @@ const JobDescriptionUploadPage: React.FC = () => {
         e.preventDefault();
         setIsLoading(true);
         try {
+            // First, get the text content from the file
+            const fileContent = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    try {
+                        const arrayBuffer = event.target?.result;
+                        if (!arrayBuffer) {
+                            return reject('Failed to read file content.');
+                        }
+
+                        if (file.type === 'application/pdf') {
+                            const pdfjsLib = await import('pdfjs-dist');
+                            pdfjsLib.GlobalWorkerOptions.workerSrc =
+                                '../../node_modules/pdfjs-dist/build/pdf.worker.mjs';
+
+                            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                            let text = '';
+                            for (let i = 1; i <= pdf.numPages; i++) {
+                                const page = await pdf.getPage(i);
+                                const content = await page.getTextContent();
+                                text += content.items.map((item: { str: string }) => item.str).join(' ');
+                            }
+                            resolve(text);
+                        } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                            const mammoth = await import('mammoth');
+                            const result = await mammoth.extractRawText({ arrayBuffer });
+                            resolve(result.value);
+                        } else {
+                            reject('Unsupported file type. Please upload a PDF or DOCX file.');
+                        }
+                    } catch (error) {
+                        reject(`Error parsing file content: ${error}`);
+                    }
+                };
+
+                reader.onerror = () => {
+                    reject('Error reading file.');
+                };
+
+                reader.readAsArrayBuffer(file);
+            });
+
+            // Now process the job description
             const { jobName, tags, success, message } = await jobDescriptionParserService.processJobDescriptionFile(file);
             if (!success) {
                 setAlertMessage(message || 'Failed to process the job description file. Please try again.');
                 return;
             }
-            // Save jobName in sessionStorage, but pass tags and selectedInterviewer as state
+            // Save jobName in sessionStorage, but pass tags, jobDescription, and selectedInterviewer as state
             sessionStorage.setItem('jobName', jobName || '');
             // Don't store tags in sessionStorage, pass them as state instead
             navigate('/interview/setup', { 
                 state: { 
                     tags,
-                    selectedInterviewer 
+                    selectedInterviewer,
+                    jobDescription: fileContent
                 } 
             });
         } catch (error) {
@@ -92,13 +136,14 @@ const JobDescriptionUploadPage: React.FC = () => {
                 setAlertMessage(message || 'Failed to process the job description text. Please try again.');
                 return;
             }
-            // Save jobName in sessionStorage, but pass tags and selectedInterviewer as state
+            // Save jobName in sessionStorage, but pass tags, jobDescription, and selectedInterviewer as state
             sessionStorage.setItem('jobName', jobName || '');
             // Don't store tags in sessionStorage, pass them as state instead
             navigate('/interview/setup', { 
                 state: { 
                     tags,
-                    selectedInterviewer 
+                    selectedInterviewer,
+                    jobDescription: jobDescriptionText
                 } 
             });
         } catch (error) {
@@ -115,7 +160,8 @@ const JobDescriptionUploadPage: React.FC = () => {
     const handleSkip = () => {
         navigate('/interview/setup', { 
             state: { 
-                selectedInterviewer 
+                selectedInterviewer,
+                jobDescription: '' // Pass empty job description when skipping
             } 
         });
     };

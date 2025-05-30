@@ -46,6 +46,9 @@ const InterviewConfiguration: React.FC = () => {
     // Get tags from location state if available
     const tagsFromState = location.state?.tags;
 
+    // Get jobDescription from location state if available
+    const jobDescriptionFromState = location.state?.jobDescription;
+
     // State management for form fields
     const [difficultyLevel, setDifficultyLevel] = useState<string>('');
     const [jobName, setJobName] = useState<string>(storedJobName);
@@ -274,7 +277,8 @@ const InterviewConfiguration: React.FC = () => {
                 difficulty: difficultyLevel,
                 tags,
                 languageCode,
-                selectedInterviewer
+                selectedInterviewer,
+                jobDescription: jobDescriptionFromState
             };
 
             // Log the values being passed
@@ -288,7 +292,8 @@ const InterviewConfiguration: React.FC = () => {
                 difficulty: difficultyLevel,
                 tags,
                 languageCode,
-                selectedInterviewer
+                selectedInterviewer,
+                jobDescription: jobDescriptionFromState
             };
 
             // Log the values being passed
