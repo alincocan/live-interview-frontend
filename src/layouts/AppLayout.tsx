@@ -10,6 +10,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SchoolIcon from '@mui/icons-material/School';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 const AppLayout: React.FC = () => {
     const navigate = useNavigate();
@@ -126,6 +127,16 @@ const AppLayout: React.FC = () => {
         navigate('/questions/bookmarked');
     };
 
+    const handleMyInterviewsClick = () => {
+        handleMenuClose();
+        navigate('/interview/list');
+    };
+
+    const handleMyTrainingsClick = () => {
+        handleMenuClose();
+        navigate('/training/choose');
+    };
+
     return (
         <Box
             sx={{
@@ -218,7 +229,7 @@ const AppLayout: React.FC = () => {
                         <Typography>Trainings</Typography>
                     </Box>
 
-                    {/* Interview List Menu Item */}
+                    {/* Learn Menu Item */}
                     <Box 
                         onClick={() => navigate('/interview/list')}
                         sx={{
@@ -229,13 +240,30 @@ const AppLayout: React.FC = () => {
                             cursor: 'pointer',
                             padding: '6px 16px',
                             borderRadius: '4px',
+                            position: 'relative',
                             '&:hover': {
                                 backgroundColor: 'rgba(255, 255, 255, 0.1)'
                             }
                         }}
                     >
-                        <ListAltIcon sx={{ mr: 1, color: '#FF9800' }} />
-                        <Typography>My Interviews</Typography>
+                        <MenuBookIcon sx={{ mr: 1, color: '#FF9800' }} />
+                        <Typography>Learn</Typography>
+                        <Typography 
+                            variant="caption" 
+                            sx={{ 
+                                position: 'absolute',
+                                bottom: '-12px',
+                                right: '10px',
+                                backgroundColor: '#4CAF50',
+                                color: 'white',
+                                padding: '2px 6px',
+                                borderRadius: '10px',
+                                fontSize: '0.6rem',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            Coming soon
+                        </Typography>
                     </Box>
 
                     {/* Token Balance Button */}
@@ -316,14 +344,59 @@ const AppLayout: React.FC = () => {
                         }}
                         PaperProps={{
                             style: {
-                                width: '250px',
+                                width: '500px',
                             },
                         }}
                     >
-                        <MenuItem onClick={handleBookmarkedQuestionsClick}>
-                            <BookmarkIcon sx={{ mr: 1, color: '#FF9800' }} />
-                            Bookmarked Questions
-                        </MenuItem>
+                        <Box 
+                            sx={{ 
+                                border: '1px solid rgba(0, 0, 0, 0.12)', 
+                                borderRadius: '4px', 
+                                padding: '8px', 
+                                margin: '8px 0',
+                                backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                            }}
+                        >
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                                <PersonIcon sx={{ fontSize: 32, color: 'primary.main' }} />
+                            </Box>
+                            <MenuItem 
+                                onClick={handleMyInterviewsClick}
+                                sx={{ 
+                                    justifyContent: 'center',
+                                    '& .MuiTypography-root': { 
+                                        fontSize: '0.875rem' 
+                                    }
+                                }}
+                            >
+                                <ListAltIcon sx={{ mr: 1, color: '#FF9800' }} />
+                                <Typography variant="body2">My Interviews</Typography>
+                            </MenuItem>
+                            <MenuItem 
+                                onClick={handleMyTrainingsClick}
+                                sx={{ 
+                                    justifyContent: 'center',
+                                    '& .MuiTypography-root': { 
+                                        fontSize: '0.875rem' 
+                                    }
+                                }}
+                            >
+                                <SchoolIcon sx={{ mr: 1, color: '#2196F3' }} />
+                                <Typography variant="body2">My Trainings</Typography>
+                            </MenuItem>
+                            <MenuItem 
+                                onClick={handleBookmarkedQuestionsClick}
+                                sx={{ 
+                                    justifyContent: 'center',
+                                    '& .MuiTypography-root': { 
+                                        fontSize: '0.875rem' 
+                                    }
+                                }}
+                            >
+                                <BookmarkIcon sx={{ mr: 1, color: '#FF9800' }} />
+                                <Typography variant="body2">Bookmarked Questions</Typography>
+                            </MenuItem>
+                        </Box>
                         <Divider />
                         <MenuItem onClick={handleProfileClick}>
                             <PersonIcon sx={{ mr: 1 }} />
