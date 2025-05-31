@@ -99,14 +99,12 @@ const JobDescriptionUploadPage: React.FC = () => {
                 setAlertMessage(message || 'Failed to process the job description file. Please try again.');
                 return;
             }
-            // Save jobName in sessionStorage, but pass tags, jobDescription, and selectedInterviewer as state
-            sessionStorage.setItem('jobName', jobName || '');
-            // Don't store tags in sessionStorage, pass them as state instead
-            navigate('/interview/setup', { 
+            navigate('/interview/setup', {
                 state: { 
                     tags,
                     selectedInterviewer,
-                    jobDescription: fileContent
+                    jobDescription: fileContent,
+                    jobName
                 } 
             });
         } catch (error) {
@@ -136,14 +134,12 @@ const JobDescriptionUploadPage: React.FC = () => {
                 setAlertMessage(message || 'Failed to process the job description text. Please try again.');
                 return;
             }
-            // Save jobName in sessionStorage, but pass tags, jobDescription, and selectedInterviewer as state
-            sessionStorage.setItem('jobName', jobName || '');
-            // Don't store tags in sessionStorage, pass them as state instead
-            navigate('/interview/setup', { 
+            navigate('/interview/setup', {
                 state: { 
                     tags,
                     selectedInterviewer,
-                    jobDescription: jobDescriptionText
+                    jobDescription: jobDescriptionText,
+                    jobName
                 } 
             });
         } catch (error) {

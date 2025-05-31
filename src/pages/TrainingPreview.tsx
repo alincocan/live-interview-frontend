@@ -12,18 +12,18 @@ import {
     Button,
 } from '@mui/material';
 import {
-    InterviewService,
-    GenerateQuestionsRequest
-} from '../service/InterviewService.ts';
+    TrainingService,
+    GenerateTrainingRequest
+} from '../service/TrainingService';
 
-const InterviewPreview: React.FC = () => {
+const TrainingPreview: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [hasPartialFailure, setHasPartialFailure] = useState(false);
-    const [interviewData, setInterviewData] = useState({
-        duration: 0,
+    const [modelUrl, setModelUrl] = useState("");
+    const [trainingData, setTrainingData] = useState({
+        numQuestions: 0,
         jobName: '',
         softSkillsPercentage: 0,
         difficulty: '',
@@ -32,39 +32,37 @@ const InterviewPreview: React.FC = () => {
         jobDescription: ''
     });
 
-    // No need for state variables as we're using response values directly
-
     useEffect(() => {
         // Fetch data from location state
-        const { duration, jobName, softSkillsPercentage, difficulty, tags, languageCode, jobDescription } = location.state || {};
+        const { numQuestions, jobName, softSkillsPercentage, difficulty, tags, languageCode, jobDescription, modelUrl } = location.state || {};
 
-        if (!duration || !jobName || !softSkillsPercentage || !tags || !difficulty) {
-            setErrorMessage("We couldn't load the interview. Please try again!");
+        if (!numQuestions || !jobName || !tags || !difficulty || !modelUrl) {
+            setErrorMessage("We couldn't load the training. Please try again!");
             return;
         }
 
+        setModelUrl(modelUrl);
         // Parse the data
         const parsedData = {
-            duration: parseInt(duration, 10),
+            numQuestions: parseInt(numQuestions, 10),
             jobName,
-            softSkillsPercentage: parseInt(softSkillsPercentage, 10),
+            softSkillsPercentage: parseInt(softSkillsPercentage || '0', 10),
             difficulty,
             tags,
             languageCode,
             jobDescription
         };
 
-        setInterviewData(parsedData);
+        setTrainingData(parsedData);
     }, [location.state]);
 
-    const startInterview = async () => {
+    const startTraining = async () => {
         setIsLoading(true);
         setErrorMessage(null);
-        setHasPartialFailure(false);
 
         try {
-            // Get languageCode from interviewData
-            const languageCode = interviewData.languageCode;
+            // Get languageCode from trainingData
+            const languageCode = trainingData.languageCode;
 
             // Get selectedInterviewer from location state if available, otherwise try sessionStorage
             const selectedInterviewerFromState = location.state?.selectedInterviewer;
@@ -72,39 +70,46 @@ const InterviewPreview: React.FC = () => {
                 JSON.stringify(selectedInterviewerFromState) : 
                 sessionStorage.getItem('selectedInterviewer');
 
-            if (!languageCode || !selectedInterviewerStr) {
-                throw new Error("We couldn't load the interview. Please try again!");
+            if (!languageCode) {
+                throw new Error("We couldn't load the training. Please try again!");
             }
 
-            // Parse the selectedInterviewer object
-            const selectedInterviewer = JSON.parse(selectedInterviewerStr);
-            const voiceId = selectedInterviewer.voiceId;
+            // Parse the selectedInterviewer object if available
+            let interviewerId = undefined;
+            let voiceId = undefined;
+
+            if (selectedInterviewerStr) {
+                const selectedInterviewer = JSON.parse(selectedInterviewerStr);
+                interviewerId = selectedInterviewer.id;
+                voiceId = selectedInterviewer.voiceId;
+            }
 
             if (!voiceId) {
-                throw new Error("We couldn't load the interview. Please try again!");
+                throw new Error("We couldn't load the training. Please try again!");
             }
 
-            // Make the 4 API calls in parallel
-            const interviewService = InterviewService.getInstance();
-
-            // 1. Create request for generating questions
-            const requestData: GenerateQuestionsRequest = { 
-                ...interviewData,
-                difficulty: interviewData.difficulty, // Explicitly include difficulty
-                duration: interviewData.duration, // Use duration as number of questions
+            // Create request for generating training questions
+            const requestData: GenerateTrainingRequest = { 
+                duration: trainingData.numQuestions, // Set duration as number of questions
+                difficulty: trainingData.difficulty, // Explicitly include difficulty
+                jobName: trainingData.jobName,
+                softSkillsPercentage: trainingData.softSkillsPercentage,
+                tags: trainingData.tags,
                 language: languageCode,
-                interviewerId: selectedInterviewer.id,
-                voiceId: selectedInterviewer.voiceId,
-                jobDescription: interviewData.jobDescription
+                interviewerId,
+                voiceId,
+                jobDescription: trainingData.jobDescription
             };
 
-            // Execute 2 API calls in parallel
+            // Call the training service to generate questions and get audio phrases in parallel
+            const trainingService = TrainingService.getInstance();
+
             const [
                 questionsResponse,
                 audioPhrasesResponse
             ] = await Promise.all([
-                interviewService.generateQuestions(requestData),
-                interviewService.getAudioPhrases(languageCode, voiceId)
+                trainingService.generateTraining(requestData),
+                trainingService.getAudioPhrases(languageCode, voiceId)
             ]);
 
             // Process questions response
@@ -114,22 +119,17 @@ const InterviewPreview: React.FC = () => {
                     sessionStorage.setItem('sessionId', questionsResponse.sessionId);
                 }
             } else {
-                throw new Error("We couldn't load the interview. Please try again!");
+                throw new Error(questionsResponse.message || "We couldn't load the training. Please try again!");
             }
 
             // Process audio phrases response
-            if (!audioPhrasesResponse.success) {
+            const hasAudioFailure = !audioPhrasesResponse.success;
+            if (hasAudioFailure) {
                 console.error('Failed to fetch audio phrases:', audioPhrasesResponse.message);
-                setHasPartialFailure(true);
-            }
-
-            // If there's a partial failure, don't navigate, just show the Try Again button
-            if (hasPartialFailure) {
-                setErrorMessage("We couldn't load the interview. Please try again!");
+                setErrorMessage("We couldn't load the training. Please try again!");
             } else {
-                // Navigate to the interview session page with all the necessary data
-                // Use the response values directly instead of state values
-                navigate('/interview/session', {
+                // Navigate to the training session page with all the necessary data
+                navigate('/training/session', {
                     state: {
                         ...location.state,
                         questions: questionsResponse.questions,
@@ -138,13 +138,14 @@ const InterviewPreview: React.FC = () => {
                         transitionPhrases: audioPhrasesResponse.transitionPhrases,
                         outroPhrase: audioPhrasesResponse.outroPhrase,
                         repeatQuestionPhrases: audioPhrasesResponse.repeatQuestionPhrases,
+                        modelUrl
                     }
                 });
             }
 
         } catch (error) {
-            console.error('Error starting interview:', error);
-            setErrorMessage("We couldn't load the interview. Please try again!");
+            console.error('Error starting training:', error);
+            setErrorMessage("We couldn't load the training. Please try again!");
         } finally {
             setIsLoading(false);
         }
@@ -155,7 +156,7 @@ const InterviewPreview: React.FC = () => {
             {isLoading ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 4 }}>
                     <Typography variant="h5" color="primary" sx={{ mb: 3, fontWeight: 500 }}>
-                        We are preparing your interview
+                        We are preparing your training
                     </Typography>
                     <CircularProgress size={60} sx={{ mb: 3 }} />
                 </Box>
@@ -168,7 +169,7 @@ const InterviewPreview: React.FC = () => {
                         <Button 
                             variant="contained" 
                             color="primary" 
-                            onClick={startInterview} 
+                            onClick={startTraining} 
                         >
                             Try Again
                         </Button>
@@ -179,47 +180,43 @@ const InterviewPreview: React.FC = () => {
                     <Card sx={{ mb: 4, borderRadius: 2, boxShadow: 3, width: '100%', minWidth: { xs: '380px', sm: '600px', md: '800px' }, maxWidth: { xs: '95%', sm: '90%', md: '1000px' } }}>
                         <CardContent sx={{ p: 3 }}>
                             <Typography variant="h5" component="h2" gutterBottom color="text.primary" sx={{ fontWeight: 'medium', mb: 2, textAlign: 'center' }}>
-                                <Box component="span" sx={{ fontWeight: 'bold' }}>Job name:</Box> {interviewData.jobName}
+                                <Box component="span" sx={{ fontWeight: 'bold' }}>Job name:</Box> {trainingData.jobName}
                             </Typography>
 
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
                                 <Typography variant="body1" gutterBottom color="text.primary" sx={{ textAlign: 'center' }}>
-                                    <Box component="span" sx={{ fontWeight: 'bold' }}>Duration:</Box> {interviewData.duration} minutes
+                                    <Box component="span" sx={{ fontWeight: 'bold' }}>Number of Questions:</Box> {trainingData.numQuestions}
                                 </Typography>
 
                                 <Typography variant="body1" gutterBottom color="text.primary" sx={{ textAlign: 'center' }}>
-                                    <Box component="span" sx={{ fontWeight: 'bold' }}>Soft Skills:</Box> {interviewData.softSkillsPercentage}%
+                                    <Box component="span" sx={{ fontWeight: 'bold' }}>Difficulty:</Box> {trainingData.difficulty}
                                 </Typography>
 
-                                <Typography variant="body1" gutterBottom color="text.primary" sx={{ textAlign: 'center' }}>
-                                    <Box component="span" sx={{ fontWeight: 'bold' }}>Difficulty:</Box> {interviewData.difficulty}
-                                </Typography>
-
-                                {interviewData.languageCode && (
+                                {trainingData.languageCode && (
                                     <Typography variant="body1" gutterBottom color="text.primary" sx={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         <Box component="span" sx={{ fontWeight: 'bold', mr: 1 }}>Language:</Box>
-                                        {interviewData.languageCode === 'en-US' ? '🇺🇸' :
-                                          interviewData.languageCode === 'en-GB' ? '🇬🇧' :
-                                          interviewData.languageCode === 'fr-FR' ? '🇫🇷' :
-                                          interviewData.languageCode === 'de-DE' ? '🇩🇪' :
-                                          interviewData.languageCode === 'es-ES' ? '🇪🇸' :
-                                          interviewData.languageCode === 'it-IT' ? '🇮🇹' :
-                                          interviewData.languageCode === 'ja-JP' ? '🇯🇵' :
-                                          interviewData.languageCode === 'ko-KR' ? '🇰🇷' :
-                                          interviewData.languageCode === 'pt-BR' ? '🇧🇷' :
-                                          interviewData.languageCode === 'zh-CN' ? '🇨🇳' :
-                                          interviewData.languageCode} {interviewData.languageCode}
+                                        {trainingData.languageCode === 'en-US' ? '🇺🇸' :
+                                          trainingData.languageCode === 'en-GB' ? '🇬🇧' :
+                                          trainingData.languageCode === 'fr-FR' ? '🇫🇷' :
+                                          trainingData.languageCode === 'de-DE' ? '🇩🇪' :
+                                          trainingData.languageCode === 'es-ES' ? '🇪🇸' :
+                                          trainingData.languageCode === 'it-IT' ? '🇮🇹' :
+                                          trainingData.languageCode === 'ja-JP' ? '🇯🇵' :
+                                          trainingData.languageCode === 'ko-KR' ? '🇰🇷' :
+                                          trainingData.languageCode === 'pt-BR' ? '🇧🇷' :
+                                          trainingData.languageCode === 'zh-CN' ? '🇨🇳' :
+                                          trainingData.languageCode} {trainingData.languageCode}
                                     </Typography>
                                 )}
                             </Box>
 
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 3, justifyContent: 'center' }}>
-                                {interviewData.tags && interviewData.tags.length > 0 && (
+                                {trainingData.tags && trainingData.tags.length > 0 && (
                                     <>
                                         <Typography variant="body1" color="text.primary" sx={{ mr: 1 }}>
-                                            <Box component="span" sx={{ fontWeight: 'bold' }}>Topics:</Box>
+                                            <Box component="span" sx={{ fontWeight: 'bold' }}>Topic:</Box>
                                         </Typography>
-                                        {interviewData.tags.map((tag, index) => (
+                                        {trainingData.tags.map((tag, index) => (
                                             <Chip key={`tag-${index}`} label={tag} variant="outlined" />
                                         ))}
                                     </>
@@ -231,7 +228,7 @@ const InterviewPreview: React.FC = () => {
                                     variant="contained"
                                     color="primary"
                                     size="medium"
-                                    onClick={startInterview}
+                                    onClick={startTraining}
                                     disabled={isLoading}
                                     sx={{
                                         px: 3,
@@ -240,7 +237,7 @@ const InterviewPreview: React.FC = () => {
                                         borderRadius: '6px'
                                     }}
                                 >
-                                    Start Interview
+                                    Start Training
                                 </Button>
                             </Box>
                         </CardContent>
@@ -251,4 +248,4 @@ const InterviewPreview: React.FC = () => {
     );
 };
 
-export default InterviewPreview;
+export default TrainingPreview;
