@@ -26,6 +26,7 @@ export interface GenerateQuestionsRequest {
   duration: number;
   jobName: string;
   softSkillsPercentage: number;
+  difficulty?: string;
   tags?: string[];
   language?: string;
   interviewerId?: string;

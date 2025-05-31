@@ -19,6 +19,8 @@ import JobDescriptionUploadPage from './pages/interview-setup/JobDescriptionUplo
 import InterviewConfigurationPage from './pages/interview-setup/InterviewConfigurationPage';
 import InterviewPage from './pages/InterviewPage.tsx';
 import InterviewPreview from './pages/InterviewPreview.tsx';
+import TrainingPreview from './pages/TrainingPreview.tsx';
+import TrainingPage from './pages/TrainingPage.tsx';
 import InterviewResultPage from './pages/InterviewResultPage.tsx';
 import InterviewListPage from './pages/InterviewListPage.tsx';
 import BookmarkedQuestionsPage from './pages/BookmarkedQuestionsPage.tsx';
@@ -63,7 +65,9 @@ function App() {
                             <Route path="interview/setup" element={<InterviewConfigurationPage />} />
                             <Route path="training/setup" element={<InterviewConfigurationPage />} />
                             <Route path="interview/preview" element={<InterviewPreview />} />
+                            <Route path="training/preview" element={<TrainingPreview />} />
                             <Route path="interview/session" element={<InterviewPage />} />
+                            <Route path="training/session" element={<TrainingPage />} />
                             <Route path="interview/finish" element={<FinishInterviewPage />} />
                             <Route path="interview/list" element={<InterviewListPage />} />
                             <Route path="interview/:interviewId" element={<InterviewResultPage />} />
