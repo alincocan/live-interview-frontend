@@ -104,18 +104,9 @@ const DashboardHome = () => {
         const fetchUserData = async () => {
             try {
                 const userService = UserService.getInstance();
-
-                // First check if user data exists in storage
                 const storedUser = userService.getUserFromStorage();
                 if (storedUser) {
                     setUser(storedUser);
-                    return;
-                }
-
-                // If no data in storage, fetch from server
-                const response = await userService.getCurrentUser();
-                if (response.success && response.user) {
-                    setUser(response.user);
                 }
             } catch (error) {
                 console.error('Error fetching user data:', error);
