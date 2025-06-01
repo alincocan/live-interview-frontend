@@ -1,0 +1,4 @@
+export enum ScoreEnum {
+    INTERVIEW_PASSING_SCORE = 60,
+    INTERVIEW_EXCELENT_SCORE = 80
+}

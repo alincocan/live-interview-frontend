@@ -14,7 +14,7 @@ import {
 import {
     TrainingService,
     GenerateTrainingRequest
-} from '../service/TrainingService';
+} from '../service/trainingService.ts';
 
 const TrainingPreview: React.FC = () => {
     const location = useLocation();

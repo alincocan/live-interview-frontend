@@ -14,6 +14,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { InterviewService, InterviewDetailsResponse } from '../service/InterviewService.ts';
 import QuestionDisplay from '../components/QuestionDisplay.tsx';
+import {ScoreEnum} from "../util/ScoreEnum.ts";
 
 const InterviewResultPage: React.FC = () => {
     const { interviewId: sessionId } = useParams<{ interviewId: string }>();
@@ -298,14 +299,14 @@ const InterviewResultPage: React.FC = () => {
                                         my: 2,
                                         py: 1,
                                         borderRadius: 1,
-                                        bgcolor: sessionDetails.score >= 60 ? 'success.light' : 'error.light',
-                                        color: sessionDetails.score >= 60 ? 'success.dark' : 'error.dark',
+                                        bgcolor: sessionDetails.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? 'success.light' : 'error.light',
+                                        color: sessionDetails.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? 'success.dark' : 'error.dark',
                                         fontWeight: 'bold',
                                         fontSize: '1rem',
                                         textTransform: 'uppercase',
                                         letterSpacing: 1
                                     }}>
-                                        {sessionDetails.score >= 60 ? 'PASSED' : 'FAILED'}
+                                        {sessionDetails.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? 'PASSED' : 'FAILED'}
                                     </Box>
 
                                     <Box sx={{ 
@@ -337,8 +338,8 @@ const InterviewResultPage: React.FC = () => {
                                             px: 2, 
                                             py: 0.5, 
                                             borderRadius: 5,
-                                            bgcolor: sessionDetails.score >= 60 ? (
-                                                        sessionDetails.score > 7 ? 'success.main' : 'warning.main'
+                                            bgcolor: sessionDetails.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? (
+                                                        sessionDetails.score > ScoreEnum.INTERVIEW_EXCELENT_SCORE ? 'success.main' : 'warning.main'
                                                     ) : 'error.main',
                                             color: 'white',
                                             fontSize: '0.75rem',
@@ -346,8 +347,8 @@ const InterviewResultPage: React.FC = () => {
                                             textTransform: 'uppercase',
                                             letterSpacing: 0.5
                                         }}>
-                                            {sessionDetails.score >= 60 ? (
-                                                sessionDetails.score > 7 ? 'Excellent' : 'Good'
+                                            {sessionDetails.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? (
+                                                sessionDetails.score > ScoreEnum.INTERVIEW_EXCELENT_SCORE ? 'Excellent' : 'Good'
                                             ) : 'Needs Improvement'}
                                         </Box>
                                     </Box>

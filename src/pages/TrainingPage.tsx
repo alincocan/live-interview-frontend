@@ -22,7 +22,7 @@ import {
     TrainingService,
     ValidateAnswerRequest,
     FinalizeTrainingRequest
-} from '../service/TrainingService';
+} from '../service/trainingService.ts';
 
 const TrainingPage: React.FC = () => {
     const location = useLocation();
