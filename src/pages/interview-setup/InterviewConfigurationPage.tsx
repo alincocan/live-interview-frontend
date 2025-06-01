@@ -41,7 +41,7 @@ const InterviewConfiguration: React.FC = () => {
     const selectedInterviewer = location.state?.selectedInterviewer;
 
     // Get jobName from sessionStorage
-    const storedJobName = sessionStorage.getItem('jobName') || '';
+    const storedJobName = location.state?.jobName;
 
     // Get tags from location state if available
     const tagsFromState = location.state?.tags;
@@ -272,6 +272,7 @@ const InterviewConfiguration: React.FC = () => {
             stateToPass = {
                 duration: '0', // Not used in training mode
                 numQuestions: numQuestions.toString(),
+                modelUrl: selectedInterviewer.glbPath,
                 jobName,
                 softSkillsPercentage: '0', // No soft skills in training mode
                 difficulty: difficultyLevel,
@@ -288,6 +289,7 @@ const InterviewConfiguration: React.FC = () => {
             stateToPass = {
                 duration: duration.toString(),
                 jobName,
+                modelUrl: selectedInterviewer.glbPath,
                 softSkillsPercentage: softSkills,
                 difficulty: difficultyLevel,
                 tags,
@@ -300,10 +302,16 @@ const InterviewConfiguration: React.FC = () => {
             console.log('Passing as state (Interview mode):', stateToPass);
         }
 
-        // Navigate to the InterviewPreview page with all values in state
-        navigate('/interview/preview', {
-            state: stateToPass
-        });
+        // Navigate to the appropriate preview page based on mode
+        if (isTraining) {
+            navigate('/training/preview', {
+                state: stateToPass
+            });
+        } else {
+            navigate('/interview/preview', {
+                state: stateToPass
+            });
+        }
     };
 
     return (
@@ -551,11 +559,19 @@ const InterviewConfiguration: React.FC = () => {
                                                 // Don't allow changes if stateTag exists
                                                 return;
                                             }
+
+                                            const value = e.target.value;
+
                                             if (tags.length > 0) {
-                                                setTags([e.target.value]);
+                                                setTags([value]);
+                                            } else if (value.trim()) {
+                                                // Automatically add to tags if there's a value
+                                                setTags([value.trim()]);
+                                                setNewTag('');
                                             } else {
-                                                setNewTag(e.target.value);
+                                                setNewTag(value);
                                             }
+
                                             // Clear error when field is updated
                                             if (errors.tags) {
                                                 setErrors(prev => ({ ...prev, tags: undefined }));
