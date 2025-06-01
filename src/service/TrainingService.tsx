@@ -3,6 +3,33 @@ import { Response } from "../bo/Response.ts";
 import { UserService } from "./userService";
 import { InterviewQuestion, AudioPhrasesResponse } from "./InterviewService";
 
+export interface TrainingListItem {
+  id: string;
+  jobName: string;
+  difficulty: string;
+  duration: number;
+  createTime: string,
+  score: number;
+  date: string; // ISO date string
+}
+
+export interface TrainingListResponse {
+  sessions: TrainingListItem[];
+  success: boolean;
+  message?: string;
+}
+
+export interface TrainingDetailsResponse {
+  id: string;
+  jobName: string;
+  difficulty: string;
+  duration: number;
+  score: number;
+  questions: InterviewQuestion[];
+  success?: boolean;
+  message?: string;
+}
+
 export interface ValidateAnswerRequest {
   question: string;
   answer: string;
@@ -258,6 +285,109 @@ export class TrainingService {
         return {
           success: false,
           message: 'An error occurred while finalizing the training. Please try again.'
+        };
+      }
+    }
+  }
+
+  public async getSessions(): Promise<TrainingListResponse> {
+    try {
+      const token = this.getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await axios.get<TrainingListResponse>(
+        `${this.baseUrl}/trainings`,
+        { headers }
+      );
+
+      return {
+        ...response.data,
+        success: true
+      };
+    } catch (error: unknown) {
+      console.error('Get training sessions list error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          sessions: [],
+          success: false,
+          message: error.response.data?.message || 'Failed to fetch training sessions. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          sessions: [],
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          sessions: [],
+          success: false,
+          message: 'An error occurred while fetching training sessions. Please try again.'
+        };
+      }
+    }
+  }
+
+  public async getTrainingDetails(sessionId: string): Promise<TrainingDetailsResponse> {
+    try {
+      const token = this.getAuthToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await axios.get<TrainingDetailsResponse>(
+        `${this.baseUrl}/trainings/${sessionId}`,
+        { headers }
+      );
+
+      return {
+        ...response.data,
+        success: true
+      };
+    } catch (error: unknown) {
+      console.error('Get training details error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        return {
+          id: '',
+          jobName: '',
+          difficulty: '',
+          duration: 0,
+          score: 0,
+          questions: [],
+          success: false,
+          message: error.response.data?.message || 'Failed to fetch training details. Please try again.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        // The request was made but no response was received
+        return {
+          id: '',
+          jobName: '',
+          difficulty: '',
+          duration: 0,
+          score: 0,
+          questions: [],
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        return {
+          id: '',
+          jobName: '',
+          difficulty: '',
+          duration: 0,
+          score: 0,
+          questions: [],
+          success: false,
+          message: 'An error occurred while fetching training details. Please try again.'
         };
       }
     }

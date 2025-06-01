@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Container,
     Typography,
@@ -9,9 +9,12 @@ import {
 } from '@mui/material';
 import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied';
 
-const FinishInterviewPage: React.FC = () => {
+const FinishSessionPage: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const sessionId = sessionStorage.getItem('sessionId');
+
+    const isTraining = location.pathname.includes('training/finish');
 
     const handleSeeResults = () => {
         if (sessionId) {
@@ -26,16 +29,16 @@ const FinishInterviewPage: React.FC = () => {
             <Paper elevation={3} sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     <SentimentVerySatisfiedIcon sx={{ fontSize: 120, color: 'success.main' }} />
-                    
+
                     <Typography variant="h4" component="h1" gutterBottom>
-                        Interview Completed Successfully!
+                        {isTraining ? 'Training Completed Successfully!' : 'Interview Completed Successfully!'}
                     </Typography>
-                    
+
                     <Typography variant="body1" paragraph>
-                        Congratulations! You have successfully completed the interview.
+                        Congratulations! You have successfully completed the {isTraining ? 'training' : 'interview'}.
                         Your answers have been recorded and analyzed.
                     </Typography>
-                    
+
                     <Button 
                         variant="contained" 
                         color="primary" 
@@ -51,4 +54,4 @@ const FinishInterviewPage: React.FC = () => {
     );
 };
 
-export default FinishInterviewPage;
+export default FinishSessionPage;

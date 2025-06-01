@@ -82,16 +82,16 @@ function Model({ url, currentText }: { url: string, currentText?: string }) {
 
   // Handle idle animation
   useEffect(() => {
-    const idleAction = actions['Male_TF_idle'];
-    if (idleAction) {
-      idleAction.reset().fadeIn(0.5).play();
+    const talkingAction = actions['Talking'];
+    if (talkingAction) {
+      talkingAction.reset().fadeIn(0.5).play();
     } else {
       console.warn('Idle animation not found:', Object.keys(actions));
     }
 
     return () => {
       // Clean up animation when component unmounts
-      idleAction?.fadeOut(0.5).stop();
+      talkingAction?.fadeOut(0.5).stop();
     };
   }, [actions]);
 
@@ -117,7 +117,7 @@ function Model({ url, currentText }: { url: string, currentText?: string }) {
     }
   }, [currentText]);
 
-  return <primitive ref={modelRef} object={scene} scale={0.6} position={[0, -0.7, 0]} />;
+  return <primitive ref={modelRef} object={scene} scale={0.6} position={[-0.02, -0.85, 0]} />;
 }
 
 interface ModelViewerProps {
@@ -235,7 +235,7 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
           <CircularProgress />
         </Box>
       }>
-        <Canvas camera={{ position: [0, 1, 5], fov: 10  }}>
+        <Canvas camera={{ position: [0, 0.3, 3], fov: 10  }}>
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 5, 5]} />
           <Model url={url} currentText={currentLetter} />

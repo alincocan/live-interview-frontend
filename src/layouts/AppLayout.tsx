@@ -134,7 +134,7 @@ const AppLayout: React.FC = () => {
 
     const handleMyTrainingsClick = () => {
         handleMenuClose();
-        navigate('/training/choose');
+        navigate('/training/list');
     };
 
     return (

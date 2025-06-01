@@ -19,13 +19,13 @@ import {
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { format } from 'date-fns';
-import { InterviewService, InterviewListItem } from '../service/InterviewService.ts';
+import { TrainingService, TrainingListItem } from '../service/TrainingService.tsx';
 
-const InterviewListPage: React.FC = () => {
+const TrainingListPage: React.FC = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [sessions, setSessions] = useState<InterviewListItem[]>([]);
+    const [sessions, setSessions] = useState<TrainingListItem[]>([]);
 
     // Pagination state
     const [page, setPage] = useState(0);
@@ -34,17 +34,17 @@ const InterviewListPage: React.FC = () => {
     useEffect(() => {
         const fetchSessions = async () => {
             try {
-                const interviewService = InterviewService.getInstance();
-                const response = await interviewService.getSessions();
+                const trainingService = TrainingService.getInstance();
+                const response = await trainingService.getSessions();
 
                 if (response.success) {
                     setSessions(response.sessions);
                     setErrorMessage(null);
                 } else {
-                    setErrorMessage(response.message || 'Failed to fetch sessions. Please try again.');
+                    setErrorMessage(response.message || 'Failed to fetch training sessions. Please try again.');
                 }
             } catch (error) {
-                console.error('Error fetching sessions:', error);
+                console.error('Error fetching training sessions:', error);
                 setErrorMessage('An unexpected error occurred. Please try again.');
             } finally {
                 setIsLoading(false);
@@ -71,7 +71,7 @@ const InterviewListPage: React.FC = () => {
 
     // Handle view session details
     const handleViewSession = (sessionId: string) => {
-        navigate(`/interview/${sessionId}`);
+        navigate(`/training/${sessionId}`);
     };
 
     // Handle page change
@@ -93,7 +93,7 @@ const InterviewListPage: React.FC = () => {
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
             <Typography variant="h5" component="h1" gutterBottom align="left" color="text.primary" sx={{ mb: 4 }}>
-                Your Interviews
+                Your Trainings
             </Typography>
 
             {isLoading ? (
@@ -127,7 +127,7 @@ const InterviewListPage: React.FC = () => {
                             }
                         }}
                     >
-                        Loading sessions...
+                        Loading training sessions...
                     </Typography>
                 </Box>
             ) : errorMessage ? (
@@ -159,7 +159,7 @@ const InterviewListPage: React.FC = () => {
                         </Box>
                         <Box>
                             <Typography variant="h6" color="error.dark" sx={{ fontWeight: 'medium', mb: 0.5 }}>
-                                Error Loading Sessions
+                                Error Loading Training Sessions
                             </Typography>
                             <Typography variant="body1" color="error.dark">
                                 {errorMessage}
@@ -174,12 +174,12 @@ const InterviewListPage: React.FC = () => {
                     overflow: 'hidden',
                     border: '1px solid rgba(0,0,0,0.05)'
                 }}>
-                    <Table sx={{ minWidth: 650 }} aria-label="sessions table">
+                    <Table sx={{ minWidth: 650 }} aria-label="training sessions table">
                         <TableHead sx={{ bgcolor: 'background.paper' }}>
                             <TableRow>
                                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Job Name</TableCell>
                                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Difficulty</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Duration</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Questions</TableCell>
                                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Date</TableCell>
                                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Score</TableCell>
                                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="center">Actions</TableCell>
@@ -213,7 +213,7 @@ const InterviewListPage: React.FC = () => {
                                         </Box>
                                     </TableCell>
                                     <TableCell>
-                                        {session.duration} minutes
+                                        {session.duration}
                                     </TableCell>
                                     <TableCell>{formatDate(session.createTime)}</TableCell>
                                     <TableCell>
@@ -242,11 +242,11 @@ const InterviewListPage: React.FC = () => {
                                         </Box>
                                     </TableCell>
                                     <TableCell align="center">
-                                        <Tooltip title="View Session Details">
+                                        <Tooltip title="View Training Session Details">
                                             <IconButton 
                                                 color="primary" 
                                                 onClick={() => handleViewSession(session.id)}
-                                                aria-label="view session details"
+                                                aria-label="view training session details"
                                             >
                                                 <VisibilityIcon />
                                             </IconButton>
@@ -301,15 +301,15 @@ const InterviewListPage: React.FC = () => {
                         <Typography variant="h4" color="info.dark">0</Typography>
                     </Box>
                     <Typography variant="h5" color="info.dark" sx={{ fontWeight: 'medium', mb: 1 }}>
-                        No Sessions Found
+                        No Training Sessions Found
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500, mb: 3 }}>
-                        You haven't completed any sessions yet. Start a new session to see your results here.
+                        You haven't completed any training sessions yet. Start a new training session to see your results here.
                     </Typography>
                     <Button 
                         variant="contained" 
                         color="primary" 
-                        onClick={() => navigate('/interview/')}
+                        onClick={() => navigate('/training/choose')}
                         sx={{ 
                             px: 3, 
                             py: 1,
@@ -317,7 +317,7 @@ const InterviewListPage: React.FC = () => {
                             fontWeight: 'medium'
                         }}
                     >
-                        Start New Interview
+                        Start New Training
                     </Button>
                 </Paper>
             )}
@@ -325,4 +325,4 @@ const InterviewListPage: React.FC = () => {
     );
 };
 
-export default InterviewListPage;
+export default TrainingListPage;

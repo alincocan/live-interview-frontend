@@ -23,8 +23,9 @@ import TrainingPreview from './pages/TrainingPreview.tsx';
 import TrainingPage from './pages/TrainingPage.tsx';
 import InterviewResultPage from './pages/InterviewResultPage.tsx';
 import InterviewListPage from './pages/InterviewListPage.tsx';
+import TrainingListPage from './pages/TrainingListPage.tsx';
 import BookmarkedQuestionsPage from './pages/BookmarkedQuestionsPage.tsx';
-import FinishInterviewPage from './pages/FinishInterviewPage.tsx';
+import FinishSessionPage from './pages/FinishSessionPage.tsx';
 import PaymentPage from './pages/PaymentPage.tsx';
 
 function App() {
@@ -68,9 +69,12 @@ function App() {
                             <Route path="training/preview" element={<TrainingPreview />} />
                             <Route path="interview/session" element={<InterviewPage />} />
                             <Route path="training/session" element={<TrainingPage />} />
-                            <Route path="interview/finish" element={<FinishInterviewPage />} />
+                            <Route path="interview/finish" element={<FinishSessionPage />} />
+                            <Route path="training/finish" element={<FinishSessionPage />} />
                             <Route path="interview/list" element={<InterviewListPage />} />
+                            <Route path="training/list" element={<TrainingListPage />} />
                             <Route path="interview/:interviewId" element={<InterviewResultPage />} />
+                            <Route path="training/:interviewId" element={<InterviewResultPage />} />
                             <Route path="questions/bookmarked" element={<BookmarkedQuestionsPage />} />
                             <Route path="payment" element={<PaymentPage />} />
                             {/*<Route path="details" element={<DetailsPage />} />*/}

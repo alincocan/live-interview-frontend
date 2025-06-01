@@ -13,7 +13,6 @@ import {
 } from '@mui/material';
 import MicIcon from '@mui/icons-material/Mic';
 import StopIcon from '@mui/icons-material/Stop';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ModelViewer from '../components/ModelViewer';
 import { 
     InterviewQuestion,
@@ -195,7 +194,7 @@ const TrainingPage: React.FC = () => {
 
             if (response.success) {
                 // Redirect to dashboard
-                navigate('/dashboard');
+                navigate('/training/finish');
             } else {
                 setErrorMessage(`Failed to finalize training: ${response.message}`);
                 // Still show completion message
@@ -279,12 +278,6 @@ const TrainingPage: React.FC = () => {
         return () => clearInterval(timerInterval);
     }, [remainingTime]);
 
-    // Format time as MM:SS
-    const formatTime = (seconds: number): string => {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    };
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -343,7 +336,7 @@ const TrainingPage: React.FC = () => {
                             position: 'relative'
                         }}
                     >
-                        {/* Timer display */}
+                        {/* Question counter display */}
                         <Box sx={{ 
                             position: 'absolute', 
                             top: 20, 
@@ -353,9 +346,11 @@ const TrainingPage: React.FC = () => {
                             flexDirection: 'column',
                             alignItems: 'center' 
                         }}>
-                            <AccessTimeIcon color="primary" sx={{ fontSize: 24, mb: 1 }} />
                             <Typography variant="body2" sx={{ textAlign: 'center', fontWeight: 'bold' }}>
-                                {formatTime(remainingTime)}
+                                Question
+                            </Typography>
+                            <Typography variant="body1" sx={{ textAlign: 'center', fontWeight: 'bold', color: 'primary.main' }}>
+                                {questionIndex + 1}/{location.state?.questions?.length || 0}
                             </Typography>
                         </Box>
                         {isValidating ? (
