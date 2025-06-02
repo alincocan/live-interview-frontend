@@ -443,6 +443,13 @@ const InterviewConfiguration: React.FC = () => {
                                         value={selectedCountry}
                                         onChange={handleCountryChange}
                                         displayEmpty
+                                        MenuProps={{
+                                            PaperProps: {
+                                                sx: {
+                                                    backgroundColor: 'background.default', // Use theme background color
+                                                },
+                                            },
+                                        }}
                                         renderValue={(selected) => {
                                             if (!selected) {
                                                 return <em>Select a language</em>;

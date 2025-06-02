@@ -4,7 +4,7 @@ import {OrbitControls, useGLTF, Environment, useAnimations} from '@react-three/d
 import { Box, CircularProgress } from '@mui/material';
 
 // Model component that loads and displays the 3D model
-function Model({ url, currentText }: { url: string, currentText?: string }) {
+export function Model({ url, currentText }: { url: string, currentText?: string }) {
   const modelRef = useRef<THREE.Group>(null);
   const [blinking, setBlinking] = useState(false);
 
@@ -80,7 +80,7 @@ function Model({ url, currentText }: { url: string, currentText?: string }) {
     };
   }, [blinking]);
 
-  // Handle idle animation
+  // Handle talking animation
   useEffect(() => {
     const talkingAction = actions['Talking'];
     if (talkingAction) {

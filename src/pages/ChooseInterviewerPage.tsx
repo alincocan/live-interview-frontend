@@ -9,9 +9,12 @@ import {
     CircularProgress,
     Box,
 } from '@mui/material';
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, Suspense} from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { InterviewService, Interviewer } from '../service/InterviewService.ts';
+import {Canvas} from "@react-three/fiber";
+import {Environment, OrbitControls} from "@react-three/drei";
+import {Model} from "../components/ModelViewer.tsx";
 
 const ChooseInterviewerPage: React.FC = () => {
     const navigate = useNavigate();
@@ -61,7 +64,7 @@ const ChooseInterviewerPage: React.FC = () => {
                 pt: 8,
             }}
         >
-            <Typography sx={{ mb: 5, color: 'text.secondary' }} variant="h4">
+            <Typography sx={{ mb: 5, color: 'text.primary' }} variant="h4">
                 {pageTitle}
             </Typography>
 
@@ -89,7 +92,8 @@ const ChooseInterviewerPage: React.FC = () => {
                         <Card
                             key={index}
                             sx={{
-                                width: 260,
+                                width: 360,
+                                height: 360,
                                 borderRadius: 3,
                                 overflow: 'hidden',
                                 boxShadow: 3,
@@ -100,7 +104,7 @@ const ChooseInterviewerPage: React.FC = () => {
                                 }
                             }}
                         >
-                            <CardActionArea onClick={() => {
+                            <CardActionArea  sx = {{height:310}} onClick={() => {
                                 // Don't store sessionType in sessionStorage, pass it as state instead
                                 // No need to store in sessionStorage
 
@@ -126,12 +130,34 @@ const ChooseInterviewerPage: React.FC = () => {
                                     });
                                 }
                             }}>
-                                <CardMedia
-                                    component="img"
-                                    height="260"
-                                    image={interviewer.avatarPath}
-                                    alt={interviewer.name}
-                                />
+                                <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
+
+                                    <Suspense fallback={
+                                        <Box sx={{
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            width: '100%',
+                                            height: '100%'
+                                        }}>
+                                            <CircularProgress />
+                                        </Box>
+                                    }>
+                                        <Canvas camera={{ position: [0, 0.3, 3], fov: 10  }}>
+                                            <ambientLight intensity={0.5} />
+                                            <directionalLight position={[5, 5, 5]} />
+                                            <Model url={interviewer.glbPath} currentText="" />
+
+                                            <OrbitControls
+                                                enablePan={true}
+                                                enableZoom={false}
+                                                enableRotate={false}
+                                                autoRotate={false}
+                                            />
+                                            <Environment preset="sunset" />
+                                        </Canvas>
+                                    </Suspense>
+                                </Box>
                                 <CardContent>
                                     <Typography variant="h6" component="div" color="text.primary" align="center">
                                         {interviewer.name}
