@@ -343,8 +343,9 @@ const AppLayout: React.FC = () => {
                             'aria-labelledby': 'profile-button',
                         }}
                         PaperProps={{
-                            style: {
+                            sx: {
                                 width: '500px',
+                                backgroundColor: 'background.default', // Use theme background color
                             },
                         }}
                     >

@@ -167,7 +167,7 @@ const JobDescriptionUploadPage: React.FC = () => {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        bgcolor: 'background.paper',
+        bgcolor: 'background.default', // Use theme background color
         boxShadow: 24,
         p: 4,
         borderRadius: 2,
@@ -193,7 +193,7 @@ const JobDescriptionUploadPage: React.FC = () => {
                 pt: 8,
             }}
         >
-            <Typography sx={{ mb: 5, color: 'text.secondary' }} variant="h4">
+            <Typography sx={{ mb: 5, color: 'text.primary' }} variant="h4">
                 Interview Setup
             </Typography>
             {isLoading ? (
