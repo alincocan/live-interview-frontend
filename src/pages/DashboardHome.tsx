@@ -25,11 +25,14 @@ import StarIcon from '@mui/icons-material/Star';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardService } from '../service/dashboardService';
 import { DashboardResponse } from '../bo/DashboardData';
 import { UserService, User } from '../service/userService';
+import {ScoreEnum} from "../util/ScoreEnum.ts";
 
 const DashboardHome = () => {
+    const navigate = useNavigate();
     const [section5Visible, setSection5Visible] = useState(false);
     const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
     const [loading, setLoading] = useState(true);
@@ -169,13 +172,23 @@ const DashboardHome = () => {
                                 Are you feeling prepared?
                             </Typography>
                             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mt: { xs: 2, sm: 0 } }}>
-                                <Button variant="contained" color="primary" size="medium">
+                                <Button 
+                                    variant="contained" 
+                                    color="primary" 
+                                    size="medium"
+                                    onClick={() => navigate('/interview/choose')}
+                                >
                                     Start Interview
                                 </Button>
                                 <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
                                     or
                                 </Typography>
-                                <Button variant="outlined" color="primary" size="medium">
+                                <Button 
+                                    variant="outlined" 
+                                    color="primary" 
+                                    size="medium"
+                                    onClick={() => navigate('/training/choose')}
+                                >
                                     Go to trainings
                                 </Button>
                             </Box>
@@ -264,11 +277,22 @@ const DashboardHome = () => {
                                 </Box>
                             ) : dashboardData?.interviews && dashboardData.interviews.length > 0 ? (
                                 <List>
-                                    {dashboardData.interviews.map((interview) => (
-                                        <ListItem key={interview.id} divider sx={{ py: 0.5 }}>
+                                    {dashboardData.interviews.slice(0,7).map((interview) => (
+                                        <ListItem 
+                                            key={interview.id} 
+                                            divider 
+                                            sx={{ 
+                                                py: 0.5,
+                                                cursor: 'pointer',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.05)'
+                                                }
+                                            }}
+                                            onClick={() => navigate(`/interview/${interview.id}`)}
+                                        >
                                             <Chip 
-                                                label={interview.score >= 5 ? "Passed" : "Failed"} 
-                                                color={interview.score >= 5 ? "success" : "error"} 
+                                                label={interview.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? "Passed" : "Failed"}
+                                                color={interview.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? "success" : "error"}
                                                 size="small" 
                                                 sx={{ mr: 1, height: '20px', '& .MuiChip-label': { fontSize: '0.7rem', px: 1 } }}
                                             />

@@ -7,7 +7,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import ConfirmUserPage from "./pages/ConfirmUserPage.tsx";
 import OAuth2RedirectPage from "./pages/OAuth2RedirectPage.tsx";
 import ProfileUpdatePage from "./pages/ProfileUpdatePage.tsx";
-import DashboardHome from "./pages/DeshboardHome.tsx";
+import DashboardHome from "./pages/DashboardHome.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import ChooseInterviewerPage from "./pages/ChooseInterviewerPage.tsx";
 import { darkGreyTheme } from "./config/theme";

@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { format } from 'date-fns';
-import { TrainingService, TrainingListItem } from '../service/TrainingService.tsx';
+import { TrainingService, TrainingListItem } from '../service/trainingService.ts';
 
 const TrainingListPage: React.FC = () => {
     const navigate = useNavigate();
