@@ -1,4 +1,4 @@
-import { Box, Typography, Menu, MenuItem, Divider, Avatar, Button, Tooltip } from '@mui/material';
+import { Box, Typography, Menu, MenuItem, Divider, Avatar, Button, Tooltip, IconButton, Switch } from '@mui/material';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { AuthenticationService } from '../service/authenticationService';
 import { UserService, User } from '../service/userService';
@@ -11,12 +11,16 @@ import SchoolIcon from '@mui/icons-material/School';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { useThemeContext } from '../config/ThemeContext';
 
 const AppLayout: React.FC = () => {
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const [user, setUser] = useState<User | null>(null);
+    const { mode, toggleColorMode } = useThemeContext();
 
     // No state for token purchase dialog as it's now a separate page
 
@@ -206,7 +210,7 @@ const AppLayout: React.FC = () => {
                         }}
                     >
                         <PlayArrowIcon sx={{ mr: 1, color: '#4CAF50' }} />
-                        <Typography>Start Interview</Typography>
+                        <Typography color="text.primary">Start Interview</Typography>
                     </Box>
 
                     {/* Trainings Menu Item */}
@@ -226,7 +230,7 @@ const AppLayout: React.FC = () => {
                         }}
                     >
                         <SchoolIcon sx={{ mr: 1, color: '#2196F3' }} />
-                        <Typography>Trainings</Typography>
+                        <Typography color="text.primary">Trainings</Typography>
                     </Box>
 
                     {/* Learn Menu Item */}
@@ -247,15 +251,15 @@ const AppLayout: React.FC = () => {
                         }}
                     >
                         <MenuBookIcon sx={{ mr: 1, color: '#FF9800' }} />
-                        <Typography>Learn</Typography>
+                        <Typography color="text.primary">Learn</Typography>
                         <Typography 
-                            variant="caption" 
+                            variant="caption"
+                            color="text.primary"
                             sx={{ 
                                 position: 'absolute',
                                 bottom: '-12px',
                                 right: '10px',
                                 backgroundColor: '#4CAF50',
-                                color: 'white',
                                 padding: '2px 6px',
                                 borderRadius: '10px',
                                 fontSize: '0.6rem',
@@ -265,6 +269,7 @@ const AppLayout: React.FC = () => {
                             Coming soon
                         </Typography>
                     </Box>
+
 
                     {/* Token Balance Button */}
                     {user && (
@@ -278,16 +283,14 @@ const AppLayout: React.FC = () => {
                                     backgroundColor: '#FFD700', // Yellow color
                                     color: '#000',
                                     '&:hover': {
-                                        backgroundColor: '#FFC400',
+                                        backgroundColor: (t) => t.palette.primary.main,
+                                        transform: 'scale(1.05)',
+                                        boxShadow: '0 6px 12px rgba(0, 0, 0, 0.3)'
                                     },
                                     fontWeight: 'bold',
                                     borderRadius: '20px',
                                     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
                                     transition: 'transform 0.2s, box-shadow 0.2s',
-                                    '&:hover': {
-                                        transform: 'scale(1.05)',
-                                        boxShadow: '0 6px 12px rgba(0, 0, 0, 0.3)'
-                                    }
                                 }}
                             >
                                 {user.tokens || 0} Tokens
@@ -324,10 +327,10 @@ const AppLayout: React.FC = () => {
                         </Avatar>
                         {user && (
                             <Typography 
-                                variant="body1" 
+                                variant="body1"
+                                color="text.primary"
                                 sx={{ 
                                     ml: 1,
-                                    color: '#fff'
                                 }}
                             >
                                 {user.lastName} {user.firstName}
@@ -344,27 +347,42 @@ const AppLayout: React.FC = () => {
                         }}
                         PaperProps={{
                             sx: {
-                                width: '500px',
-                                backgroundColor: 'background.default', // Use theme background color
+                                backgroundColor: (t) => t.palette.mode === 'light' ? '#ffffff' : t.palette.background.default
                             },
                         }}
                     >
-                        <Box 
-                            sx={{ 
-                                border: '1px solid rgba(0, 0, 0, 0.12)', 
-                                borderRadius: '4px', 
-                                padding: '8px', 
+                        <Box
+                            sx={{
+                                mb: 2,
+                                padding: '8px',
                                 margin: '8px 0',
-                                backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                                display: 'flex',
+                                alignItems: 'center',
                             }}
                         >
-                            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                                <PersonIcon sx={{ fontSize: 32, color: 'primary.main' }} />
-                            </Box>
+                            <PersonIcon sx={{ fontSize: 32, color: 'primary.main', mr: 2 }} />
+                            {user && (
+                                <Box>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold'}}>
+                                        {user.lastName} {user.firstName}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
+                                        {user.email}
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Box>
+                        <Divider />
+                        <Box 
+                            sx={{
+                                padding: '8px', 
+                                margin: '8px 0',
+                            }}
+                        >
+
                             <MenuItem 
                                 onClick={handleMyInterviewsClick}
-                                sx={{ 
-                                    justifyContent: 'center',
+                                sx={{
                                     '& .MuiTypography-root': { 
                                         fontSize: '0.875rem' 
                                     }
@@ -375,8 +393,7 @@ const AppLayout: React.FC = () => {
                             </MenuItem>
                             <MenuItem 
                                 onClick={handleMyTrainingsClick}
-                                sx={{ 
-                                    justifyContent: 'center',
+                                sx={{
                                     '& .MuiTypography-root': { 
                                         fontSize: '0.875rem' 
                                     }
@@ -387,8 +404,7 @@ const AppLayout: React.FC = () => {
                             </MenuItem>
                             <MenuItem 
                                 onClick={handleBookmarkedQuestionsClick}
-                                sx={{ 
-                                    justifyContent: 'center',
+                                sx={{
                                     '& .MuiTypography-root': { 
                                         fontSize: '0.875rem' 
                                     }
@@ -398,10 +414,22 @@ const AppLayout: React.FC = () => {
                                 <Typography variant="body2">Bookmarked Questions</Typography>
                             </MenuItem>
                         </Box>
-                        <Divider />
+                        <Divider sx={{ my: 1}}/>
                         <MenuItem onClick={handleProfileClick}>
                             <PersonIcon sx={{ mr: 1 }} />
                             Profile
+                        </MenuItem>
+                        <Divider />
+                        <MenuItem sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                {mode === 'dark' ? <Brightness7Icon sx={{ mr: 1 }} /> : <Brightness4Icon sx={{ mr: 1 }} />}
+                                <Typography>{mode === 'dark' ? "Light Mode" : "Dark Mode"}</Typography>
+                            </Box>
+                            <Switch 
+                                checked={mode === 'dark'} 
+                                onChange={toggleColorMode}
+                                color="primary"
+                            />
                         </MenuItem>
                         <Divider />
                         <MenuItem onClick={handleLogout}>

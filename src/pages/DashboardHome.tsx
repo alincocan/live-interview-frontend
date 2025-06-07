@@ -53,8 +53,8 @@ const DashboardHome = () => {
     const chartData = dashboardData ? {
         xAxis: [
             {
-                data: dashboardData.interviews.map((_: any, index: number) => index + 1),
-                label: 'Interview Number',
+                data: dashboardData.interviews.slice().reverse().map((_: any, index: number) => index + 1),
+                label: 'Interview',
                 tickMinStep: 1,
             },
         ],
@@ -67,12 +67,12 @@ const DashboardHome = () => {
         ],
         series: [
             {
-                data: dashboardData.interviews.map((interview: { score: any; }) => interview.score),
+                data: dashboardData.interviews.slice().reverse().map((interview: { score: any; }) => interview.score),
                 label: 'Score',
             },
         ],
     } : {
-        xAxis: [{ data: [], label: 'Interview Number', tickMinStep: 1 }],
+        xAxis: [{ data: [], label: 'Interview', tickMinStep: 1 }],
         yAxis: [{ min: 1, max: 10, tickMinStep: 1 }],
         series: [{ data: [], label: 'Score' }],
     };
