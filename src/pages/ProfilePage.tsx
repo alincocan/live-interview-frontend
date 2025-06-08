@@ -7,19 +7,28 @@ import {
     Card, 
     CardContent, 
     CardHeader, 
-    CircularProgress
+    CircularProgress,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper
 } from '@mui/material';
 import { UserService, User } from '../service/userService.ts';
+import subscriptionsService, { Subscription } from '../service/subscriptionsService';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
 const ProfilePage: React.FC = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState<User | null>(null);
+    const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        const fetchUserData = async () => {
+        const fetchData = async () => {
             setLoading(true);
             const userService = UserService.getInstance();
 
@@ -33,11 +42,17 @@ const ProfilePage: React.FC = () => {
                 }
             }
 
+            // Fetch subscriptions data
+            const subscriptionsResponse = await subscriptionsService.getSubscriptions();
+            if (subscriptionsResponse.success && subscriptionsResponse.subscriptions) {
+                setSubscriptions(subscriptionsResponse.subscriptions);
+            }
+
             setUser(userData);
             setLoading(false);
         };
 
-        fetchUserData();
+        fetchData();
     }, []);
 
     // Format date for display
@@ -154,6 +169,55 @@ const ProfilePage: React.FC = () => {
                                     Buy More Tokens
                                 </Button>
                             </Box>
+                        </CardContent>
+                    </Card>
+                </Grid>
+
+                {/* Subscriptions Card */}
+                <Grid item xs={12}>
+                    <Card elevation={3} sx={{ backgroundColor: '#333333', borderRadius: 3, mt: 3 }}>
+                        <CardHeader 
+                            title="Subscriptions" 
+                            sx={{ 
+                                backgroundColor: 'black', 
+                                color: 'white',
+                                borderTopLeftRadius: 12,
+                                borderTopRightRadius: 12
+                            }}
+                        />
+                        <CardContent>
+                            {subscriptions.length > 0 ? (
+                                <TableContainer component={Paper} sx={{ backgroundColor: '#444444' }}>
+                                    <Table>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Name</TableCell>
+                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Price</TableCell>
+                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Currency</TableCell>
+                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Type</TableCell>
+                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Start Date</TableCell>
+                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Next Billing Date</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {subscriptions.map((subscription, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell sx={{ color: 'white' }}>{subscription.name}</TableCell>
+                                                    <TableCell sx={{ color: 'white' }}>{subscription.price}</TableCell>
+                                                    <TableCell sx={{ color: 'white' }}>{subscription.currency}</TableCell>
+                                                    <TableCell sx={{ color: 'white' }}>{subscription.type}</TableCell>
+                                                    <TableCell sx={{ color: 'white' }}>{formatDate(subscription.startDate)}</TableCell>
+                                                    <TableCell sx={{ color: 'white' }}>{formatDate(subscription.nextBillingDate)}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            ) : (
+                                <Typography variant="body1" sx={{ color: 'white', textAlign: 'center', py: 3 }}>
+                                    No active subscriptions found.
+                                </Typography>
+                            )}
                         </CardContent>
                     </Card>
                 </Grid>
