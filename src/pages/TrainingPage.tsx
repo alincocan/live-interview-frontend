@@ -4,12 +4,11 @@ import {
     Container,
     Typography,
     Box,
-    Card,
     CardContent,
     CircularProgress,
     Alert,
     Paper,
-    IconButton,
+    IconButton, Card,
 } from '@mui/material';
 import MicIcon from '@mui/icons-material/Mic';
 import StopIcon from '@mui/icons-material/Stop';
@@ -280,7 +279,7 @@ const TrainingPage: React.FC = () => {
 
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <div>
             {errorMessage ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 4 }}>
                     <Alert severity="error" sx={{ my: 2, width: '100%' }}>
@@ -289,13 +288,20 @@ const TrainingPage: React.FC = () => {
                 </Box>
             ) : (
                 <Box sx={{ display: 'flex', width: '100%' }}>
-                    {/* Main content */}
-                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <Card sx={{ width: '100%', mb: 4, borderRadius: 2, boxShadow: 3 }}>
-                            <CardContent>
-                                {/* 3D Model Viewer */}
-                                <Box sx={{ height: '700px', width: '100%', mb: 4, position: 'relative' }}>
-                                    <ModelViewer 
+                    <Card sx={{ width: '100%', mb: 4, borderRadius: 2, boxShadow: 3 }}>
+                            <CardContent sx={{ backgroundColor: 'transparent' }}>
+                                {/* 3D Model Viewer as background */}
+                                <Box sx={{
+                                    height: '100vh',
+                                    width: '100%',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    zIndex: 0
+                                }}>
+                                    <ModelViewer
                                         url={location.state?.modelUrl}
                                         audioMap={audioList[index]}
                                         onAudioFinished={() => {
@@ -320,10 +326,7 @@ const TrainingPage: React.FC = () => {
                                 </Box>
                             </CardContent>
                         </Card>
-                    </Box>
-
-                    {/* Right side panel - always visible */}
-                    <Paper 
+                    <Paper
                         elevation={3} 
                         sx={{ 
                             width: '80px', 
@@ -333,7 +336,9 @@ const TrainingPage: React.FC = () => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             height: '700px',
-                            position: 'relative'
+                            position: 'relative',
+                            zIndex: 1,
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)'
                         }}
                     >
                         {/* Question counter display */}
@@ -402,7 +407,7 @@ const TrainingPage: React.FC = () => {
                     </Paper>
                 </Box>
             )}
-        </Container>
+        </div>
     );
 };
 

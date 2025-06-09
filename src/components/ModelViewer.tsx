@@ -117,7 +117,7 @@ export function Model({ url, currentText }: { url: string, currentText?: string 
     }
   }, [currentText]);
 
-  return <primitive ref={modelRef} object={scene} scale={0.6} position={[-0.05, -0.85, -1]} />;
+  return <primitive ref={modelRef} object={scene} scale={0.6} position={[-0.05, -0.90, -1]} />;
 }
 
 interface ModelViewerProps {
@@ -222,7 +222,15 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
   }, [audioMap]);
 
   return (
-    <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
+    <Box sx={{ 
+      width: '100%', 
+      height: '100%', 
+      position: 'relative',
+      backgroundImage: 'url(/images/background.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }}>
 
       <Suspense fallback={
         <Box sx={{ 
