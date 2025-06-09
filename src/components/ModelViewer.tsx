@@ -117,7 +117,7 @@ export function Model({ url, currentText }: { url: string, currentText?: string 
     }
   }, [currentText]);
 
-  return <primitive ref={modelRef} object={scene} scale={0.6} position={[-0.02, -0.85, 0]} />;
+  return <primitive ref={modelRef} object={scene} scale={0.6} position={[-0.05, -0.85, -1]} />;
 }
 
 interface ModelViewerProps {

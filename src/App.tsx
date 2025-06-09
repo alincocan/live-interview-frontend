@@ -27,6 +27,7 @@ import TrainingListPage from './pages/TrainingListPage.tsx';
 import BookmarkedQuestionsPage from './pages/BookmarkedQuestionsPage.tsx';
 import FinishSessionPage from './pages/FinishSessionPage.tsx';
 import PaymentPage from './pages/PaymentPage.tsx';
+import PaymentSuccessPage from './pages/PaymentSuccessPage.tsx';
 
 function App() {
 
@@ -77,6 +78,7 @@ function App() {
                             <Route path="training/:interviewId" element={<InterviewResultPage />} />
                             <Route path="questions/bookmarked" element={<BookmarkedQuestionsPage />} />
                             <Route path="payment" element={<PaymentPage />} />
+                            <Route path="payment/success" element={<PaymentSuccessPage />} />
                             {/*<Route path="details" element={<DetailsPage />} />*/}
                         </Route>
                         <Route path="*" element={<PageNotFound />} />
