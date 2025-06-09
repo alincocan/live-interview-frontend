@@ -277,7 +277,7 @@ const DashboardHome = () => {
                                 </Box>
                             ) : dashboardData?.interviews && dashboardData.interviews.length > 0 ? (
                                 <List>
-                                    {dashboardData.interviews.slice(0,7).map((interview) => (
+                                    {dashboardData.interviews.slice(0,5).map((interview) => (
                                         <ListItem 
                                             key={interview.id} 
                                             divider 

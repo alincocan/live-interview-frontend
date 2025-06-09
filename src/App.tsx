@@ -28,6 +28,7 @@ import BookmarkedQuestionsPage from './pages/BookmarkedQuestionsPage.tsx';
 import FinishSessionPage from './pages/FinishSessionPage.tsx';
 import PaymentPage from './pages/PaymentPage.tsx';
 import { ThemeProvider, useThemeContext } from './config/ThemeContext';
+import PaymentSuccessPage from './pages/PaymentSuccessPage.tsx';
 
 // Wrapper component that uses the theme context
 const ThemedApp = () => {
@@ -39,7 +40,7 @@ const ThemedApp = () => {
             <Box
                 sx={{
                     backgroundColor: (t) => t.palette.mode === 'light' ? t.palette.background.default : 'transparent',
-                    background: (t) => t.palette.mode === 'light' 
+                    background: (t) => t.palette.mode === 'light'
                         ? '#f8f8f8'
                         : 'linear-gradient(to bottom, #000000, #000846)',
                     backgroundSize: 'cover',
@@ -83,6 +84,7 @@ const ThemedApp = () => {
                             <Route path="training/:interviewId" element={<InterviewResultPage />} />
                             <Route path="questions/bookmarked" element={<BookmarkedQuestionsPage />} />
                             <Route path="payment" element={<PaymentPage />} />
+                            <Route path="payment/success" element={<PaymentSuccessPage />} />
                             {/*<Route path="details" element={<DetailsPage />} />*/}
                         </Route>
                         <Route path="*" element={<PageNotFound />} />

@@ -10,7 +10,9 @@ import {
     Paper,
     Chip,
     useTheme,
-    alpha
+    alpha,
+    Alert,
+    Snackbar
 } from '@mui/material';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import PaymentIcon from '@mui/icons-material/Payment';
@@ -18,30 +20,24 @@ import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import StarIcon from '@mui/icons-material/Star';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { useState } from 'react';
+import paymentService, { 
+    BasePaymentOption, 
+    SubscriptionPaymentOption, 
+} from '../service/paymentService';
 
-// Define types for payment options
-interface BasePaymentOption {
-    id: number;
-    name: string;
-    tokens: number;
-    price: number;
-    description: string;
-    features: string[];
-    popular?: boolean;
-    bestValue?: boolean;
-}
-
-interface SubscriptionPaymentOption extends BasePaymentOption {
-    period: 'month' | 'year';
-}
+// Use types from paymentService instead of redefining them
 
 const PaymentPage = () => {
     const theme = useTheme();
+    const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+    const [statusMessage, setStatusMessage] = useState<string | null>(null);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
 
     // One-time payment options
     const oneTimeOptions: BasePaymentOption[] = [
         { 
-            id: 1, 
+            id: 'basic', 
             name: 'Basic', 
             tokens: 300, 
             price: 9.99, 
@@ -52,7 +48,7 @@ const PaymentPage = () => {
             ]
         },
         { 
-            id: 2, 
+            id: 'standard', 
             name: 'Standard', 
             tokens: 900, 
             price: 24.99, 
@@ -64,7 +60,7 @@ const PaymentPage = () => {
             ]
         },
         { 
-            id: 3, 
+            id: 'premium', 
             name: 'Premium', 
             tokens: 1500, 
             price: 39.99, 
@@ -80,7 +76,7 @@ const PaymentPage = () => {
     // Subscription options
     const subscriptionOptions: SubscriptionPaymentOption[] = [
         { 
-            id: 1, 
+            id: 'monthly-basic', 
             name: 'Monthly Basic', 
             tokens: 600, 
             price: 14.99, 
@@ -92,7 +88,7 @@ const PaymentPage = () => {
             ]
         },
         { 
-            id: 2, 
+            id: 'monthly-premium', 
             name: 'Monthly Premium', 
             tokens: 1500, 
             price: 29.99, 
@@ -105,7 +101,7 @@ const PaymentPage = () => {
             ]
         },
         { 
-            id: 3, 
+            id: 'annual-premium', 
             name: 'Annual Premium', 
             tokens: 18000, 
             price: 249.99, 
@@ -119,13 +115,38 @@ const PaymentPage = () => {
         }
     ];
 
-    // Handle purchase (placeholder function)
-    const handlePurchase = (
-        option: BasePaymentOption | SubscriptionPaymentOption, 
-        type: 'onetime' | 'subscription'
+    // Handle purchase function
+    const handlePurchase = async (
+        option: BasePaymentOption | SubscriptionPaymentOption
     ) => {
-        console.log(`Purchasing ${type} option:`, option);
-        // Here you would implement the actual purchase logic
+        // For both one-time payments and subscriptions, get checkout URL and redirect
+        setPaymentStatus('processing');
+
+        try {
+            const planId = option.id.toString();
+            const response = await paymentService.checkout(planId);
+
+            if (response.success && response.checkoutUrl) {
+                // Redirect to Stripe checkout
+                window.location.href = response.checkoutUrl;
+            } else {
+                // Show error
+                setPaymentStatus('error');
+                setStatusMessage(response.message || 'Failed to create payment');
+                setSnackbarOpen(true);
+            }
+        } catch (error) {
+            console.error('Payment creation error:', error);
+            setPaymentStatus('error');
+            setStatusMessage('An unexpected error occurred');
+            setSnackbarOpen(true);
+        }
+    };
+
+
+    // Handle snackbar close
+    const handleSnackbarClose = () => {
+        setSnackbarOpen(false);
     };
 
     return (
@@ -135,6 +156,23 @@ const PaymentPage = () => {
             pt: 4,
             pb: 8
         }}>
+
+            {/* Status Snackbar */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert 
+                    onClose={handleSnackbarClose} 
+                    severity={paymentStatus === 'success' ? 'success' : 'error'}
+                    sx={{ width: '100%' }}
+                >
+                    {statusMessage}
+                </Alert>
+            </Snackbar>
+
             {/* Hero Section with Paper background */}
             <Paper
                 elevation={0}
@@ -334,7 +372,7 @@ const PaymentPage = () => {
                                         <Button 
                                             variant="contained" 
                                             fullWidth
-                                            onClick={() => handlePurchase(option, 'onetime')}
+                                            onClick={() => handlePurchase(option)}
                                             sx={{
                                                 backgroundColor: option.bestValue ? '#FFD700' : '#FFA500',
                                                 color: '#000',
@@ -487,7 +525,7 @@ const PaymentPage = () => {
                                         <Button 
                                             variant="contained" 
                                             fullWidth
-                                            onClick={() => handlePurchase(option, 'subscription')}
+                                            onClick={() => handlePurchase(option)}
                                             sx={{
                                                 backgroundColor: option.bestValue ? '#8BC34A' : '#4CAF50',
                                                 color: '#000',
