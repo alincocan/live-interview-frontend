@@ -150,8 +150,7 @@ const PaymentPage = () => {
     };
 
     return (
-        <Box sx={{ 
-            background: 'linear-gradient(to bottom, #000000, #000846)',
+        <Box sx={{
             minHeight: '100vh',
             pt: 4,
             pb: 8
@@ -177,7 +176,6 @@ const PaymentPage = () => {
             <Paper
                 elevation={0}
                 sx={{
-                    background: 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 100%)',
                     backdropFilter: 'blur(10px)',
                     borderRadius: '16px',
                     maxWidth: 'lg',
@@ -201,7 +199,7 @@ const PaymentPage = () => {
                 }}
             >
                 <Box sx={{ position: 'relative', zIndex: 1 }}>
-                    <Typography variant="h6" color="white" sx={{ mb: 1, maxWidth: '800px', mx: 'auto', opacity: 0.9 }}>
+                    <Typography variant="h6" sx={{ mb: 1, maxWidth: '800px', mx: 'auto', opacity: 0.9 }}>
                         Choose the perfect plan to enhance your interview experience with our token system
                     </Typography>
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1.5 }}>

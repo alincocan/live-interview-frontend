@@ -290,43 +290,42 @@ const ProfilePage: React.FC = () => {
 
                 {/* Subscriptions Card */}
                 <Grid item xs={12}>
-                    <Card elevation={3} sx={{ backgroundColor: '#333333', borderRadius: 3, mt: 3 }}>
+                    <Card elevation={3} sx={{ borderRadius: 3, mt: 3 }}>
                         <CardHeader
                             title="Subscriptions"
                             sx={{
-                                backgroundColor: 'black',
-                                color: 'white',
                                 borderTopLeftRadius: 12,
                                 borderTopRightRadius: 12
                             }}
                         />
+                        <Divider sx={{ mb: 1 }} />
                         <CardContent>
                             {subscriptions.length > 0 ? (
-                                <TableContainer component={Paper} sx={{ backgroundColor: '#444444' }}>
+                                <TableContainer component={Paper}>
                                     <Table>
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Name</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Price</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Currency</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Tokens</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Type</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Start Date</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Next Billing Date</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Name</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Price</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Currency</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Tokens</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Type</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Start Date</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Next Billing Date</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Actions</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
                                             {subscriptions.map((subscription, index) => (
                                                 <TableRow key={index}>
-                                                    <TableCell sx={{ color: 'white' }}>{subscription.name}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{subscription.price}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{subscription.currency}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{subscription.tokens}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{subscription.type}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{formatDate(subscription.startDate)}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{formatDate(subscription.nextBillingDate)}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>
+                                                    <TableCell>{subscription.name}</TableCell>
+                                                    <TableCell>{subscription.price}</TableCell>
+                                                    <TableCell>{subscription.currency}</TableCell>
+                                                    <TableCell>{subscription.tokens}</TableCell>
+                                                    <TableCell>{subscription.type}</TableCell>
+                                                    <TableCell>{formatDate(subscription.startDate)}</TableCell>
+                                                    <TableCell>{formatDate(subscription.nextBillingDate)}</TableCell>
+                                                    <TableCell>
                                                         <IconButton
                                                             color="error"
                                                             onClick={() => openCancelDialog(subscription.subscriptionId)}
@@ -342,7 +341,7 @@ const ProfilePage: React.FC = () => {
                                     </Table>
                                 </TableContainer>
                             ) : (
-                                <Typography variant="body1" sx={{ color: 'white', textAlign: 'center', py: 3 }}>
+                                <Typography variant="body1" sx={{textAlign: 'center', py: 3 }}>
                                     No active subscriptions found.
                                 </Typography>
                             )}
@@ -359,38 +358,34 @@ const ProfilePage: React.FC = () => {
                 fullWidth
                 PaperProps={{
                     style: {
-                        backgroundColor: '#333333',
                         boxShadow: '0 8px 16px rgba(0, 0, 0, 0.5)'
                     }
                 }}
             >
-                <DialogTitle sx={{ color: 'white' }}>
+                <DialogTitle>
                     Are you sure you want to cancel this subscription?
                 </DialogTitle>
-                <DialogContent sx={{ color: 'white' }}>
+                <DialogContent>
                     <FormControl component="fieldset" sx={{ width: '100%', mt: 2 }}>
-                        <FormLabel component="legend" sx={{ color: 'white' }}>Please select a reason for cancellation:</FormLabel>
+                        <FormLabel component="legend">Please select a reason for cancellation:</FormLabel>
                         <RadioGroup
                             aria-label="cancellation-reason"
                             name="cancellation-reason"
                             value={cancelReason}
                             onChange={handleReasonChange}
-                            sx={{ color: 'white' }}
                         >
                             {cancellationReasons.map((reason, index) => (
                                 <FormControlLabel
                                     key={index}
                                     value={reason}
-                                    control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#90caf9' } }} />}
+                                    control={<Radio sx={{ '&.Mui-checked': { color: '#90caf9' } }} />}
                                     label={reason}
-                                    sx={{ color: 'white' }}
                                 />
                             ))}
                             <FormControlLabel
                                 value="Other"
-                                control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#90caf9' } }} />}
+                                control={<Radio sx={{'&.Mui-checked': { color: '#90caf9' } }} />}
                                 label="Other"
-                                sx={{ color: 'white' }}
                             />
                         </RadioGroup>
 
