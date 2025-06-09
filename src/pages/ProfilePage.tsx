@@ -14,8 +14,22 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Paper
+    Paper,
+    IconButton,
+    Snackbar,
+    Alert,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    RadioGroup,
+    Radio,
+    FormControlLabel,
+    TextField,
+    FormControl,
+    FormLabel
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { UserService, User } from '../service/userService.ts';
 import subscriptionsService, { Subscription } from '../service/subscriptionsService';
 import { format } from 'date-fns';
@@ -26,6 +40,30 @@ const ProfilePage: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [notification, setNotification] = useState<{
+        open: boolean;
+        message: string;
+        severity: 'success' | 'error';
+    }>({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
+
+    // State for cancel subscription dialog
+    const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+    const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<string>('');
+    const [cancelReason, setCancelReason] = useState<string>('');
+    const [otherReason, setOtherReason] = useState<string>('');
+
+    // Predefined reasons for cancellation
+    const cancellationReasons = [
+        "Too expensive",
+        "Not using the service enough",
+        "Found a better alternative",
+        "Technical issues",
+        "Temporary pause, will subscribe again later"
+    ];
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,6 +105,69 @@ const ProfilePage: React.FC = () => {
         }
     };
 
+    // Open the cancel subscription dialog
+    const openCancelDialog = (subscriptionId: string) => {
+        setSelectedSubscriptionId(subscriptionId);
+        setCancelReason('');
+        setOtherReason('');
+        setCancelDialogOpen(true);
+    };
+
+    // Close the cancel subscription dialog
+    const closeCancelDialog = () => {
+        setCancelDialogOpen(false);
+    };
+
+    // Handle reason change
+    const handleReasonChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setCancelReason(event.target.value);
+    };
+
+    // Handle other reason text change
+    const handleOtherReasonChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setOtherReason(event.target.value);
+    };
+
+    // Handle the actual subscription cancellation
+    const handleCancelSubscription = async () => {
+        // Get the final reason (either selected from predefined or custom "other" reason)
+        const finalReason = cancelReason === 'Other' ? otherReason : cancelReason;
+
+        // Close the dialog
+        closeCancelDialog();
+
+        // Call the service with the subscription ID and reason
+        const response = await subscriptionsService.cancelSubscription(selectedSubscriptionId, finalReason);
+
+        if (response.success) {
+            // Show success notification
+            setNotification({
+                open: true,
+                message: response.message,
+                severity: 'success'
+            });
+
+            // Remove the subscription from the list
+            setSubscriptions(subscriptions.filter(sub => sub.subscriptionId !== selectedSubscriptionId));
+
+            // Auto-dismiss success message after 5 seconds
+            setTimeout(() => {
+                setNotification(prev => ({...prev, open: false}));
+            }, 5000);
+        } else {
+            // Show error notification
+            setNotification({
+                open: true,
+                message: response.message,
+                severity: 'error'
+            });
+        }
+    };
+
+    const handleCloseNotification = () => {
+        setNotification(prev => ({...prev, open: false}));
+    };
+
     if (loading) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
@@ -85,6 +186,21 @@ const ProfilePage: React.FC = () => {
                 minHeight: '80vh',
             }}
         >
+            {/* Notification Snackbar */}
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={notification.severity === 'success' ? 5000 : null}
+                onClose={handleCloseNotification}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert 
+                    onClose={handleCloseNotification} 
+                    severity={notification.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {notification.message}
+                </Alert>
+            </Snackbar>
 
             <Grid container spacing={3} sx={{ maxWidth: 1000, width: '100%' }}>
                 {/* Personal Details Card */}
@@ -194,9 +310,11 @@ const ProfilePage: React.FC = () => {
                                                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Name</TableCell>
                                                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Price</TableCell>
                                                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Currency</TableCell>
+                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Tokens</TableCell>
                                                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Type</TableCell>
                                                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Start Date</TableCell>
                                                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Next Billing Date</TableCell>
+                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -205,9 +323,20 @@ const ProfilePage: React.FC = () => {
                                                     <TableCell sx={{ color: 'white' }}>{subscription.name}</TableCell>
                                                     <TableCell sx={{ color: 'white' }}>{subscription.price}</TableCell>
                                                     <TableCell sx={{ color: 'white' }}>{subscription.currency}</TableCell>
+                                                    <TableCell sx={{ color: 'white' }}>{subscription.tokens}</TableCell>
                                                     <TableCell sx={{ color: 'white' }}>{subscription.type}</TableCell>
                                                     <TableCell sx={{ color: 'white' }}>{formatDate(subscription.startDate)}</TableCell>
                                                     <TableCell sx={{ color: 'white' }}>{formatDate(subscription.nextBillingDate)}</TableCell>
+                                                    <TableCell sx={{ color: 'white' }}>
+                                                        <IconButton 
+                                                            color="error" 
+                                                            onClick={() => openCancelDialog(subscription.subscriptionId)}
+                                                            size="small"
+                                                            title="Cancel subscription"
+                                                        >
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -223,6 +352,115 @@ const ProfilePage: React.FC = () => {
                 </Grid>
             </Grid>
 
+            {/* Cancellation Confirmation Dialog */}
+            <Dialog 
+                open={cancelDialogOpen} 
+                onClose={closeCancelDialog} 
+                maxWidth="sm" 
+                fullWidth
+                PaperProps={{
+                    style: {
+                        backgroundColor: '#333333',
+                        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.5)'
+                    }
+                }}
+            >
+                <DialogTitle sx={{ color: 'white' }}>
+                    Are you sure you want to cancel this subscription?
+                </DialogTitle>
+                <DialogContent sx={{ color: 'white' }}>
+                    <FormControl component="fieldset" sx={{ width: '100%', mt: 2 }}>
+                        <FormLabel component="legend" sx={{ color: 'white' }}>Please select a reason for cancellation:</FormLabel>
+                        <RadioGroup
+                            aria-label="cancellation-reason"
+                            name="cancellation-reason"
+                            value={cancelReason}
+                            onChange={handleReasonChange}
+                            sx={{ color: 'white' }}
+                        >
+                            {cancellationReasons.map((reason, index) => (
+                                <FormControlLabel 
+                                    key={index} 
+                                    value={reason} 
+                                    control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#90caf9' } }} />} 
+                                    label={reason} 
+                                    sx={{ color: 'white' }}
+                                />
+                            ))}
+                            <FormControlLabel 
+                                value="Other" 
+                                control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#90caf9' } }} />} 
+                                label="Other" 
+                                sx={{ color: 'white' }}
+                            />
+                        </RadioGroup>
+
+                        {cancelReason === 'Other' && (
+                            <TextField
+                                label="Please specify"
+                                variant="outlined"
+                                fullWidth
+                                value={otherReason}
+                                onChange={handleOtherReasonChange}
+                                margin="normal"
+                                required
+                                error={cancelReason === 'Other' && otherReason.trim() === ''}
+                                helperText={cancelReason === 'Other' && otherReason.trim() === '' ? 'Please provide a reason' : ''}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: 'rgba(255, 255, 255, 0.5)',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#90caf9',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: 'rgba(255, 255, 255, 0.7)',
+                                    },
+                                    '& .MuiInputBase-input': {
+                                        color: 'white',
+                                    },
+                                    '& .MuiFormHelperText-root': {
+                                        color: 'rgba(255, 255, 255, 0.7)',
+                                    },
+                                }}
+                            />
+                        )}
+                    </FormControl>
+                </DialogContent>
+                <DialogActions sx={{ padding: '16px 24px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                    <Button 
+                        onClick={closeCancelDialog} 
+                        sx={{ 
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            '&:hover': {
+                                color: 'white',
+                                backgroundColor: 'rgba(255, 255, 255, 0.08)'
+                            }
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        onClick={handleCancelSubscription} 
+                        color="error" 
+                        variant="contained"
+                        disabled={cancelReason === '' || (cancelReason === 'Other' && otherReason.trim() === '')}
+                        sx={{
+                            '&.Mui-disabled': {
+                                backgroundColor: 'rgba(211, 47, 47, 0.3)',
+                                color: 'rgba(255, 255, 255, 0.4)'
+                            }
+                        }}
+                    >
+                        Confirm Cancellation
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

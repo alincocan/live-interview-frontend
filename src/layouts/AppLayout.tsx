@@ -1,5 +1,5 @@
 import { Box, Typography, Menu, MenuItem, Divider, Avatar, Button, Tooltip } from '@mui/material';
-import { useNavigate, Outlet } from 'react-router-dom';
+import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { AuthenticationService } from '../service/authenticationService';
 import { UserService, User } from '../service/userService';
 import { useState, useEffect } from 'react';
@@ -14,9 +14,13 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 const AppLayout: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const [user, setUser] = useState<User | null>(null);
+
+    // Check if current page is interview or training session
+    const isSessionPage = location.pathname === '/interview/session' || location.pathname === '/training/session';
 
     // No state for token purchase dialog as it's now a separate page
 
@@ -150,14 +154,14 @@ const AppLayout: React.FC = () => {
                 p: 0,
             }}
         >
-            {/* Modern transparent top menu */}
+            {/* Modern transparent top menu - hidden on session pages */}
             <Box
                 sx={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
                     width: '100%',
-                    display: 'flex',
+                    display: isSessionPage ? 'none' : 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     backgroundColor: 'transparent',
@@ -412,7 +416,7 @@ const AppLayout: React.FC = () => {
                 </Box>
             </Box>
 
-            <Box sx={{ pt: '64px' }}>
+            <Box sx={{ pt: isSessionPage ? 0 : '64px' }}>
                 <Outlet />
             </Box>
 

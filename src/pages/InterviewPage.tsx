@@ -288,7 +288,7 @@ const InterviewPage: React.FC = () => {
     };
 
     return (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <div>
             {errorMessage ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 4 }}>
                     <Alert severity="error" sx={{ my: 2, width: '100%' }}>
@@ -297,13 +297,20 @@ const InterviewPage: React.FC = () => {
                 </Box>
             ) : (
                 <Box sx={{ display: 'flex', width: '100%' }}>
-                    {/* Main content */}
-                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <Card sx={{ width: '100%', mb: 4, borderRadius: 2, boxShadow: 3 }}>
                             <CardContent>
-                                {/* 3D Model Viewer */}
-                                <Box sx={{ height: '700px', width: '100%', mb: 4, position: 'relative' }}>
-                                    <ModelViewer 
+                                {/* 3D Model Viewer as background */}
+                                <Box sx={{
+                                    height: '100vh',
+                                    width: '100%',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    zIndex: 0
+                                }}>
+                                    <ModelViewer
                                         url="/models/david/david.glb"
                                         audioMap={audioList[index]}
                                         onAudioFinished={() => {
@@ -328,16 +335,14 @@ const InterviewPage: React.FC = () => {
                                 </Box>
                             </CardContent>
                         </Card>
-                    </Box>
-
                     {/* Right side panel - always visible */}
-                    <Paper 
-                        elevation={3} 
-                        sx={{ 
-                            width: '80px', 
-                            ml: 2, 
-                            display: 'flex', 
-                            flexDirection: 'column', 
+                    <Paper
+                        elevation={3}
+                        sx={{
+                            width: '80px',
+                            ml: 2,
+                            display: 'flex',
+                            flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
                             height: '700px',
@@ -345,14 +350,14 @@ const InterviewPage: React.FC = () => {
                         }}
                     >
                         {/* Timer display */}
-                        <Box sx={{ 
-                            position: 'absolute', 
-                            top: 20, 
-                            left: 0, 
-                            right: 0, 
-                            display: 'flex', 
+                        <Box sx={{
+                            position: 'absolute',
+                            top: 20,
+                            left: 0,
+                            right: 0,
+                            display: 'flex',
                             flexDirection: 'column',
-                            alignItems: 'center' 
+                            alignItems: 'center'
                         }}>
                             <AccessTimeIcon color="primary" sx={{ fontSize: 24, mb: 1 }} />
                             <Typography variant="body2" sx={{ textAlign: 'center', fontWeight: 'bold' }}>
@@ -365,13 +370,13 @@ const InterviewPage: React.FC = () => {
                                     Validating...
                                 </Typography>
 
-                                <Box sx={{ 
-                                    position: 'absolute', 
-                                    bottom: 20, 
-                                    left: 0, 
-                                    right: 0, 
-                                    display: 'flex', 
-                                    justifyContent: 'center' 
+                                <Box sx={{
+                                    position: 'absolute',
+                                    bottom: 20,
+                                    left: 0,
+                                    right: 0,
+                                    display: 'flex',
+                                    justifyContent: 'center'
                                 }}>
                                     <CircularProgress size={24} color="primary" />
                                 </Box>
@@ -391,8 +396,8 @@ const InterviewPage: React.FC = () => {
                                 {/* Stop recording button */}
                                 {isRecording && (
                                     <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <IconButton 
-                                            color="error" 
+                                        <IconButton
+                                            color="error"
                                             onClick={stopRecording}
                                             sx={{ mb: 1 }}
                                         >
@@ -408,7 +413,7 @@ const InterviewPage: React.FC = () => {
                     </Paper>
                 </Box>
             )}
-        </Container>
+    </div>
     );
 };
 

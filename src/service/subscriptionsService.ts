@@ -4,9 +4,11 @@ import { PaymentType } from './paymentService';
 
 // Define subscription data interface
 export interface Subscription {
+  subscriptionId: string;
   name: string;
   price: number;
   currency: string;
+  tokens: number;
   type: PaymentType;
   startDate: string; // LocalDate format
   nextBillingDate: string; // LocalDate format
@@ -78,6 +80,59 @@ class SubscriptionsService {
         return {
           success: false,
           message: 'An error occurred while fetching subscription data. Please try again.'
+        };
+      }
+    }
+  }
+
+  public async cancelSubscription(subscriptionId: string, reason?: string): Promise<Response> {
+    try {
+      // Get the auth token from storage
+      const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+
+      if (!token) {
+        return {
+          success: false,
+          message: 'No authentication token found'
+        };
+      }
+
+      // Add reason as a query parameter if provided
+      const url = reason 
+        ? `${this.baseUrl}/subscriptions/${subscriptionId}?reason=${encodeURIComponent(reason)}`
+        : `${this.baseUrl}/subscriptions/${subscriptionId}`;
+
+      await axios.delete(
+        url,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      return {
+        success: true,
+        message: 'Subscription cancelled successfully'
+      };
+    } catch (error: unknown) {
+      console.error('Cancel subscription error:', error);
+
+      // Handle different types of errors
+      if (axios.isAxiosError(error) && error.response) {
+        return {
+          success: false,
+          message: error.response.data?.message || 'Failed to cancel subscription.'
+        };
+      } else if (axios.isAxiosError(error) && error.request) {
+        return {
+          success: false,
+          message: 'No response from server. Please try again later.'
+        };
+      } else {
+        return {
+          success: false,
+          message: 'An error occurred while cancelling subscription. Please try again.'
         };
       }
     }
