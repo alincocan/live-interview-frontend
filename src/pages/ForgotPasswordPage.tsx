@@ -58,7 +58,7 @@ const ForgotPasswordPage: React.FC = () => {
     };
 
     return (
-        <Container component="main" maxWidth="xs">
+        <Container component="main" maxWidth="xs" sx={{height: '100vh'}}>
             <Box
                 sx={{
                     display: 'flex',

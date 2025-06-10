@@ -10,8 +10,8 @@ import ProfileUpdatePage from "./pages/ProfileUpdatePage.tsx";
 import DashboardHome from "./pages/DashboardHome.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import ChooseInterviewerPage from "./pages/ChooseInterviewerPage.tsx";
-import { darkGreyTheme } from "./config/theme";
-import { Box, ThemeProvider } from "@mui/material";
+import { getThemeByMode } from "./config/theme";
+import { Box, ThemeProvider as MuiThemeProvider } from "@mui/material";
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './layouts/AppLayout';
 import PageNotFound from './pages/PageNotFound.tsx';
@@ -27,16 +27,22 @@ import TrainingListPage from './pages/TrainingListPage.tsx';
 import BookmarkedQuestionsPage from './pages/BookmarkedQuestionsPage.tsx';
 import FinishSessionPage from './pages/FinishSessionPage.tsx';
 import PaymentPage from './pages/PaymentPage.tsx';
+import { ThemeProvider, useThemeContext } from './config/ThemeContext';
 import PaymentSuccessPage from './pages/PaymentSuccessPage.tsx';
 
-function App() {
+// Wrapper component that uses the theme context
+const ThemedApp = () => {
+    const { mode } = useThemeContext();
+    const theme = getThemeByMode(mode);
 
     return (
-        <ThemeProvider theme={darkGreyTheme}>
+        <MuiThemeProvider theme={theme}>
             <Box
                 sx={{
-                    //backgroundColor: (t) => t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
-                    background: 'linear-gradient(to bottom, #000000, #000846)',
+                    backgroundColor: (t) => t.palette.mode === 'light' ? t.palette.background.default : 'transparent',
+                    background: (t) => t.palette.mode === 'light'
+                        ? '#f8f8f8'
+                        : 'linear-gradient(to bottom, #000000, #000846)',
                     backgroundSize: 'cover',
                     backgroundRepeat: 'no-repeat',
                     height: '100%',
@@ -85,6 +91,14 @@ function App() {
                     </Routes>
                 </Router>
             </Box>
+        </MuiThemeProvider>
+    );
+};
+
+function App() {
+    return (
+        <ThemeProvider>
+            <ThemedApp />
         </ThemeProvider>
     );
 }

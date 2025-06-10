@@ -27,7 +27,8 @@ import {
     FormControlLabel,
     TextField,
     FormControl,
-    FormLabel
+    FormLabel,
+    Divider
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { UserService, User } from '../service/userService.ts';
@@ -193,8 +194,8 @@ const ProfilePage: React.FC = () => {
                 onClose={handleCloseNotification}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert 
-                    onClose={handleCloseNotification} 
+                <Alert
+                    onClose={handleCloseNotification}
                     severity={notification.severity}
                     sx={{ width: '100%' }}
                 >
@@ -205,45 +206,44 @@ const ProfilePage: React.FC = () => {
             <Grid container spacing={3} sx={{ maxWidth: 1000, width: '100%' }}>
                 {/* Personal Details Card */}
                 <Grid item xs={12} md={7}>
-                    <Card elevation={3} sx={{ height: '100%', backgroundColor: '#333333', borderRadius: 3 }}>
+                    <Card elevation={3} sx={{ height: '100%', borderRadius: 3 }}>
                         <CardHeader 
                             title="Personal Details" 
-                            sx={{ 
-                                backgroundColor: 'black', 
-                                color: 'white',
+                            sx={{
                                 borderTopLeftRadius: 12,
                                 borderTopRightRadius: 12
                             }}
                         />
+                        <Divider sx={{ mb: 1 }} />
                         <CardContent>
                             <Grid container spacing={2}>
                                 <Grid item xs={6}>
-                                    <Typography variant="subtitle2" sx={{ color: 'white' }}>First Name:</Typography>
-                                    <Typography variant="body1" sx={{ color: 'white' }}>{user?.firstName || 'N/A'}</Typography>
+                                    <Typography variant="subtitle2">First Name:</Typography>
+                                    <Typography variant="body1">{user?.firstName || 'N/A'}</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant="subtitle2" sx={{ color: 'white' }}>Last Name:</Typography>
-                                    <Typography variant="body1" sx={{ color: 'white' }}>{user?.lastName || 'N/A'}</Typography>
+                                    <Typography variant="subtitle2">Last Name:</Typography>
+                                    <Typography variant="body1">{user?.lastName || 'N/A'}</Typography>
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <Typography variant="subtitle2" sx={{ color: 'white' }}>Email:</Typography>
-                                    <Typography variant="body1" sx={{ color: 'white' }}>{user?.email || 'N/A'}</Typography>
+                                    <Typography variant="subtitle2">Email:</Typography>
+                                    <Typography variant="body1">{user?.email || 'N/A'}</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant="subtitle2" sx={{ color: 'white' }}>Occupation:</Typography>
-                                    <Typography variant="body1" sx={{ color: 'white' }}>{user?.occupation || 'N/A'}</Typography>
+                                    <Typography variant="subtitle2">Occupation:</Typography>
+                                    <Typography variant="body1">{user?.occupation || 'N/A'}</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant="subtitle2" sx={{ color: 'white' }}>Date of Birth:</Typography>
-                                    <Typography variant="body1" sx={{ color: 'white' }}>{formatDate(user?.dateOfBirth)}</Typography>
+                                    <Typography variant="subtitle2">Date of Birth:</Typography>
+                                    <Typography variant="body1">{formatDate(user?.dateOfBirth)}</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant="subtitle2" sx={{ color: 'white' }}>Joining Date:</Typography>
-                                    <Typography variant="body1" sx={{ color: 'white' }}>{formatDate(user?.createTime)}</Typography>
+                                    <Typography variant="subtitle2">Joining Date:</Typography>
+                                    <Typography variant="body1">{formatDate(user?.createTime)}</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant="subtitle2" sx={{ color: 'white' }}>Years of Experience:</Typography>
-                                    <Typography variant="body1" sx={{ color: 'white' }}>{user?.yearsOfExperience || 'N/A'}</Typography>
+                                    <Typography variant="subtitle2">Years of Experience:</Typography>
+                                    <Typography variant="body1">{user?.yearsOfExperience || 'N/A'}</Typography>
                                 </Grid>
                             </Grid>
                             <Button variant="outlined" fullWidth sx={{ mt: 3 }}>
@@ -255,25 +255,24 @@ const ProfilePage: React.FC = () => {
 
                 {/* Payment Card */}
                 <Grid item xs={12} md={5}>
-                    <Card elevation={3} sx={{ height: '100%', backgroundColor: '#333333', borderRadius: 3 }}>
+                    <Card elevation={3} sx={{ height: '100%', borderRadius: 3 }}>
                         <CardHeader 
                             title="Payment Information" 
-                            sx={{ 
-                                backgroundColor: 'black', 
-                                color: 'white',
+                            sx={{
                                 borderTopLeftRadius: 12,
                                 borderTopRightRadius: 12
                             }}
                         />
+                        <Divider sx={{ mb: 1 }} />
                         <CardContent>
                             <Box sx={{ textAlign: 'center', py: 2 }}>
                                 <Typography variant="h3" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                                     {user?.tokens || 0}
                                 </Typography>
-                                <Typography variant="h6" sx={{ mb: 3, color: 'white' }}>
+                                <Typography variant="h6" sx={{ mb: 3}}>
                                     Available Tokens
                                 </Typography>
-                                <Typography variant="body2" sx={{ mb: 4, color: 'white' }}>
+                                <Typography variant="body2" sx={{ mb: 4}}>
                                     Tokens are used for conducting interviews and accessing premium features.
                                 </Typography>
                                 <Button 
@@ -291,45 +290,44 @@ const ProfilePage: React.FC = () => {
 
                 {/* Subscriptions Card */}
                 <Grid item xs={12}>
-                    <Card elevation={3} sx={{ backgroundColor: '#333333', borderRadius: 3, mt: 3 }}>
-                        <CardHeader 
-                            title="Subscriptions" 
-                            sx={{ 
-                                backgroundColor: 'black', 
-                                color: 'white',
+                    <Card elevation={3} sx={{ borderRadius: 3, mt: 3 }}>
+                        <CardHeader
+                            title="Subscriptions"
+                            sx={{
                                 borderTopLeftRadius: 12,
                                 borderTopRightRadius: 12
                             }}
                         />
+                        <Divider sx={{ mb: 1 }} />
                         <CardContent>
                             {subscriptions.length > 0 ? (
-                                <TableContainer component={Paper} sx={{ backgroundColor: '#444444' }}>
+                                <TableContainer component={Paper}>
                                     <Table>
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Name</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Price</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Currency</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Tokens</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Type</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Start Date</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Next Billing Date</TableCell>
-                                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Name</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Price</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Currency</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Tokens</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Type</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Start Date</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Next Billing Date</TableCell>
+                                                <TableCell sx={{fontWeight: 'bold' }}>Actions</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
                                             {subscriptions.map((subscription, index) => (
                                                 <TableRow key={index}>
-                                                    <TableCell sx={{ color: 'white' }}>{subscription.name}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{subscription.price}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{subscription.currency}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{subscription.tokens}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{subscription.type}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{formatDate(subscription.startDate)}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>{formatDate(subscription.nextBillingDate)}</TableCell>
-                                                    <TableCell sx={{ color: 'white' }}>
-                                                        <IconButton 
-                                                            color="error" 
+                                                    <TableCell>{subscription.name}</TableCell>
+                                                    <TableCell>{subscription.price}</TableCell>
+                                                    <TableCell>{subscription.currency}</TableCell>
+                                                    <TableCell>{subscription.tokens}</TableCell>
+                                                    <TableCell>{subscription.type}</TableCell>
+                                                    <TableCell>{formatDate(subscription.startDate)}</TableCell>
+                                                    <TableCell>{formatDate(subscription.nextBillingDate)}</TableCell>
+                                                    <TableCell>
+                                                        <IconButton
+                                                            color="error"
                                                             onClick={() => openCancelDialog(subscription.subscriptionId)}
                                                             size="small"
                                                             title="Cancel subscription"
@@ -343,7 +341,7 @@ const ProfilePage: React.FC = () => {
                                     </Table>
                                 </TableContainer>
                             ) : (
-                                <Typography variant="body1" sx={{ color: 'white', textAlign: 'center', py: 3 }}>
+                                <Typography variant="body1" sx={{textAlign: 'center', py: 3 }}>
                                     No active subscriptions found.
                                 </Typography>
                             )}
@@ -353,45 +351,41 @@ const ProfilePage: React.FC = () => {
             </Grid>
 
             {/* Cancellation Confirmation Dialog */}
-            <Dialog 
-                open={cancelDialogOpen} 
-                onClose={closeCancelDialog} 
-                maxWidth="sm" 
+            <Dialog
+                open={cancelDialogOpen}
+                onClose={closeCancelDialog}
+                maxWidth="sm"
                 fullWidth
                 PaperProps={{
                     style: {
-                        backgroundColor: '#333333',
                         boxShadow: '0 8px 16px rgba(0, 0, 0, 0.5)'
                     }
                 }}
             >
-                <DialogTitle sx={{ color: 'white' }}>
+                <DialogTitle>
                     Are you sure you want to cancel this subscription?
                 </DialogTitle>
-                <DialogContent sx={{ color: 'white' }}>
+                <DialogContent>
                     <FormControl component="fieldset" sx={{ width: '100%', mt: 2 }}>
-                        <FormLabel component="legend" sx={{ color: 'white' }}>Please select a reason for cancellation:</FormLabel>
+                        <FormLabel component="legend">Please select a reason for cancellation:</FormLabel>
                         <RadioGroup
                             aria-label="cancellation-reason"
                             name="cancellation-reason"
                             value={cancelReason}
                             onChange={handleReasonChange}
-                            sx={{ color: 'white' }}
                         >
                             {cancellationReasons.map((reason, index) => (
-                                <FormControlLabel 
-                                    key={index} 
-                                    value={reason} 
-                                    control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#90caf9' } }} />} 
-                                    label={reason} 
-                                    sx={{ color: 'white' }}
+                                <FormControlLabel
+                                    key={index}
+                                    value={reason}
+                                    control={<Radio sx={{ '&.Mui-checked': { color: '#90caf9' } }} />}
+                                    label={reason}
                                 />
                             ))}
-                            <FormControlLabel 
-                                value="Other" 
-                                control={<Radio sx={{ color: 'white', '&.Mui-checked': { color: '#90caf9' } }} />} 
-                                label="Other" 
-                                sx={{ color: 'white' }}
+                            <FormControlLabel
+                                value="Other"
+                                control={<Radio sx={{'&.Mui-checked': { color: '#90caf9' } }} />}
+                                label="Other"
                             />
                         </RadioGroup>
 
@@ -433,9 +427,9 @@ const ProfilePage: React.FC = () => {
                     </FormControl>
                 </DialogContent>
                 <DialogActions sx={{ padding: '16px 24px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
-                    <Button 
-                        onClick={closeCancelDialog} 
-                        sx={{ 
+                    <Button
+                        onClick={closeCancelDialog}
+                        sx={{
                             color: 'rgba(255, 255, 255, 0.7)',
                             '&:hover': {
                                 color: 'white',
@@ -445,9 +439,9 @@ const ProfilePage: React.FC = () => {
                     >
                         Cancel
                     </Button>
-                    <Button 
-                        onClick={handleCancelSubscription} 
-                        color="error" 
+                    <Button
+                        onClick={handleCancelSubscription}
+                        color="error"
                         variant="contained"
                         disabled={cancelReason === '' || (cancelReason === 'Other' && otherReason.trim() === '')}
                         sx={{
