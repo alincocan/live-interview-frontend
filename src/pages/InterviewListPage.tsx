@@ -177,12 +177,12 @@ const InterviewListPage: React.FC = () => {
                     <Table sx={{ minWidth: 650 }} aria-label="sessions table">
                         <TableHead sx={{ bgcolor: 'background.paper' }}>
                             <TableRow>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Job Name</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Difficulty</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Duration</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Date</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Score</TableCell>
-                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="center">Actions</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>Job Name</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>Difficulty</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>Duration</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }}>Score</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold' }} align="center">Actions</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>

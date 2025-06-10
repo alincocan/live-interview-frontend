@@ -17,7 +17,6 @@ const PaymentSuccessPage = () => {
 
     return (
         <Box sx={{ 
-            background: 'linear-gradient(to bottom, #000000, #000846)',
             minHeight: '100vh',
             pt: 8,
             pb: 8
@@ -26,7 +25,6 @@ const PaymentSuccessPage = () => {
                 <Paper
                     elevation={3}
                     sx={{
-                        background: 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 100%)',
                         backdropFilter: 'blur(10px)',
                         borderRadius: '16px',
                         p: 4,
@@ -47,8 +45,6 @@ const PaymentSuccessPage = () => {
                             onClick={handleGoToDashboard}
                             size="large"
                             sx={{
-                                backgroundColor: '#4CAF50',
-                                color: '#fff',
                                 fontWeight: 'bold',
                                 px: 4,
                                 py: 1.5,
