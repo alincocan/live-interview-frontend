@@ -2,19 +2,16 @@ import {
     Typography,
     Card,
     CardActionArea,
-    CardMedia,
     CardContent,
     Container,
     Stack,
     CircularProgress,
     Box,
 } from '@mui/material';
-import React, {useState, useEffect, Suspense} from "react";
+import React, {useState, useEffect} from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { InterviewService, Interviewer } from '../service/InterviewService.ts';
-import {Canvas} from "@react-three/fiber";
-import {Environment, OrbitControls} from "@react-three/drei";
-import {Model} from "../components/ModelViewer.tsx";
+import ModelViewer from "../components/ModelViewer.tsx";
 
 const ChooseInterviewerPage: React.FC = () => {
     const navigate = useNavigate();
@@ -132,31 +129,7 @@ const ChooseInterviewerPage: React.FC = () => {
                             }}>
                                 <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
 
-                                    <Suspense fallback={
-                                        <Box sx={{
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            width: '100%',
-                                            height: '100%'
-                                        }}>
-                                            <CircularProgress />
-                                        </Box>
-                                    }>
-                                        <Canvas camera={{ position: [0, 0.3, 3], fov: 10  }}>
-                                            <ambientLight intensity={0.5} />
-                                            <directionalLight position={[5, 5, 5]} />
-                                            <Model url={interviewer.glbPath} currentText="" />
-
-                                            <OrbitControls
-                                                enablePan={true}
-                                                enableZoom={false}
-                                                enableRotate={false}
-                                                autoRotate={false}
-                                            />
-                                            <Environment preset="sunset" />
-                                        </Canvas>
-                                    </Suspense>
+                                    <ModelViewer url={interviewer.glbPath} />
                                 </Box>
                                 <CardContent>
                                     <Typography variant="h6" component="div" color="text.primary" align="center">

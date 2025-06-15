@@ -4,7 +4,7 @@ import {OrbitControls, useGLTF, Environment, useAnimations} from '@react-three/d
 import { Box, CircularProgress } from '@mui/material';
 
 // Model component that loads and displays the 3D model
-export function Model({ url, currentText, isPlaying }: { url: string, currentText?: string, isPlaying?: boolean }) {
+export function Model({ url, currentText }: { url: string, currentText?: string}) {
   const modelRef = useRef<THREE.Group>(null);
   const [blinking, setBlinking] = useState(false);
 
@@ -22,11 +22,23 @@ export function Model({ url, currentText, isPlaying }: { url: string, currentTex
   const { scene, animations } = useGLTF(url);
   const { actions } = useAnimations(animations, modelRef);
 
-  const listenAction = actions['Listen'];
-  const talkingAction = actions['Talking'];
+  // Ensure both actions are loaded before trying to use them
+  useEffect(() => {
+    const listenAction = actions?.['Listen'];
+    const talkingAction = actions?.['Talking'];
 
-  listenAction?.play();
-  talkingAction?.play();
+    if (!listenAction || !talkingAction) {
+      return; // animations not yet ready
+    }
+
+    listenAction?.play();
+    talkingAction?.play();
+
+    return () => {
+      listenAction.stop();
+      talkingAction.stop();
+    };
+  }, [actions]);
 
   // Function to find a specific mesh in the scene
   const findMeshByName = (name: string) => {
