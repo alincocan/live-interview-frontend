@@ -296,6 +296,21 @@ const TrainingPage: React.FC = () => {
         return () => clearInterval(timerInterval);
     }, [remainingTime]);
 
+    // Add keyboard event listener for Enter key to stop recording
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Enter' && isRecording) {
+                stopRecording();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isRecording]);
+
 
 
     return (
