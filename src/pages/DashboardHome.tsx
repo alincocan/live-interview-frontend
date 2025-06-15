@@ -151,7 +151,7 @@ const DashboardHome = () => {
                                 <Typography variant="body2" color="text.secondary">
                                     You've scored
                                 </Typography>
-                                <Typography variant="h3" fontWeight="bold" sx={{ my: 1 }}>
+                                <Typography variant="h4" fontWeight="bold" sx={{ my: 1 }}>
                                     {dashboardData.lastInterviewScore.toFixed(1)}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">

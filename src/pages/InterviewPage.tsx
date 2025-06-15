@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-    Container,
     Typography,
     Box,
     Card,
@@ -28,6 +27,7 @@ const InterviewPage: React.FC = () => {
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [jobName, setJobName] = useState<string | undefined>(undefined);
     const [language, setLanguage] = useState<string | undefined>(undefined);
@@ -41,6 +41,7 @@ const InterviewPage: React.FC = () => {
     const [audioList, setAudioList] = useState<Map<string, string>[]>([]);
     const [shouldStartRecording, setShouldStartRecording] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
+    const [showFirstAudio, setShowFirstAudio] = useState(false);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
 
@@ -263,6 +264,23 @@ const InterviewPage: React.FC = () => {
         }
     }, [duration]);
 
+    // Add a 3-second delay before showing the first audio
+    useEffect(() => {
+        if (audioList.length > 0 && index === 0) {
+            // Initially set showFirstAudio to false
+            setShowFirstAudio(false);
+
+            // Set a timeout to show the first audio after 3 seconds
+            const timer = setTimeout(() => {
+                setShowFirstAudio(true);
+            }, 3000);
+
+            // Clean up the timer if the component unmounts
+            return () => clearTimeout(timer);
+        }
+    }, [audioList, index]);
+
+
     // Timer countdown effect
     useEffect(() => {
         if (remainingTime <= 0) return;
@@ -280,6 +298,21 @@ const InterviewPage: React.FC = () => {
         return () => clearInterval(timerInterval);
     }, [remainingTime]);
 
+    // Add keyboard event listener for Enter key to stop recording
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Enter' && isRecording) {
+                stopRecording();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isRecording]);
+
     // Format time as MM:SS
     const formatTime = (seconds: number): string => {
         const minutes = Math.floor(seconds / 60);
@@ -287,8 +320,10 @@ const InterviewPage: React.FC = () => {
         return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 
+
     return (
         <div>
+
             {errorMessage ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 4 }}>
                     <Alert severity="error" sx={{ my: 2, width: '100%' }}>
@@ -312,7 +347,7 @@ const InterviewPage: React.FC = () => {
                                 }}>
                                     <ModelViewer
                                         url="/models/david/david.glb"
-                                        audioMap={audioList[index]}
+                                        audioMap={showFirstAudio ? audioList[index] : new Map()}
                                         onAudioFinished={() => {
                                             if(index === 1) {
                                                 setShouldStartRecording(true);

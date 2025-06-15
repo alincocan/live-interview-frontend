@@ -2,6 +2,7 @@ import './App.css';
 import LoginPage from "./pages/LoginPage.tsx";
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import SignUpPage from "./pages/SignUpPage.tsx";
+import PresentationPage from "./pages/PresentationPage.tsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.tsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import ConfirmUserPage from "./pages/ConfirmUserPage.tsx";
@@ -58,6 +59,7 @@ const ThemedApp = () => {
                         <Route path="/confirm" element={<ConfirmUserPage />} />
                         <Route path="/oauth2/redirect" element={<OAuth2RedirectPage />} />
                         <Route path="/profile-update" element={<ProfileUpdatePage />} />
+                        <Route path="/presentation" element={<PresentationPage />} />
                         <Route path="/" element={
                             <ProtectedRoute>
                                 <AppLayout />

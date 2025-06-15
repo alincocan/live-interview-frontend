@@ -4,7 +4,7 @@ import {OrbitControls, useGLTF, Environment, useAnimations} from '@react-three/d
 import { Box, CircularProgress } from '@mui/material';
 
 // Model component that loads and displays the 3D model
-export function Model({ url, currentText }: { url: string, currentText?: string }) {
+export function Model({ url, currentText }: { url: string, currentText?: string}) {
   const modelRef = useRef<THREE.Group>(null);
   const [blinking, setBlinking] = useState(false);
 
@@ -21,6 +21,24 @@ export function Model({ url, currentText }: { url: string, currentText?: string 
 
   const { scene, animations } = useGLTF(url);
   const { actions } = useAnimations(animations, modelRef);
+
+  // Ensure both actions are loaded before trying to use them
+  useEffect(() => {
+    const listenAction = actions?.['Listen'];
+    const talkingAction = actions?.['Talking'];
+
+    if (!listenAction || !talkingAction) {
+      return; // animations not yet ready
+    }
+
+    listenAction?.play();
+    talkingAction?.play();
+
+    return () => {
+      listenAction.stop();
+      talkingAction.stop();
+    };
+  }, [actions]);
 
   // Function to find a specific mesh in the scene
   const findMeshByName = (name: string) => {
@@ -80,21 +98,6 @@ export function Model({ url, currentText }: { url: string, currentText?: string 
     };
   }, [blinking]);
 
-  // Handle talking animation
-  useEffect(() => {
-    const talkingAction = actions['Talking'];
-    if (talkingAction) {
-      talkingAction.reset().fadeIn(0.5).play();
-    } else {
-      console.warn('Idle animation not found:', Object.keys(actions));
-    }
-
-    return () => {
-      // Clean up animation when component unmounts
-      talkingAction?.fadeOut(0.5).stop();
-    };
-  }, [actions]);
-
   // Handle mouth movement based on current text
   useEffect(() => {
     if (!currentText) return;
@@ -134,6 +137,8 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
 }) => {
   // State to track the current letter being spoken
   const [currentLetter, setCurrentLetter] = useState<string>('');
+  // State to track if audio is currently playing
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   useEffect(() => {
     if (!audioMap || audioMap.size === 0) return;
@@ -171,6 +176,9 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
       // Reset mouth at the beginning
       setCurrentLetter('');
 
+      // Set isPlaying to true when audio starts
+      setIsPlaying(true);
+
       buffers.forEach((buffer, index) => {
         const source = ctx.createBufferSource();
         source.buffer = buffer;
@@ -206,6 +214,8 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
         if (!cancelled) {
           // Reset mouth at the end
           setCurrentLetter('');
+          // Set isPlaying to false when audio stops
+          setIsPlaying(false);
           if (onAudioFinished) {
             onAudioFinished();
           }
@@ -246,7 +256,7 @@ const ModelViewer: React.FC<ModelViewerProps> = ({
         <Canvas camera={{ position: [0, 0.3, 3], fov: 10  }}>
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 5, 5]} />
-          <Model url={url} currentText={currentLetter} />
+          <Model url={url} currentText={currentLetter} isPlaying={isPlaying} />
 
           <OrbitControls 
             enablePan={true} 

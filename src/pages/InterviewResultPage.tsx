@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import {
     Container,
     Typography,
@@ -18,10 +18,14 @@ import {ScoreEnum} from "../util/ScoreEnum.ts";
 
 const InterviewResultPage: React.FC = () => {
     const { interviewId: sessionId } = useParams<{ interviewId: string }>();
+    const location = useLocation();
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [sessionDetails, setSessionDetails] = useState<InterviewDetailsResponse | null>(null);
     const questionsListRef = useRef<HTMLDivElement>(null);
+
+    // Check if we're on the training path
+    const isTrainingPath = location.pathname.includes('/training/');
 
     // Current question index for display
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -286,28 +290,30 @@ const InterviewResultPage: React.FC = () => {
                                                 Duration:
                                             </Typography>
                                             <Typography variant="body1" fontWeight="bold">
-                                                {sessionDetails.duration} minutes
+                                                {sessionDetails.duration} {isTrainingPath ? 'questions' : 'minutes'}
                                             </Typography>
                                         </Box>
                                     </Box>
 
-                                    {/* PASSED/FAILED Status */}
-                                    <Box sx={{ 
-                                        display: 'flex', 
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        my: 2,
-                                        py: 1,
-                                        borderRadius: 1,
-                                        bgcolor: sessionDetails.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? 'success.light' : 'error.light',
-                                        color: sessionDetails.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? 'success.dark' : 'error.dark',
-                                        fontWeight: 'bold',
-                                        fontSize: '1rem',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: 1
-                                    }}>
-                                        {sessionDetails.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? 'PASSED' : 'FAILED'}
-                                    </Box>
+                                    {/* PASSED/FAILED Status - Only show for interview sessions */}
+                                    {!isTrainingPath && (
+                                        <Box sx={{ 
+                                            display: 'flex', 
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            my: 2,
+                                            py: 1,
+                                            borderRadius: 1,
+                                            bgcolor: sessionDetails.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? 'success.light' : 'error.light',
+                                            color: sessionDetails.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? 'success.dark' : 'error.dark',
+                                            fontWeight: 'bold',
+                                            fontSize: '1rem',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: 1
+                                        }}>
+                                            {sessionDetails.score >= ScoreEnum.INTERVIEW_PASSING_SCORE ? 'PASSED' : 'FAILED'}
+                                        </Box>
+                                    )}
 
                                     <Box sx={{ 
                                         display: 'flex', 

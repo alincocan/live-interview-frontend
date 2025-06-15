@@ -1,4 +1,4 @@
-import { Box, Typography, Menu, MenuItem, Divider, Avatar, Button, Tooltip, IconButton, Switch } from '@mui/material';
+import { Box, Typography, Menu, MenuItem, Divider, Avatar, Button, Tooltip, IconButton, Switch, Drawer, List, ListItem, ListItemIcon, ListItemText, useMediaQuery, useTheme } from '@mui/material';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { AuthenticationService } from '../service/authenticationService';
 import { UserService, User } from '../service/userService';
@@ -13,12 +13,17 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useThemeContext } from '../config/ThemeContext';
 
 const AppLayout: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const open = Boolean(anchorEl);
     const [user, setUser] = useState<User | null>(null);
     const { mode, toggleColorMode } = useThemeContext();
@@ -115,6 +120,14 @@ const AppLayout: React.FC = () => {
         setAnchorEl(null);
     };
 
+    const handleDrawerOpen = () => {
+        setDrawerOpen(true);
+    };
+
+    const handleDrawerClose = () => {
+        setDrawerOpen(false);
+    };
+
     const handleProfileClick = () => {
         handleMenuClose();
         navigate('/profile');
@@ -197,85 +210,102 @@ const AppLayout: React.FC = () => {
                     </Box>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', pr: 3 }}>
-                    {/* Start Interview Menu Item */}
-                    <Box 
-                        onClick={() => navigate('/interview/choose')}
-                        sx={{
-                            mr: 2,
-                            color: '#fff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            cursor: 'pointer',
-                            padding: '6px 16px',
-                            borderRadius: '4px',
-                            '&:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                            }
-                        }}
-                    >
-                        <PlayArrowIcon sx={{ mr: 1, color: '#4CAF50' }} />
-                        <Typography color="text.primary">Start Interview</Typography>
-                    </Box>
-
-                    {/* Trainings Menu Item */}
-                    <Box 
-                        onClick={() => navigate('/training/choose')}
-                        sx={{
-                            mr: 2,
-                            color: '#fff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            cursor: 'pointer',
-                            padding: '6px 16px',
-                            borderRadius: '4px',
-                            '&:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                            }
-                        }}
-                    >
-                        <SchoolIcon sx={{ mr: 1, color: '#2196F3' }} />
-                        <Typography color="text.primary">Trainings</Typography>
-                    </Box>
-
-                    {/* Learn Menu Item */}
-                    <Box 
-                        onClick={() => navigate('/interview/list')}
-                        sx={{
-                            mr: 2,
-                            color: '#fff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            cursor: 'pointer',
-                            padding: '6px 16px',
-                            borderRadius: '4px',
-                            position: 'relative',
-                            '&:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                            }
-                        }}
-                    >
-                        <MenuBookIcon sx={{ mr: 1, color: '#FF9800' }} />
-                        <Typography color="text.primary">Learn</Typography>
-                        <Typography 
-                            variant="caption"
-                            color="text.primary"
-                            sx={{ 
-                                position: 'absolute',
-                                bottom: '-12px',
-                                right: '10px',
-                                backgroundColor: '#4CAF50',
-                                padding: '2px 6px',
-                                borderRadius: '10px',
-                                fontSize: '0.6rem',
-                                fontWeight: 'bold'
-                            }}
+                    {/* Mobile Menu Button - only visible on mobile */}
+                    {isMobile && (
+                        <IconButton
+                            color="inherit"
+                            aria-label="open drawer"
+                            edge="start"
+                            onClick={handleDrawerOpen}
+                            sx={{ mr: 2, display: { xs: 'flex', md: 'none' } }}
                         >
-                            Coming soon
-                        </Typography>
-                    </Box>
+                            <MenuIcon />
+                        </IconButton>
+                    )}
 
+                    {/* Desktop Navigation - hidden on mobile */}
+                    {!isMobile && (
+                        <>
+                            {/* Start Interview Menu Item */}
+                            <Box 
+                                onClick={() => navigate('/interview/choose')}
+                                sx={{
+                                    mr: 2,
+                                    color: '#fff',
+                                    display: { xs: 'none', md: 'flex' },
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                    padding: '6px 16px',
+                                    borderRadius: '4px',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
+                            >
+                                <PlayArrowIcon sx={{ mr: 1, color: '#4CAF50' }} />
+                                <Typography color="text.primary">Start Interview</Typography>
+                            </Box>
 
-                    {/* Token Balance Button */}
+                            {/* Trainings Menu Item */}
+                            <Box 
+                                onClick={() => navigate('/training/choose')}
+                                sx={{
+                                    mr: 2,
+                                    color: '#fff',
+                                    display: { xs: 'none', md: 'flex' },
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                    padding: '6px 16px',
+                                    borderRadius: '4px',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
+                            >
+                                <SchoolIcon sx={{ mr: 1, color: '#2196F3' }} />
+                                <Typography color="text.primary">Trainings</Typography>
+                            </Box>
+
+                            {/* Learn Menu Item */}
+                            <Box 
+                                onClick={() => navigate('/interview/list')}
+                                sx={{
+                                    mr: 2,
+                                    color: '#fff',
+                                    display: { xs: 'none', md: 'flex' },
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                    padding: '6px 16px',
+                                    borderRadius: '4px',
+                                    position: 'relative',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
+                            >
+                                <MenuBookIcon sx={{ mr: 1, color: '#FF9800' }} />
+                                <Typography color="text.primary">Learn</Typography>
+                                <Typography 
+                                    variant="caption"
+                                    color="text.primary"
+                                    sx={{ 
+                                        position: 'absolute',
+                                        bottom: '-12px',
+                                        right: '10px',
+                                        backgroundColor: '#4CAF50',
+                                        padding: '2px 6px',
+                                        borderRadius: '10px',
+                                        fontSize: '0.6rem',
+                                        fontWeight: 'bold'
+                                    }}
+                                >
+                                    Coming soon
+                                </Typography>
+                            </Box>
+                        </>
+                    )}
+
+                    {/* Token Balance Button - responsive styling */}
                     {user && (
                         <Tooltip title="Go to payment and subscriptions">
                             <Button
@@ -295,9 +325,20 @@ const AppLayout: React.FC = () => {
                                     borderRadius: '20px',
                                     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
                                     transition: 'transform 0.2s, box-shadow 0.2s',
+                                    // Hide text on small mobile screens, show only icon
+                                    '& .MuiButton-startIcon': {
+                                        mr: { xs: 0, sm: 1 }
+                                    },
+                                    '& .MuiButton-endIcon': {
+                                        ml: { xs: 0, sm: 1 }
+                                    },
+                                    minWidth: { xs: '40px', sm: 'auto' },
+                                    px: { xs: 1, sm: 2 }
                                 }}
                             >
-                                {user.tokens || 0} Tokens
+                                <Typography sx={{ display: { xs: 'none', sm: 'block' } }}>
+                                    {user.tokens || 0} Tokens
+                                </Typography>
                             </Button>
                         </Tooltip>
                     )}
@@ -329,12 +370,13 @@ const AppLayout: React.FC = () => {
                         >
                             <PersonIcon />
                         </Avatar>
-                        {user && (
+                        {user && !isMobile && (
                             <Typography 
                                 variant="body1"
                                 color="text.primary"
                                 sx={{ 
                                     ml: 1,
+                                    display: { xs: 'none', sm: 'block' }
                                 }}
                             >
                                 {user.lastName} {user.firstName}
@@ -448,6 +490,197 @@ const AppLayout: React.FC = () => {
                 <Outlet />
             </Box>
 
+            {/* Mobile Navigation Drawer */}
+            <Drawer
+                anchor="left"
+                open={drawerOpen}
+                onClose={handleDrawerClose}
+                sx={{
+                    '& .MuiDrawer-paper': {
+                        width: '80%',
+                        maxWidth: '300px',
+                        boxSizing: 'border-box',
+                        backgroundColor: (t) => t.palette.background.paper,
+                    },
+                }}
+            >
+                <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
+                    <img 
+                        src="/images/logo.png" 
+                        alt="Live Interview AI Logo" 
+                        style={{ 
+                            height: '40px',
+                            objectFit: 'contain'
+                        }} 
+                        onClick={() => {
+                            navigate('/dashboard');
+                            handleDrawerClose();
+                        }}
+                    />
+                </Box>
+                <List sx={{ width: '100%' }}>
+                    {/* Start Interview */}
+                    <ListItem 
+                        button 
+                        onClick={() => {
+                            navigate('/interview/choose');
+                            handleDrawerClose();
+                        }}
+                        sx={{ py: 2 }}
+                    >
+                        <ListItemIcon>
+                            <PlayArrowIcon sx={{ color: '#4CAF50' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="Start Interview" />
+                    </ListItem>
+
+                    {/* Trainings */}
+                    <ListItem 
+                        button 
+                        onClick={() => {
+                            navigate('/training/choose');
+                            handleDrawerClose();
+                        }}
+                        sx={{ py: 2 }}
+                    >
+                        <ListItemIcon>
+                            <SchoolIcon sx={{ color: '#2196F3' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="Trainings" />
+                    </ListItem>
+
+                    {/* Learn */}
+                    <ListItem 
+                        button 
+                        onClick={() => {
+                            navigate('/interview/list');
+                            handleDrawerClose();
+                        }}
+                        sx={{ py: 2 }}
+                    >
+                        <ListItemIcon>
+                            <MenuBookIcon sx={{ color: '#FF9800' }} />
+                        </ListItemIcon>
+                        <ListItemText 
+                            primary={
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <Typography>Learn</Typography>
+                                    <Typography 
+                                        variant="caption"
+                                        sx={{ 
+                                            ml: 1,
+                                            backgroundColor: '#4CAF50',
+                                            padding: '2px 6px',
+                                            borderRadius: '10px',
+                                            fontSize: '0.6rem',
+                                            fontWeight: 'bold',
+                                            color: 'white'
+                                        }}
+                                    >
+                                        Coming soon
+                                    </Typography>
+                                </Box>
+                            } 
+                        />
+                    </ListItem>
+
+                    <Divider sx={{ my: 1 }} />
+
+                    {/* My Interviews */}
+                    <ListItem 
+                        button 
+                        onClick={() => {
+                            handleMyInterviewsClick();
+                            handleDrawerClose();
+                        }}
+                        sx={{ py: 2 }}
+                    >
+                        <ListItemIcon>
+                            <ListAltIcon sx={{ color: '#FF9800' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="My Interviews" />
+                    </ListItem>
+
+                    {/* My Trainings */}
+                    <ListItem 
+                        button 
+                        onClick={() => {
+                            handleMyTrainingsClick();
+                            handleDrawerClose();
+                        }}
+                        sx={{ py: 2 }}
+                    >
+                        <ListItemIcon>
+                            <SchoolIcon sx={{ color: '#2196F3' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="My Trainings" />
+                    </ListItem>
+
+                    {/* Bookmarked Questions */}
+                    <ListItem 
+                        button 
+                        onClick={() => {
+                            handleBookmarkedQuestionsClick();
+                            handleDrawerClose();
+                        }}
+                        sx={{ py: 2 }}
+                    >
+                        <ListItemIcon>
+                            <BookmarkIcon sx={{ color: '#FF9800' }} />
+                        </ListItemIcon>
+                        <ListItemText primary="Bookmarked Questions" />
+                    </ListItem>
+
+                    <Divider sx={{ my: 1 }} />
+
+                    {/* Profile */}
+                    <ListItem 
+                        button 
+                        onClick={() => {
+                            handleProfileClick();
+                            handleDrawerClose();
+                        }}
+                        sx={{ py: 2 }}
+                    >
+                        <ListItemIcon>
+                            <PersonIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Profile" />
+                    </ListItem>
+
+                    {/* Dark/Light Mode Toggle */}
+                    <ListItem sx={{ py: 2, display: 'flex', justifyContent: 'space-between' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <ListItemIcon>
+                                {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                            </ListItemIcon>
+                            <ListItemText primary={mode === 'dark' ? "Light Mode" : "Dark Mode"} />
+                        </Box>
+                        <Switch
+                            checked={mode === 'dark'}
+                            onChange={toggleColorMode}
+                            color="primary"
+                        />
+                    </ListItem>
+
+                    <Divider sx={{ my: 1 }} />
+
+                    {/* Logout */}
+                    <ListItem 
+                        button 
+                        onClick={() => {
+                            handleLogout();
+                            handleDrawerClose();
+                        }}
+                        sx={{ py: 2 }}
+                    >
+                        <ListItemIcon>
+                            <LogoutIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Logout" />
+                    </ListItem>
+                </List>
+            </Drawer>
         </Box>
     );
 };
